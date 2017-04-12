@@ -28,11 +28,11 @@ If you have an AWS account and you’re already familiar with AWS services and C
 If you want to take a look under the covers, you can view the AWS CloudFormation template that automates the deployment. You can customize the template during launch, or download and extend it for other projects.
 
 <a href="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace-master.template" target="_blank">
-    <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/view-button-new.png"/>
+    <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/view-template-new.png"/>
 </a>
 
 <a href="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace.template" target="_blank">
-    <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/view-button-existing.png"/>
+    <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/view-template-existing.png"/>
 </a>
 
 # Testing data access to the ha cluster
