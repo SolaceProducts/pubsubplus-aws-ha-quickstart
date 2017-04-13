@@ -138,7 +138,7 @@
                 "Ubuntu-Server-16.04-LTS-HVM",
                 "Amazon-Linux-HVM"
             ],
-            "ConstraintDescription": "Supported versions of Linux AMIs for Confluent deployments",
+            "ConstraintDescription": "Supported versions of Linux AMIs for Solace Message Routers",
             "Default": "CentOS-7-HVM",
             "Description": "Operating system AMI for cluster instances; you MUST authorize access to the proper AMI at https://aws.amazon.com/marketplace",
             "Type": "String"
@@ -328,7 +328,7 @@
                 }
             }
         },
-        "ConfluentStack": {
+        "SolaceStack": {
             "DependsOn": "VPCStack",
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
@@ -351,7 +351,7 @@
                             {
                                 "Ref": "QSS3KeyPrefix"
                             },
-                            "templates/confluent-kafka.template"
+                            "templates/solace-aws.template"
                         ]
                     ]
                 },
