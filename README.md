@@ -15,7 +15,7 @@ This is a ... step process:
 
 The following links are for your convenience. Before you launch the Quick Start, please review the architecture, configuration, network security, and other considerations discussed in this guide.
 
-If you have an AWS account and you’re already familiar with AWS services and Cloudera, you can launch the Quick Start to deploy Cloudera EDH into a new virtual private cloud (VPC) in your AWS account. The deployment takes approximately 30 minutes. If you’re new to AWS or Cloudera, please review the implementation details and follow the step-by-step instructions provided later in this guide to launch the Quick Start.
+* If you have an AWS account and you’re already familiar with AWS services and Solace message router HA, you can launch the Quick Start to deploy Solace into a new virtual private cloud (VPC) in your AWS account. The deployment takes approximately 30 minutes. If you’re new to AWS or Solace Message Router, please review the implementation details and follow the step-by-step instructions.[TODO]
 
 <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1-2#/stacks/new?stackName=Solace-HA&templateURL=https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace-master.template" target="_blank">
     <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/launch-button-new.png"/>
@@ -25,7 +25,7 @@ If you have an AWS account and you’re already familiar with AWS services and C
     <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/launch-button-existing.png"/>
 </a>
 
-If you want to take a look under the covers, you can view the AWS CloudFormation template that automates the deployment. You can customize the template during launch, or download and extend it for other projects.
+* If you want to take a look under the covers, you can view the AWS CloudFormation template that automates the deployment. You can customize the template during launch, or download and extend it for other projects.
 
 <a href="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace-master.template" target="_blank">
     <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/view-template-new.png"/>
