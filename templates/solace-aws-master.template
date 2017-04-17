@@ -29,6 +29,26 @@
                 },
                 {
                     "Label": {
+                        "default": "MessageRouterInstance Configuration"
+                    },
+                    "Parameters": [
+                        "MessageRouterNodeInstanceType",
+                        "MessageRouterNodeStorage",
+                        "MessageRouterNodeSpotPrice"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "MonitorInstance Configuration"
+                    },
+                    "Parameters": [
+                        "MonitorNodeInstanceType",
+                        "MonitorNodeStorage",
+                        "MonitorNodeSpotPrice"
+                    ]
+                },
+                {
+                    "Label": {
                         "default": "AWS Quick Start Configuration"
                     },
                     "Parameters": [
