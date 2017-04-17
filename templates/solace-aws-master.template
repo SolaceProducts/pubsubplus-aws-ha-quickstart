@@ -404,6 +404,15 @@
                     "MessageRouterNodeStorage": {
                         "Ref": "MessageRouterNodeStorage"
                     },
+                    "MonitorNodeInstanceType": {
+                        "Ref": "MonitorNodeInstanceType"
+                    },
+                    "MonitorNodeSpotPrice": {
+                        "Ref": "MonitorNodeSpotPrice"
+                    },
+                    "MonitorNodeStorage": {
+                        "Ref": "MonitorNodeStorage"
+                    },
                     "KeyPairName": {
                         "Ref": "KeyPairName"
                     },
@@ -440,16 +449,7 @@
                             "VPCStack",
                             "Outputs.VPCID"
                         ]
-                    },
-                    "MonitorNodeInstanceType": {
-                        "Ref": "MonitorNodeInstanceType"
-                    },
-                    "MonitorNodeSpotPrice": {
-                        "Ref": "MonitorNodeSpotPrice"
-                    },
-                    "MonitorNodeStorage": {
-                        "Ref": "MonitorNodeStorage"
-                    },
+                    }
                 }
             }
         }
