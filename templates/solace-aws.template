@@ -1,0 +1,4 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudFormation template to deploy Solace HA Message Routers on AWS",
+}
