@@ -127,24 +127,17 @@
         },
         "MessageRouterNodeInstanceType": {
             "AllowedValues": [
+                "t2.medium",
+                "t2.large",
+                "t2.xlarge",
                 "m3.large",
                 "m3.xlarge",
                 "m4.large",
                 "m4.xlarge",
-                "m4.2xlarge",
-                "m4.4xlarge",
-                "c3.xlarge",
-                "c3.2xlarge",
-                "c3.4xlarge",
-                "d2.xlarge",
-                "d2.2xlarge",
-                "d2.4xlarge",
-                "d2.8xlarge",
-                "i2.xlarge",
-                "i2.2xlarge"
+                "c4.xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
-            "Default": "m4.xlarge",
+            "Default": "t2.large",
             "Description": "Instance Type for Solace Message Router",
             "Type": "String"
         },
@@ -213,24 +206,18 @@
         },
         "MonitorNodeInstanceType": {
             "AllowedValues": [
+                "t2.medium",
+                "t2.large",
+                "t2.xlarge",
                 "m3.large",
                 "m3.xlarge",
+                "m4.large",
                 "m4.xlarge",
-                "m4.2xlarge",
-                "m4.4xlarge",
-                "c3.xlarge",
-                "c3.2xlarge",
-                "c3.4xlarge",
-                "d2.xlarge",
-                "d2.2xlarge",
-                "d2.4xlarge",
-                "d2.8xlarge",
-                "i2.xlarge",
-                "i2.2xlarge"
+                "c4.xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
-            "Default": "m4.xlarge",
-            "Description": "Instance Type for Solace Monitor Node",
+            "Default": "t2.large",
+            "Description": "Instance Type for Solace Message Router",
             "Type": "String"
         },
         "MonitorNodeSpotPrice": {
