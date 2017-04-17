@@ -392,15 +392,6 @@
                     ]
                 },
                 "Parameters": {
-                    "MonitorNodeInstanceType": {
-                        "Ref": "MonitorNodeInstanceType"
-                    },
-                    "MonitorNodeSpotPrice": {
-                        "Ref": "MonitorNodeSpotPrice"
-                    },
-                    "MonitorNodeStorage": {
-                        "Ref": "MonitorNodeStorage"
-                    },
                     "BootDiskSize": {
                         "Ref": "BootDiskSize"
                     },
@@ -412,6 +403,15 @@
                     },
                     "MessageRouterNodeStorage": {
                         "Ref": "MessageRouterNodeStorage"
+                    },
+                    "MonitorNodeInstanceType": {
+                        "Ref": "MonitorNodeInstanceType"
+                    },
+                    "MonitorNodeSpotPrice": {
+                        "Ref": "MonitorNodeSpotPrice"
+                    },
+                    "MonitorNodeStorage": {
+                        "Ref": "MonitorNodeStorage"
                     },
                     "KeyPairName": {
                         "Ref": "KeyPairName"
