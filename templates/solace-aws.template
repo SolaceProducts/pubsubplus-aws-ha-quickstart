@@ -33,6 +33,7 @@
                         "MessageRouterNodeInstanceType",
                         "MessageRouterNodeStorage",
                         "MessageRouterNodeSpotPrice"
+                        "MessageRouterNumberOfNodes"
                     ]
                 },
                 {
@@ -43,6 +44,7 @@
                         "MonitorNodeInstanceType",
                         "MonitorNodeStorage",
                         "MonitorNodeSpotPrice"
+                        "MonitorNumberOfNodes"
                     ]
                 },
                 {
@@ -68,6 +70,9 @@
                 "MessageRouterNodeStorage": {
                     "default": "Persistent Storage"
                 },
+                "MessageRouterNumberOfNodes": {
+                    "default": "Number of Message Router"
+                },
                 "MonitorNodeInstanceType": {
                     "default": "Instance Type"
                 },
@@ -76,6 +81,9 @@
                 },
                 "MonitorNodeNodeStorage": {
                     "default": "Persistent Storage"
+                },
+                "MonitorNumberOfNodes": {
+                    "default": "Number of Monitor"
                 },
                 "KeyPairName": {
                     "default": "Key Pair Name"
@@ -143,6 +151,14 @@
             "Description": "Spot Price to bid for requested instances (0.00 will result in using on-demand instances)",
             "Type": "String"
         },
+        "MessageRouterNumberOfNodes": {
+            "ConstraintDescription": "At this time only 2 Message Router nodes excepted",
+            "Default": "2",
+            "Description": "Specify that there will be 2 Message Router nodes",
+            "MaxValue": "2",
+            "MinValue": "2",
+            "Type": "Number"
+        },
         "MonitorNodeInstanceType": {
             "AllowedValues": [
                 "t2.medium",
@@ -159,7 +175,7 @@
             "Description": "Instance Type for Solace Message Router",
             "Type": "String"
         },
-                "MonitorNodeSpotPrice": {
+        "MonitorNodeSpotPrice": {
             "AllowedPattern": "([0-9]{1}[.]{1}[0-9]{2})",
             "ConstraintDescription": "Must be decimal numeric value",
             "Default": "0.00",
@@ -172,6 +188,14 @@
             "Description": "Allocated EBS storage for each block device (in GiB; 4 devs per node); 0 indicates ephemeral storage only",
             "MaxValue": "1024",
             "MinValue": "0",
+            "Type": "Number"
+        },
+        "MonitorNumberOfNodes": {
+            "ConstraintDescription": "At this time only 1 Monitor node excepted",
+            "Default": "1",
+            "Description": "Specify that there will be 2 Monitor node",
+            "MaxValue": "1",
+            "MinValue": "1",
             "Type": "Number"
         },
         "KeyPairName": {
@@ -285,6 +309,59 @@
         }
     },
     "Resources": {
+        "InstanceIAMRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "ec2:CreateTags",
+                                        "ec2:DescribeInstances",
+                                        "cloudformation:DescribeStackResources",
+                                        "s3:Get*",
+                                        "s3:List*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ]
+                        },
+                        "PolicyName": "DescribeAccessEC2andCFN"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "InstanceProfile": {
+            "Properties": {
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "InstanceIAMRole"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::InstanceProfile"
+        },
         "MessageRouterStack": {
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
@@ -317,6 +394,9 @@
                     },
                     "ClusterInfoHandle": {
                         "Ref": "ClusterInfoHandle"
+                    },
+                    "InstanceProfile": {
+                        "Ref": "InstanceProfile"
                     },
                     "KeyPairName": {
                         "Ref": "KeyPairName"
@@ -392,6 +472,9 @@
                     },
                     "ClusterInfoHandle": {
                         "Ref": "ClusterInfoHandle"
+                    },
+                    "InstanceProfile": {
+                        "Ref": "InstanceProfile"
                     },
                     "KeyPairName": {
                         "Ref": "KeyPairName"
