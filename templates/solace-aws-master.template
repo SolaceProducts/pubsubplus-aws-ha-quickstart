@@ -64,13 +64,13 @@
                 "BootDiskSize": {
                     "default": "Boot Disk Capacity (GiB)"
                 },
-                "MessageRoutingNodeInstanceType": {
+                "MessageRouterNodeInstanceType": {
                     "default": "Instance Type"
                 },
-                "MessageRoutingNodeSpotPrice": {
+                "MessageRouterNodeSpotPrice": {
                     "default": "Spot Price (optional)"
                 },
-                "MessageRoutingNodeStorage": {
+                "MessageRouterNodeStorage": {
                     "default": "Persistent Storage"
                 },
                 "MonitorNodeInstanceType": {
@@ -125,7 +125,7 @@
             "MinValue": "8",
             "Type": "Number"
         },
-        "MessageRoutingNodeInstanceType": {
+        "MessageRouterNodeInstanceType": {
             "AllowedValues": [
                 "m3.large",
                 "m3.xlarge",
@@ -148,14 +148,14 @@
             "Description": "Instance Type for Solace Message Router",
             "Type": "String"
         },
-        "MessageRoutingNodeSpotPrice": {
+        "MessageRouterNodeSpotPrice": {
             "AllowedPattern": "([0-9]{1}[.]{1}[0-9]{2})",
             "ConstraintDescription": "Must be decimal numeric value",
             "Default": "0.00",
             "Description": "Spot Price to bid for requested instances (0.00 will result in using on-demand instances)",
             "Type": "String"
         },
-        "MessageRoutingNodeStorage": {
+        "MessageRouterNodeStorage": {
             "ConstraintDescription": "No more than 1024 GiB per device (4 TiB per node).",
             "Default": "0",
             "Description": "Allocated EBS storage for each block device (in GiB; 4 devs per node); 0 indicates ephemeral storage only",
@@ -409,7 +409,7 @@
                         "Ref": "BootDiskSize"
                     },
                     "MessageRouterNodeInstanceType": {
-                        "Ref": "MessageRouterInstanceType"
+                        "Ref": "MessageRouterNodeInstanceType"
                     },
                     "MessageRouterNodeSpotPrice": {
                         "Ref": "MessageRouterNodeSpotPrice"
