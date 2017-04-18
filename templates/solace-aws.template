@@ -526,7 +526,7 @@
                 }
             }
         },
-        "MessageBrokerSecurityGroup": {
+        "MessageRouterSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "VpcId": {
