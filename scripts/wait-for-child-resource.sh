@@ -14,14 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# Specifically, this script is intended SOLELY to support the Confluent
-# Quick Start offering in Amazon Web Services. It is not recommended
-# for use in any other production environment.
-#
-#
-#
-#
 # Simple script to wait for a Cloudformation resource identified as 
 # part of a Cloudformation::Stack chain (using logical resource names).
 #
@@ -41,7 +33,7 @@ fi
 
 ThisRegion=$(curl -f $murl_top/placement/availability-zone 2> /dev/null)
 if [ -z "$ThisRegion" ] ; then
-	ThisRegion="us-west-2"
+	ThisRegion="us-east-1"
 else
 	ThisRegion="${ThisRegion%[a-z]}"
 fi

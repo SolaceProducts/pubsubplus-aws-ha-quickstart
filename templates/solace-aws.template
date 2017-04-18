@@ -208,7 +208,7 @@
                 "Ubuntu-Server-16.04-LTS-HVM",
                 "Amazon-Linux-HVM"
             ],
-            "ConstraintDescription": "Supported versions of Linux AMIs for Confluent deployments",
+            "ConstraintDescription": "Supported versions of Linux AMIs for Solace Message Routers",
             "Default": "CentOS-7-HVM",
             "Description": "Operating system AMI for cluster instances; you MUST authorize access to the proper AMI at https://aws.amazon.com/marketplace",
             "Type": "String"
@@ -226,7 +226,7 @@
             "Type": "String"
         },
         "SubnetID": {
-            "Description": "Comma separated list of VPC subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Confluent cluster access (internal and external)",
+            "Description": "Comma separated list of VPC subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access (internal and external)",
             "Type": "List<AWS::EC2::Subnet::Id>"
         },
         "VPCID": {

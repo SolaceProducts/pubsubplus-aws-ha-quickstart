@@ -15,13 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Specifically, this script is intended SOLELY to support the Confluent
-# Quick Start offering in Amazon Web Services. It is not recommended
-# for use in any other production environment.
-#
-#
-#
-#
 # Simple script to wait for a Cloudformation resource
 #
 # usage:

@@ -15,10 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Specifically, this script is intended SOLELY to support the Solace
-# Quick Start offering in Amazon Web Services. It is not recommended
-# for use in any other production environment.
-#
 # Generate the clusters hosts files for a AWS Cloudformation Stack.
 # If no stack is given, we try to figure out out from tags of this
 # instance.
@@ -106,16 +102,16 @@ fi
 #
 grep -q -e "-MessageRouterNodes-" -e "-MessageRouterStack-" ${CP_HOSTS_FILE}
 if [ $? -eq 0 ] ; then
-	grep -e "-MessageRouterNodes-" -e "-MessageRouterStack-" ${CP_HOSTS_FILE} \
-		| awk '{print $1" ROUTERNODE"NR-1" "$2" "$3" "$4}' > /tmp/brokers
+    grep -e "-MessageRouterNodes-" -e "-MessageRouterStack-" ${CP_HOSTS_FILE} \
+    | awk '{print $1" ROUTERNODE"NR-1" "$2" "$3" "$4}' > /tmp/routers
 else
-	cp ${CP_HOSTS_FILE} /tmp/routers
+    cp ${CP_HOSTS_FILE} /tmp/routers
 fi
 
 grep -q -e "-MonitorNodes-" -e "-MonitorStack-" ${CP_HOSTS_FILE}
 if [ $? -eq 0 ] ; then
-	grep -e "-MonitorNodes-" -e "-MonitorStack-" ${CP_HOSTS_FILE} \
-		| awk '{print $1" MONITORNODE"NR-1" "$2" "$3" "$4}' > /tmp/monitors
+    grep -e "-MonitorNodes-" -e "-MonitorStack-" ${CP_HOSTS_FILE} \
+    | awk '{print $1" MONITORNODE"NR-1" "$2" "$3" "$4}' > /tmp/monitors
 fi
 
 
