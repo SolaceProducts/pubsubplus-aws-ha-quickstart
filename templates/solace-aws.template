@@ -112,7 +112,7 @@
             }
         }
     },
-        "Parameters": {
+    "Parameters": {
         "BootDiskSize": {
             "ConstraintDescription": "Deployment supports 8 to 128 GB for boot volumes",
             "Default": "24",
@@ -317,58 +317,43 @@
         }
     },
     "Resources": {
-        "InstanceIAMRole": {
+        "RootRole": {
+            "Type": "AWS::IAM::Role",
             "Properties": {
                 "AssumeRolePolicyDocument": {
-                    "Statement": [
-                        {
-                            "Action": [
-                                "sts:AssumeRole"
-                            ],
-                            "Effect": "Allow",
-                            "Principal": {
-                                "Service": [
-                                    "ec2.amazonaws.com"
-                                ]
-                            }
-                        }
-                    ],
-                    "Version": "2012-10-17"
+                "Version" : "2012-10-17",
+                "Statement": [ {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": [ "ec2.amazonaws.com" ]
+                    },
+                    "Action": [ "sts:AssumeRole" ]
+                } ]
                 },
-                "Path": "/",
-                "Policies": [
-                    {
-                        "PolicyDocument": {
-                            "Statement": [
-                                {
-                                    "Action": [
-                                        "ec2:CreateTags",
-                                        "ec2:DescribeInstances",
-                                        "cloudformation:DescribeStackResources",
-                                        "s3:Get*",
-                                        "s3:List*"
-                                    ],
-                                    "Effect": "Allow",
-                                    "Resource": "*"
-                                }
-                            ]
-                        },
-                        "PolicyName": "DescribeAccessEC2andCFN"
-                    }
-                ]
-            },
-            "Type": "AWS::IAM::Role"
+                "Path": "/"
+            }
         },
+        "RolePolicies": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "root",
+                "PolicyDocument": {
+                "Version" : "2012-10-17",
+                "Statement": [ {
+                    "Effect": "Allow",
+                    "Action": "*",
+                    "Resource": "*"
+                } ]
+                },
+                "Roles": [ { "Ref": "RootRole" } ]
+            }
+         },
         "InstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
             "Properties": {
                 "Path": "/",
-                "Roles": [
-                    {
-                        "Ref": "InstanceIAMRole"
-                    }
-                ]
-            },
-            "Type": "AWS::IAM::InstanceProfile"
+                "Roles": [ { "Ref": "RootRole" } ]
+            }
         },
         "MessageRouterStack": {
             "Type": "AWS::CloudFormation::Stack",
@@ -392,7 +377,7 @@
                             {
                                 "Ref": "QSS3KeyPrefix"
                             },
-                            "templates/message-router.template"
+                            "templates/nodegroup.template"
                         ]
                     ]
                 },
@@ -470,7 +455,7 @@
                             {
                                 "Ref": "QSS3KeyPrefix"
                             },
-                            "templates/monitor.template"
+                            "templates/nodegroup.template"
                         ]
                     ]
                 },
@@ -490,7 +475,7 @@
                     "LinuxOSAMI": {
                         "Ref": "LinuxOSAMI"
                     },
-                    "NodeDesignation": "message-router",
+                    "NodeDesignation": "monitor",
                     "NodeInstanceType": {
                         "Ref": "MonitorNodeInstanceType"
                     },
