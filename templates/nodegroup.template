@@ -68,7 +68,7 @@
             "Default": "3",
             "Description": "Number of Nodes in Auto-scaling Group",
             "MaxValue": "3",
-            "MinValue": "3",
+            "MinValue": "1",
             "Type": "Number"
         },
         "ParentStackName": {
@@ -310,14 +310,14 @@
                 },
                 "DesiredCapacity": {
                     "Ref": "NumNodes"
-                }
-            },
-            "CreationPolicy": {
-                "ResourceSignal": {
-                    "Count": {
-                        "Ref": "NumNodes"
-                    },
-                    "Timeout": "PT30M"
+                },
+                "CreationPolicy": {
+                    "ResourceSignal": {
+                        "Count": {
+                            "Ref": "NumNodes"
+                        },
+                        "Timeout": "PT30M"
+                    }
                 }
             }
         },
@@ -325,6 +325,9 @@
             "Type": "AWS::AutoScaling::LaunchConfiguration",
             "Metadata": {
                 "AWS::CloudFormation::Init": {
+                    "configSets" : {
+                        "install_all" : [ "install_cfn", "install_app", "install_logs" ]
+                    },                   
                     "config": {
                         "files": {
                             "/tmp/sbin/gen-cluster-hosts.sh": {
@@ -410,6 +413,39 @@
                                 "mode": "000755",
                                 "owner": "root",
                                 "group": "root"
+                            }
+                        }
+                    },
+                    "install_cfn" : {
+                        "files" : {
+                            "/etc/cfn/cfn-hup.conf" : {
+                                "content" : { "Fn::Join" : ["", [
+                                "[main]\n",
+                                "stack=", { "Ref" : "AWS::StackId" }, "\n",
+                                "region=", { "Ref" : "AWS::Region" }, "\n"
+                                ]]},
+                                "mode"    : "000400",
+                                "owner"   : "root",
+                                "group"   : "root"
+                            },
+                            "/etc/cfn/hooks.d/cfn-auto-reloader.conf" : {
+                                "content": { "Fn::Join" : ["", [
+                                "[cfn-auto-reloader-hook]\n",
+                                "triggers=post.update\n",
+                                "path=Resources.WebServerInstance.Metadata.AWS::CloudFormation::Init\n",
+                                "action=/opt/aws/bin/cfn-init -v ",
+                                "         --stack ", { "Ref" : "AWS::StackName" },
+                                "         --resource WebServerInstance ",
+                                "         --configsets install_all ",
+                                "         --region ", { "Ref" : "AWS::Region" }, "\n",
+                                "runas=root\n"
+                                ]]}
+                            }
+                        },
+                        "services" : {
+                            "sysvinit" : {
+                                "cfn-hup" : { "enabled" : "true", "ensureRunning" : "true",
+                                            "files" : ["/etc/cfn/cfn-hup.conf", "/etc/cfn/hooks.d/cfn-auto-reloader.conf"]}
                             }
                         }
                     }
