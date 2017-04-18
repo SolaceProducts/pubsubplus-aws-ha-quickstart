@@ -32,7 +32,7 @@
                     "Parameters": [
                         "MessageRouterNodeInstanceType",
                         "MessageRouterNodeStorage",
-                        "MessageRouterNodeSpotPrice"
+                        "MessageRouterNodeSpotPrice",
                         "MessageRouterNumberOfNodes"
                     ]
                 },
@@ -43,7 +43,7 @@
                     "Parameters": [
                         "MonitorNodeInstanceType",
                         "MonitorNodeStorage",
-                        "MonitorNodeSpotPrice"
+                        "MonitorNodeSpotPrice",
                         "MonitorNumberOfNodes"
                     ]
                 },
