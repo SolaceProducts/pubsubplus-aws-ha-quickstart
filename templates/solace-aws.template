@@ -423,7 +423,7 @@
                         "Ref": "MessageRouterNodeSpotPrice"
                     },
                     "NumNodes": {
-                        "Ref": "2"
+                        "Ref": "MessageRouterNumberOfNodes"
                     },
                     "ParentStackName": {
                         "Ref": "AWS::StackName"
@@ -501,7 +501,7 @@
                         "Ref": "MonitorNodeSpotPrice"
                     },
                     "NumNodes": {
-                        "Ref": "2"
+                        "Ref": "MonitorNumberOfNodes"
                     },
                     "ParentStackName": {
                         "Ref": "AWS::StackName"
