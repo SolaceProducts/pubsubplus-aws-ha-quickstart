@@ -402,29 +402,6 @@
                                 "mode": "000755",
                                 "owner": "root",
                                 "group": "root"
-                            },
-                            "/etc/cfn/cfn-hup.conf" : {
-                                "content" : { "Fn::Join" : ["", [
-                                "[main]\n",
-                                "stack=", { "Ref" : "AWS::StackId" }, "\n",
-                                "region=", { "Ref" : "AWS::Region" }, "\n"
-                                ]]},
-                                "mode"    : "000400",
-                                "owner"   : "root",
-                                "group"   : "root"
-                            },
-                            "/etc/cfn/hooks.d/cfn-auto-reloader.conf" : {
-                                "content": { "Fn::Join" : ["", [
-                                "[cfn-auto-reloader-hook]\n",
-                                "triggers=post.update\n",
-                                "path=Resources.WebServerInstance.Metadata.AWS::CloudFormation::Init\n",
-                                "action=/opt/aws/bin/cfn-init -v ",
-                                "         --stack ", { "Ref" : "AWS::StackName" },
-                                "         --resource WebServerInstance ",
-                                "         --configsets install_all ",
-                                "         --region ", { "Ref" : "AWS::Region" }, "\n",
-                                "runas=root\n"
-                                ]]}
                             }
                         },
                         "services" : {
@@ -634,6 +611,11 @@
                                 "  [ `which apt-get` ] && apt-get -y install sshpass \n",
                                 "fi \n",
                                 "\n",
+                                "if [ ! -f /usr/bin/jq ] ; then \n",
+                                "  [ `which yum` ] && yum install -y jq \n",
+                                "  [ `which apt-get` ] && apt-get -y install jq \n",
+                                "fi \n",
+                                "\n",
                                 "which pip &> /dev/null \n",
                                 "if [ $? -ne 0 ] ; then \n",
                                 "  [ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip)\n",
@@ -735,7 +717,7 @@
                                 "$AMI_SBIN/wait-for-resource.sh NodesReadyCondition \n",
                                 "\n",
                                 "## Signal back information for outputs (now that all nodes are up) \n",
-                                "$AMI_SBIN/post-cp-info.sh '",
+                                "cfn-signal -e 0 -r 'Solace HA deployment complete' '",
                                 {
                                     "Ref": "ClusterInfoHandle"
                                 },
