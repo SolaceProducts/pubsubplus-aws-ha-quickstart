@@ -2,8 +2,16 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "This template creates a new VPC infrastructure for Solace high availability architecture. **WARNING** This template creates Amazon EC2 instance and related resources. You will be billed for the AWS resources used if you create a stack from this template.",
     "Metadata": {
-        "AWS::CloudFormation::Interface": {
+        "AWS::CloudFormation::Instance": {
             "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Solace Docker URL"
+                    },
+                    "Parameters": [
+                        "SolaceDockerURL"
+                    ]
+                },
                 {
                     "Label": {
                         "default": "Network Configuration"
@@ -59,6 +67,9 @@
                 }
             ],
             "ParameterLabels": {
+                "SolaceDockerURL": {
+                    "default": "Solace Docker URL"
+                },
                 "AvailabilityZones": {
                     "default": "Availability Zones"
                 },
@@ -117,6 +128,10 @@
         }
     },
     "Parameters": {
+        "SolaceDockerURL": {
+            "Description": "URL to Solace Docker Image obtained via registration here: http://dev.solace.com/downloads/download_vmr-ce-docker",
+            "Type": "String"
+        },
         "AvailabilityZones": {
             "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved and only 2 AZs are used for this deployment.",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"
@@ -166,12 +181,12 @@
         },
         "LinuxOSAMI": {
             "AllowedValues": [
+                "Amazon-Linux-HVM",
                 "CentOS-7-HVM",
-                "Ubuntu-Server-16.04-LTS-HVM",
-                "Amazon-Linux-HVM"
+                "Ubuntu-Server-16.04-LTS-HVM"
             ],
-            "ConstraintDescription": "Supported versions of Linux AMIs for Solace Message Routers",
-            "Default": "CentOS-7-HVM",
+            "ConstraintDescription": "Supported versions of Linux AMIs for Solace Message Routers, use Amazon for now",
+            "Default": "Amazon-Linux-HVM",
             "Description": "Operating system AMI for cluster instances; you MUST authorize access to the proper AMI at https://aws.amazon.com/marketplace",
             "Type": "String"
         },
@@ -414,6 +429,9 @@
                     ]
                 },
                 "Parameters": {
+                    "SolaceDockerURL": {
+                        "Ref": "SolaceDockerURL"
+                    },
                     "BootDiskSize": {
                         "Ref": "BootDiskSize"
                     },
@@ -461,6 +479,12 @@
                                     "Fn::GetAtt": [
                                         "VPCStack",
                                         "Outputs.PublicSubnet2ID"
+                                    ]
+                                },
+                                {
+                                    "Fn::GetAtt": [
+                                        "VPCStack",
+                                        "Outputs.PublicSubnet3ID"
                                     ]
                                 }
                             ]

@@ -19,8 +19,7 @@
 # If no stack is given, we try to figure out out from tags of this
 # instance.
 #
-# The assumption is that the Cloudformation Stack deploys 1 or more
-# autoscaling groups.
+# The assumption is that the Cloudformation Stack deploys 2 autoscaling groups.
 #	MessageRouter	(/tmp/routers)
 #	MonitorNodes	(/tmp/monitors)
 #

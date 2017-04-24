@@ -6,14 +6,6 @@
             "ParameterGroups": [
                 {
                     "Label": {
-                        "default": "Solace Docker URL"
-                    },
-                    "Parameters": [
-                        "SolaceDockerURL"
-                    ]
-                },                
-                {
-                    "Label": {
                         "default": "Network Configuration"
                     },
                     "Parameters": [
@@ -40,7 +32,8 @@
                     "Parameters": [
                         "MessageRouterNodeInstanceType",
                         "MessageRouterNodeStorage",
-                        "MessageRouterNodeSpotPrice"
+                        "MessageRouterNodeSpotPrice",
+                        "MessageRouterNumberOfNodes"
                     ]
                 },
                 {
@@ -50,7 +43,8 @@
                     "Parameters": [
                         "MonitorNodeInstanceType",
                         "MonitorNodeStorage",
-                        "MonitorNodeSpotPrice"
+                        "MonitorNodeSpotPrice",
+                        "MonitorNumberOfNodes"
                     ]
                 },
                 {
@@ -64,9 +58,6 @@
                 }
             ],
             "ParameterLabels": {
-                "SolaceDockerURL": {
-                    "default": "Solace Docker URL"
-                },                
                 "BootDiskSize": {
                     "default": "Boot Disk Capacity (GiB)"
                 },
@@ -122,10 +113,6 @@
         }
     },
     "Parameters": {
-        "SolaceDockerURL": {
-            "Description": "Require URL to enterprise or Evaluation VMR, not Community",
-            "Type": "String"
-        },
         "BootDiskSize": {
             "ConstraintDescription": "Deployment supports 8 to 128 GB for boot volumes",
             "Default": "24",
@@ -164,6 +151,14 @@
             "Description": "Spot Price to bid for requested instances (0.00 will result in using on-demand instances)",
             "Type": "String"
         },
+        "MessageRouterNumberOfNodes": {
+            "ConstraintDescription": "At this time only 2 Message Router nodes excepted",
+            "Default": "2",
+            "Description": "Specify that there will be 2 Message Router nodes",
+            "MaxValue": "2",
+            "MinValue": "2",
+            "Type": "Number"
+        },
         "MonitorNodeInstanceType": {
             "AllowedValues": [
                 "t2.medium",
@@ -195,18 +190,26 @@
             "MinValue": "0",
             "Type": "Number"
         },
+        "MonitorNumberOfNodes": {
+            "ConstraintDescription": "At this time only 1 Monitor node excepted",
+            "Default": "1",
+            "Description": "Specify that there will be 2 Monitor node",
+            "MaxValue": "1",
+            "MinValue": "1",
+            "Type": "Number"
+        },
         "KeyPairName": {
             "Description": "Name of an existing EC2 key pair within the AWS region; all instances will launch with this key pair",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "LinuxOSAMI": {
             "AllowedValues": [
-                "Amazon-Linux-HVM",
                 "CentOS-7-HVM",
-                "Ubuntu-Server-16.04-LTS-HVM"
+                "Ubuntu-Server-16.04-LTS-HVM",
+                "Amazon-Linux-HVM"
             ],
             "ConstraintDescription": "Supported versions of Linux AMIs for Solace Message Routers",
-            "Default": "Amazon-Linux-HVM",
+            "Default": "CentOS-7-HVM",
             "Description": "Operating system AMI for cluster instances; you MUST authorize access to the proper AMI at https://aws.amazon.com/marketplace",
             "Type": "String"
         },
@@ -352,9 +355,8 @@
                 "Roles": [ { "Ref": "RootRole" } ]
             }
         },
-        "MessageRouterPrimaryStack": {
+        "MessageRouterStack": {
             "Type": "AWS::CloudFormation::Stack",
-            "DeletionPolicy" : "Retain",
             "Properties": {
                 "TemplateURL": {
                     "Fn::Join": [
@@ -380,9 +382,6 @@
                     ]
                 },
                 "Parameters": {
-                    "SolaceDockerURL": {
-                        "Ref": "SolaceDockerURL"
-                    },
                     "BootDiskSize": {
                         "Ref": "BootDiskSize"
                     },
@@ -398,7 +397,7 @@
                     "LinuxOSAMI": {
                         "Ref": "LinuxOSAMI"
                     },
-                    "NodeDesignation": "message-router-primary",
+                    "NodeDesignation": "message-router",
                     "NodeInstanceType": {
                         "Ref": "MessageRouterNodeInstanceType"
                     },
@@ -407,6 +406,9 @@
                     },
                     "NodeSpotPrice": {
                         "Ref": "MessageRouterNodeSpotPrice"
+                    },
+                    "NumNodes": {
+                        "Ref": "MessageRouterNumberOfNodes"
                     },
                     "ParentStackName": {
                         "Ref": "AWS::StackName"
@@ -421,87 +423,8 @@
                         "Ref": "QSS3KeyPrefix"
                     },
                     "SubnetID": {
-                        "Fn::Select": [
-                            0,
-                            {
-                                "Ref": "SubnetID"
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        "MessageRouterBackupStack": {
-            "Type": "AWS::CloudFormation::Stack",
-            "DeletionPolicy" : "Retain",            
-            "Properties": {
-                "TemplateURL": {
-                    "Fn::Join": [
-                        "/",
-                        [
-                            {
-                                "Fn::FindInMap": [
-                                    "AWSInfoRegionMap",
-                                    {
-                                        "Ref": "AWS::Region"
-                                    },
-                                    "QuickStartS3URL"
-                                ]
-                            },
-                            {
-                                "Ref": "QSS3BucketName"
-                            },
-                            {
-                                "Ref": "QSS3KeyPrefix"
-                            },
-                            "templates/nodegroup.template"
-                        ]
-                    ]
-                },
-                "Parameters": {
-                    "SolaceDockerURL": {
-                        "Ref": "SolaceDockerURL"
-                    },
-                    "BootDiskSize": {
-                        "Ref": "BootDiskSize"
-                    },
-                    "ClusterInfoHandle": {
-                        "Ref": "ClusterInfoHandle"
-                    },
-                    "InstanceProfile": {
-                        "Ref": "InstanceProfile"
-                    },
-                    "KeyPairName": {
-                        "Ref": "KeyPairName"
-                    },
-                    "LinuxOSAMI": {
-                        "Ref": "LinuxOSAMI"
-                    },
-                    "NodeDesignation": "message-router-backup",
-                    "NodeInstanceType": {
-                        "Ref": "MessageRouterNodeInstanceType"
-                    },
-                    "NodeSecurityGroup": {
-                        "Ref" : "MessageRouterSecurityGroup"
-                    },
-                    "NodeSpotPrice": {
-                        "Ref": "MessageRouterNodeSpotPrice"
-                    },
-                    "ParentStackName": {
-                        "Ref": "AWS::StackName"
-                    },
-                    "PersistentStorage": {
-                        "Ref": "MessageRouterNodeStorage"
-                    },
-                    "QSS3BucketName": {
-                        "Ref": "QSS3BucketName"
-                    },
-                    "QSS3KeyPrefix": {
-                        "Ref": "QSS3KeyPrefix"
-                    },
-                    "SubnetID": {
-                        "Fn::Select": [
-                            1,
+                        "Fn::Join": [
+                            ",",
                             {
                                 "Ref": "SubnetID"
                             }
@@ -512,7 +435,6 @@
         },
         "MonitorStack" :{
             "Type": "AWS::CloudFormation::Stack",
-            "DeletionPolicy" : "Retain",
             "Properties": {
                 "TemplateURL": {
                     "Fn::Join": [
@@ -538,9 +460,6 @@
                     ]
                 },
                 "Parameters": {
-                    "SolaceDockerURL": {
-                        "Ref": "SolaceDockerURL"
-                    },
                     "BootDiskSize": {
                         "Ref": "BootDiskSize"
                     },
@@ -566,6 +485,9 @@
                     "NodeSpotPrice": {
                         "Ref": "MonitorNodeSpotPrice"
                     },
+                    "NumNodes": {
+                        "Ref": "MonitorNumberOfNodes"
+                    },
                     "ParentStackName": {
                         "Ref": "AWS::StackName"
                     },
@@ -579,8 +501,8 @@
                         "Ref": "QSS3KeyPrefix"
                     },
                     "SubnetID": {
-                        "Fn::Select": [
-                            2,
+                        "Fn::Join": [
+                            ",",
                             {
                                 "Ref": "SubnetID"
                             }
@@ -641,7 +563,7 @@
         "ClusterInfoCondition": {
             "Type": "AWS::CloudFormation::WaitCondition",
             "Condition": "EnableWaitConditions",
-            "DependsOn": ["MessageRouterPrimaryStack", "MessageRouterBackupStack", "MonitorStack"],
+            "DependsOn": "MessageRouterStack",
             "Properties": {
                 "Handle": {
                     "Ref": "ClusterInfoHandle"

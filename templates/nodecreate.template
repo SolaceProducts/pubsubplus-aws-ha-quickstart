@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "CloudFormation sub-template for Auto-scaling group deployment",
+    "Description": "CloudFormation sub-template for ec2 creation",
     "Parameters": {
         "SolaceDockerURL": {
             "Description": "Require URL to enterprise or Evaluation VMR, not Community",
@@ -28,9 +28,9 @@
         },
         "LinuxOSAMI": {
             "AllowedValues": [
+                "Amazon-Linux-HVM",
                 "CentOS-7-HVM",
-                "Ubuntu-Server-16.04-LTS-HVM",
-                "Amazon-Linux-HVM"
+                "Ubuntu-Server-16.04-LTS-HVM"
             ],
             "ConstraintDescription": "Supported versions of Linux AMIs for Solace Message Routers",
             "Default": "Amazon-Linux-HVM",
@@ -54,7 +54,7 @@
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Kafka brokers; select m3/m4 or i2 instance types for us-west-1 and sa-east-1",
+            "Description": "Instance Type for Solace Router and Monitor nodes.",
             "Type": "String"
         },
         "NodeSecurityGroup": {
@@ -67,13 +67,6 @@
             "Default": "0.00",
             "Description": "Spot Price to bid for requested instances (0.00 will result in using on-demand instances)",
             "Type": "String"
-        },
-        "NumNodes": {
-            "Default": "1",
-            "Description": "Number of Nodes in Auto-scaling Group",
-            "MaxValue": "3",
-            "MinValue": "1",
-            "Type": "Number"
         },
         "ParentStackName": {
             "Description": "Wrapper stack for this deployment",
@@ -102,8 +95,8 @@
             "Type": "String"
         },
         "SubnetID": {
-            "Description": "Comma separated list of VPC subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solacet cluster access (internal and external)and the subnets must be in the same VPC as the security groups",
-            "Type": "List<AWS::EC2::Subnet::Id>"
+            "Description": "VPC subnet ID for the node; VPC must exist with proper configuration for Solace cluster access (internal and external)and the subnet must be in the same VPC as the security groups",
+            "Type": "String"
         }
     },
     "Mappings": {
@@ -290,35 +283,12 @@
         "NodesReadyCondition": {
             "Type": "AWS::CloudFormation::WaitCondition",
             "Properties": {
-                "Handle": {
-                    "Ref": "NodesReadyHandle"
-                },
-                "Timeout": "2400",
-                "Count": {
-                    "Ref": "NumNodes"
-                }
-            }
-        },
-        "Nodes": {
-            "Type": "AWS::AutoScaling::AutoScalingGroup",
-            "Properties": {
-                "VPCZoneIdentifier": {
-                    "Ref": "SubnetID"
-                },
-                "LaunchConfigurationName": {
-                    "Ref": "NodeLaunchConfig"
-                },
-                "MinSize": 0,
-                "MaxSize": {
-                    "Ref": "NumNodes"
-                },
-                "DesiredCapacity": {
-                    "Ref": "NumNodes"
-                }
+                "Handle": {"Ref": "NodesReadyHandle"},
+                "Timeout": "9000"
             }
         },
         "NodeLaunchConfig": {
-            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Type": "AWS::EC2::Instance",
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "config" : {
@@ -407,12 +377,6 @@
                                 "owner": "root",
                                 "group": "root"
                             }
-                        },
-                        "services" : {
-                            "sysvinit" : {
-                                "cfn-hup" : { "enabled" : "true", "ensureRunning" : "true",
-                                            "files" : ["/etc/cfn/cfn-hup.conf", "/etc/cfn/hooks.d/cfn-auto-reloader.conf"]}
-                            }
                         }
                     }
                 }
@@ -442,50 +406,6 @@
                             {
                                 "DeviceName": "/dev/sdb",
                                 "VirtualName": "ephemeral0"
-                            },
-                            {
-                                "DeviceName": "/dev/sdc",
-                                "VirtualName": "ephemeral1"
-                            },
-                            {
-                                "DeviceName": "/dev/sdd",
-                                "VirtualName": "ephemeral2"
-                            },
-                            {
-                                "DeviceName": "/dev/sde",
-                                "VirtualName": "ephemeral3"
-                            },
-                            {
-                                "DeviceName": "/dev/sdf",
-                                "VirtualName": "ephemeral4"
-                            },
-                            {
-                                "DeviceName": "/dev/sdg",
-                                "VirtualName": "ephemeral5"
-                            },
-                            {
-                                "DeviceName": "/dev/sdh",
-                                "VirtualName": "ephemeral6"
-                            },
-                            {
-                                "DeviceName": "/dev/sdi",
-                                "VirtualName": "ephemeral7"
-                            },
-                            {
-                                "DeviceName": "/dev/sdj",
-                                "VirtualName": "ephemeral8"
-                            },
-                            {
-                                "DeviceName": "/dev/sdk",
-                                "VirtualName": "ephemeral9"
-                            },
-                            {
-                                "DeviceName": "/dev/sdl",
-                                "VirtualName": "ephemeral10"
-                            },
-                            {
-                                "DeviceName": "/dev/sdm",
-                                "VirtualName": "ephemeral11"
                             }
                         ],
                         [
@@ -514,33 +434,6 @@
                                     },
                                     "DeleteOnTermination": "True"
                                 }
-                            },
-                            {
-                                "DeviceName": "/dev/sdc",
-                                "Ebs": {
-                                    "VolumeSize": {
-                                        "Ref": "PersistentStorage"
-                                    },
-                                    "DeleteOnTermination": "True"
-                                }
-                            },
-                            {
-                                "DeviceName": "/dev/sdd",
-                                "Ebs": {
-                                    "VolumeSize": {
-                                        "Ref": "PersistentStorage"
-                                    },
-                                    "DeleteOnTermination": "True"
-                                }
-                            },
-                            {
-                                "DeviceName": "/dev/sde",
-                                "Ebs": {
-                                    "VolumeSize": {
-                                        "Ref": "PersistentStorage"
-                                    },
-                                    "DeleteOnTermination": "True"
-                                }
                             }
                         ]
                     ]
@@ -562,9 +455,15 @@
                         }
                     ]
                 },
-                "SecurityGroups": {
-                    "Ref": "NodeSecurityGroup"
-                },
+                "NetworkInterfaces" : [
+                    {
+                        "DeleteOnTermination" : true,
+                        "Description"         : "Main interface",
+                        "DeviceIndex"         : "0",
+                        "GroupSet"            : { "Ref" : "NodeSecurityGroup" },
+                        "SubnetId"            : { "Ref" : "SubnetID" }
+                    }
+                ],
                 "InstanceType": {
                     "Ref": "NodeInstanceType"
                 },
@@ -581,10 +480,6 @@
                 },
                 "KeyName": {
                     "Ref": "KeyPairName"
-                },
-                "AssociatePublicIpAddress": "true",
-                "IamInstanceProfile": {
-                    "Ref": "InstanceProfile"
                 },
                 "UserData": {
                     "Fn::Base64": {
