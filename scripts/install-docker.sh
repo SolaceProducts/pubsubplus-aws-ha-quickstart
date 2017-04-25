@@ -17,33 +17,17 @@
 
 sudo yum update -y
 
-OPTIND=1         # Reset in case getopts has been used previously in the shell.
-
-# Initialize our own variables:
-solace_tarball=""
-verbose=0
-
-while getopts "f:" opt; do
-    case "$opt" in
-    f)  solace_tarball=$OPTARG
-        ;;
-    esac
-done
-
-shift $((OPTIND-1))
-
-[ "$1" = "--" ] && shift
-
-echo "solace_tarball=$solace_tarball, Leftovers: $@"
-
-if [[ -z "${$solace_tarball// }" ]] ; then
-    echo "Did not get an ansible tarball"
-    exit 0
-fi  
-
-cd /tmp
-tar zxf $solace_tarball
-
-if [ ! -f /usr/local/bin/ansible ] ; then
-   pip install ansible
+if [ ! -f /usr/bin/docker ] ; then
+   [ `which yum` ] && yum install -y docker
+   service docker start
+   usermod -a -G docker ec2-user
+   docker info
 fi
+
+if [ ! -f /usr/bin/wget ] ; then
+   [ `which yum` ] && yum install -y wget
+   [ `which apt-get` ] && apt-get -y install wget
+fi
+
+[ `which yum` ] && yum install -y wget
+[ `which apt-get` ] && apt-get -y install wget

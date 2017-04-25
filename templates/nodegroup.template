@@ -331,18 +331,12 @@
                                             {
                                                 "Fn::FindInMap": [
                                                     "AWSInfoRegionMap",
-                                                    {
-                                                        "Ref": "AWS::Region"
-                                                    },
+                                                    { "Ref": "AWS::Region" },
                                                     "QuickStartS3URL"
                                                 ]
                                             },
-                                            {
-                                                "Ref": "QSS3BucketName"
-                                            },
-                                            {
-                                                "Ref": "QSS3KeyPrefix"
-                                            },
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
                                             "scripts/gen-cluster-hosts.sh"
                                         ]
                                     ]
@@ -359,18 +353,12 @@
                                             {
                                                 "Fn::FindInMap": [
                                                     "AWSInfoRegionMap",
-                                                    {
-                                                        "Ref": "AWS::Region"
-                                                    },
+                                                    { "Ref": "AWS::Region" },
                                                     "QuickStartS3URL"
                                                 ]
                                             },
-                                            {
-                                                "Ref": "QSS3BucketName"
-                                            },
-                                            {
-                                                "Ref": "QSS3KeyPrefix"
-                                            },
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
                                             "scripts/wait-for-child-resource.sh"
                                         ]
                                     ]
@@ -387,19 +375,101 @@
                                             {
                                                 "Fn::FindInMap": [
                                                     "AWSInfoRegionMap",
-                                                    {
-                                                        "Ref": "AWS::Region"
-                                                    },
+                                                    { "Ref": "AWS::Region" },
                                                     "QuickStartS3URL"
                                                 ]
                                             },
-                                            {
-                                                "Ref": "QSS3BucketName"
-                                            },
-                                            {
-                                                "Ref": "QSS3KeyPrefix"
-                                            },
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
                                             "scripts/wait-for-resource.sh"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000755",
+                                "owner": "root",
+                                "group": "root"
+                            },
+                            "/tmp/install-ansible.sh": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    { "Ref": "AWS::Region" },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
+                                            "scripts/install-ansible.sh"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000755",
+                                "owner": "root",
+                                "group": "root"
+                            },
+                            "/tmp/install-docker.sh": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    { "Ref": "AWS::Region" },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
+                                            "scripts/install-docker.sh"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000755",
+                                "owner": "root",
+                                "group": "root"
+                            },
+                            "/tmp/install-solace.sh": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    { "Ref": "AWS::Region" },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
+                                            "scripts/install-solace.sh"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000755",
+                                "owner": "root",
+                                "group": "root"
+                            },
+                            "/tmp/solace-ansible.tgz": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    { "Ref": "AWS::Region" },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
+                                            "scripts/solace-ansible.tgz"
                                         ]
                                     ]
                                 },
@@ -408,12 +478,6 @@
                                 "group": "root"
                             }
                         },
-                        "services" : {
-                            "sysvinit" : {
-                                "cfn-hup" : { "enabled" : "true", "ensureRunning" : "true",
-                                            "files" : ["/etc/cfn/cfn-hup.conf", "/etc/cfn/hooks.d/cfn-auto-reloader.conf"]}
-                            }
-                        }
                     }
                 }
             },
@@ -610,11 +674,6 @@
                                 "PATH=$PATH:/usr/local/bin \n",
                                 "\n",
                                 "## Install core O/S packages\n",
-                                "if [ ! -f /usr/bin/sshpass ] ; then \n",
-                                "  [ `which yum` ] && yum install -y sshpass \n",
-                                "  [ `which apt-get` ] && apt-get -y install sshpass \n",
-                                "fi \n",
-                                "\n",
                                 "if [ ! -f /usr/bin/jq ] ; then \n",
                                 "  [ `which yum` ] && yum install -y jq \n",
                                 "  [ `which apt-get` ] && apt-get -y install jq \n",
@@ -671,7 +730,7 @@
                                 " MessageRouterStack Nodes\n",
                                 "\n",
                                 "## Now find the private IP addresses of all deployed nodes\n",
-                                "##   (generating /tmp/cphosts and /tmp/<role> files)\n",
+                                "##   (generating /tmp/solacehosts and /tmp/<role> files)\n",
                                 "$AMI_SBIN/gen-cluster-hosts.sh ",
                                 {
                                     "Ref": "ParentStackName"
@@ -726,6 +785,16 @@
                                     "Ref": "ClusterInfoHandle"
                                 },
                                 "'\n",
+                                "\n"
+                                "## Install Docker\n",
+                                "$AMI_SBIN/install-docker.sh \n",
+                                "\n",
+                                "## Install Ansible\n",
+                                "$AMI_SBIN/install-ansible.sh -f /tmp/solace-ansible.tgz\n",
+                                "\n",
+                                "## Install Solace\n",
+                                "$AMI_SBIN/install-solace.sh SolaceDockerURL\n",
+                                "\n",
                                 "\n"
                             ]
                         ]

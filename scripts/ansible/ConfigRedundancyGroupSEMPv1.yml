@@ -1,0 +1,21 @@
+--
+#enable
+#configure
+#redundancy
+#switchover-mechanism hostlist
+#group
+#create node VMR-perf-155-HA-Primary
+#ip 192.168.169.101
+#node-type message-routing-node
+#exit
+#create node VMR-perf-154-HA-Backup
+#ip 192.168.169.202
+#node-type message-routing-node
+#exit
+#create node VMR-perf-94-HA-Monitor
+#ip 192.168.169.128
+#node-type monitor-node
+#exit
+#password passwd
+#exit
+#no shut
