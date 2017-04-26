@@ -6,7 +6,7 @@
             "ParameterGroups": [
                 {
                     "Label": {
-                        "default": "Solace Docker URL"
+                        "default": "Solace Parameters"
                     },
                     "Parameters": [
                         "SolaceDockerURL",
@@ -69,7 +69,7 @@
                     "default": "Solace Docker URL"
                 },
                 "AdminPassword": {
-                    "default": "Password to access SolOS admin console and SEMP",
+                    "default": "Password to access SolOS admin console and SEMP"
                 },                
                 "BootDiskSize": {
                     "default": "Boot Disk Capacity (GiB)"

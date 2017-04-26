@@ -481,7 +481,7 @@
                                 "owner": "root",
                                 "group": "root"
                             }
-                        },
+                        }
                     }
                 }
             },
@@ -769,10 +769,6 @@
                                 " --resources $instance_id --tags Key=Name,Value=$instance_tag\n",
                                 "fi\n",
                                 "\n",
-                                "## [ OPTIONAL ] Open up ssh to allow direct login\n",
-                                "#sed -i 's/ChallengeResponseAuthentication .*no$/ChallengeResponseAuthentication yes/' /etc/ssh/sshd_config\n",
-                                "#service sshd restart\n",
-                                "\n",
                                 "## If all went well, signal success (must be done by ALL nodes in group)\n",
                                 "cfn-signal -e 0 -r 'Solace node deployment complete' '",
                                 {
@@ -789,17 +785,24 @@
                                     "Ref": "ClusterInfoHandle"
                                 },
                                 "'\n",
-                                "\n"
+                                "\n",
                                 "## Install Docker\n",
                                 "$AMI_SBIN/install-docker.sh \n",
                                 "\n",
                                 "## Install Ansible\n",
-                                "$AMI_SBIN/install-ansible.sh -f /tmp/solace-ansible.tgz -d /tmp\n",
+                                "$AMI_SBIN/install-ansible.sh -f /tmp/solace-ansible.tgz -d /tmp \n",
                                 "\n",
                                 "## Install Solace\n",
                                 "$AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/ansible ",
-                                "-u " { "Ref": "SolaceDockerURL"} ,
-                                "-p " { "Ref": "AdminPassword"} "\n",
+                                " -u ",
+                                {
+                                    "Ref": "SolaceDockerURL"
+                                },
+                                " -p ",
+                                {
+                                    "Ref": "AdminPassword"
+                                }, 
+                                "\n",
                                 "\n"
                             ]
                         ]

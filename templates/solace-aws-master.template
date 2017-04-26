@@ -6,10 +6,11 @@
             "ParameterGroups": [
                 {
                     "Label": {
-                        "default": "Solace Docker URL"
+                        "default": "Solace Parameters"
                     },
                     "Parameters": [
-                        "SolaceDockerURL"
+                        "SolaceDockerURL",
+                        "AdminPassword"
                     ]
                 },
                 {
@@ -70,6 +71,9 @@
                 "SolaceDockerURL": {
                     "default": "Solace Docker URL"
                 },
+                "AdminPassword": {
+                    "default": "Password to access SolOS admin console and SEMP"
+                }, 
                 "AvailabilityZones": {
                     "default": "Availability Zones"
                 },
@@ -130,6 +134,10 @@
     "Parameters": {
         "SolaceDockerURL": {
             "Description": "URL to Solace Docker Image obtained via registration here: http://dev.solace.com/downloads/download_vmr-ce-docker",
+            "Type": "String"
+        },
+        "AdminPassword": {
+            "Description": "Require password to access SolOS admin console and SEMP",
             "Type": "String"
         },
         "AvailabilityZones": {
@@ -431,6 +439,9 @@
                 "Parameters": {
                     "SolaceDockerURL": {
                         "Ref": "SolaceDockerURL"
+                    },
+                    "AdminPassword": {
+                        "Ref": "AdminPassword"
                     },
                     "BootDiskSize": {
                         "Ref": "BootDiskSize"

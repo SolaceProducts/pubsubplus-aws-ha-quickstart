@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
 # Initialize our own variables:
