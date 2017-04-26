@@ -790,11 +790,14 @@
                                 "$AMI_SBIN/install-docker.sh \n",
                                 "\n",
                                 "## Install Ansible\n",
-                                "$AMI_SBIN/install-ansible.sh -f /tmp/solace-ansible.tgz\n",
+                                "$AMI_SBIN/install-ansible.sh -f /tmp/solace-ansible.tgz -d /tmp\n",
                                 "\n",
                                 "## Install Solace\n",
-                                "$AMI_SBIN/install-solace.sh SolaceDockerURL\n",
-                                "\n",
+                                "$AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/ansible -u ",
+                                {
+                                    "Ref": "SolaceDockerURL"
+                                },
+                                "'\n",
                                 "\n"
                             ]
                         ]

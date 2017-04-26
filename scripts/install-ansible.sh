@@ -23,10 +23,11 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 solace_tarball=""
 verbose=0
 
-while getopts "f:" opt; do
+while getopts "f:d:" opt; do
     case "$opt" in
     f)  solace_tarball=$OPTARG
         ;;
+    d)  solace_directory=$OPTARG
     esac
 done
 
@@ -34,14 +35,14 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
-echo "solace_tarball=$solace_tarball, Leftovers: $@"
+echo "solace_tarball=$solace_tarball ,solace_directory=$solace_directory ,Leftovers: $@"
 
 if [[ -z "${$solace_tarball// }" ]] ; then
     echo "Did not get an ansible tarball"
     exit 0
 fi  
 
-cd /tmp
+cd $solace_directory
 tar zxf $solace_tarball
 
 if [ ! -f /usr/local/bin/ansible ] ; then
