@@ -3,3 +3,43 @@
 #    no shut
 #    service mate-link
 #    no shut
+- hosts: LOCALHOST
+  vars:
+     ROLE: "{{ lookup('env', 'VMR_ROLE') }}"
+
+  tasks:
+    -name: No shut message-spool
+     uri:
+         url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
+         method:           GET
+         user:             "{{ ANSIBLE_USERNAME }}"
+         password:         "{{ ANSIBLE_PASSWORD }}"
+         body:             "<rpc semp-version='soltr/8_2'>\
+                           <hardware><message-spool><no><shutdown><{{ VMR_ROLE }}/></shutdown></no></message-spool></hardware></rpc>"
+         force_basic_auth: yes
+         status_code:      200
+         body_format:      raw
+         return_content:   yes
+      register: rpc_reply
+      ignore_errors: True
+      until: rpc_reply|success
+      retries: 60
+      delay: 10
+
+    -name: No shut service mate-link
+     uri:
+         url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
+         method:           GET
+         user:             "{{ ANSIBLE_USERNAME }}"
+         password:         "{{ ANSIBLE_PASSWORD }}"
+         body:             "<rpc semp-version='soltr/8_2'>\
+                           <service><mate-link><no><shutdown/></no></mate-link></service></rpc>"
+         force_basic_auth: yes
+         status_code:      200
+         body_format:      raw
+         return_content:   yes
+      register: rpc_reply
+      ignore_errors: True
+      until: rpc_reply|success
+      retries: 60
+      delay: 10

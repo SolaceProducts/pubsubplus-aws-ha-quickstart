@@ -1,7 +1,0 @@
---
-#    redundancy shut
-#    group 
-#    active-standby-role backup
-#    mate-link connect-via 192.168.169.101
-#    no shut
-#    end

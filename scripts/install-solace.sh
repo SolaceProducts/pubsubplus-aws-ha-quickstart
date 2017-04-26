@@ -58,10 +58,12 @@ do
         ?MessageRouterPrimary* ) 
             sed -i "s/SOLACE_PRIMARY_NAME/${role_name}/g" group_vars_LOCALHOST/localhost.yml
             sed -i "s/SOLACE_PRIMARY_IP/${role_ip}/g" group_vars_LOCALHOST/localhost.yml
+            PRIMARY_IP=${role_ip}
             ;; 
         ?MessageRouterBackup* ) 
             sed -i "s/SOLACE_BACKUP_NAME/${role_name}/g" group_vars_LOCALHOST/localhost.yml
             sed -i "s/SOLACE_BACKUP_IP/${role_ip}/g" group_vars_LOCALHOST/localhost.yml
+            BACKUP_IP=${role_ip}
             ;; 
     esac
 done
@@ -80,17 +82,21 @@ case $local_role in
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
         ;; 
     ?MessageRouterPrimary* ) 
+        export VMR_ROLE=primary
+        export MATE_IP=${BACKUP_IP}
         sed -i "s/SOLACE_LOCAL_ROLE/PRIMARY/g" group_vars_LOCALHOST/localhost.yml 
         ansible-playbook ${DEBUG} -i hosts ConfigShutMessageSpoolSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
-        ansible-playbook ${DEBUG} -i hosts ConfigRedundancyPrimarySEMPv1.yml --connection=local
+        ansible-playbook ${DEBUG} -i hosts ConfigRedundancyMateSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigNoShutMessageSpoolSEMPv1.yml --connection=local
         ;; 
     ?MessageRouterBackup* ) 
+        export VMR_ROLE=backup
+        export MATE_IP=${PRIMARY_IP}
         sed -i "s/SOLACE_LOCAL_ROLE/BACKUP/g" group_vars_LOCALHOST/localhost.yml 
         ansible-playbook ${DEBUG} -i hosts ConfigShutMessageSpoolSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
-        ansible-playbook ${DEBUG} -i hosts ConfigRedundancyBackupSEMPv1.yml --connection=local
+        ansible-playbook ${DEBUG} -i hosts ConfigRedundancyMateSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigNoShutMessageSpoolSEMPv1.yml --connection=local
         ;; 
 esac
