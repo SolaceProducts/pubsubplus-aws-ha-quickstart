@@ -6,6 +6,10 @@
             "Description": "Require URL to enterprise or Evaluation VMR, not Community",
             "Type": "String"
         },
+        "AdminPassword": {
+            "Description": "Require password to access SolOS admin console and SEMP",
+            "Type": "String"
+        },
         "BootDiskSize": {
             "ConstraintDescription": "Deployment supports 8 to 128 GB for boot volumes",
             "Default": "24",
@@ -793,11 +797,9 @@
                                 "$AMI_SBIN/install-ansible.sh -f /tmp/solace-ansible.tgz -d /tmp\n",
                                 "\n",
                                 "## Install Solace\n",
-                                "$AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/ansible -u ",
-                                {
-                                    "Ref": "SolaceDockerURL"
-                                },
-                                "'\n",
+                                "$AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/ansible ",
+                                "-u " { "Ref": "SolaceDockerURL"} ,
+                                "-p " { "Ref": "AdminPassword"} "\n",
                                 "\n"
                             ]
                         ]

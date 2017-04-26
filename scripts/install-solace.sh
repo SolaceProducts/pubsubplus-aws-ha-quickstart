@@ -21,14 +21,17 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 config_file=""
 solace_directory=""
 solace_url=""
+admin_password=""
 
 verbose=0
 
-while getopts "c:d:u:" opt; do
+while getopts "c:d:p:u:" opt; do
     case "$opt" in
     c)  config_file=$OPTARG
         ;;
     d)  solace_directory=$OPTARG
+        ;;
+    p)  admin_password=$OPTARG
         ;;
     u)  solace_url=$OPTARG
         ;;
@@ -64,9 +67,9 @@ docker create \
    -v internalSpool:/usr/sw/internalSpool \
    -v adbBackup:/usr/sw/adb \
    -v softAdb:/usr/sw/internalSpool/softAdb \
-   --env 'username_admin_globalaccesslevel=admin' \
-   --env 'username_admin_password=admin' \
-   --env='SERVICE_SSH_PORT=2222' \
+   --env "username_admin_globalaccesslevel=admin" \
+   --env "username_admin_password=${admin_password}" \
+   --env "SERVICE_SSH_PORT=2222" \
    --name=solace ${VMR_VERSION}
 
 #Construct systemd for VMR
