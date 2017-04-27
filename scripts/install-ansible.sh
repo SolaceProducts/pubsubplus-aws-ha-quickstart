@@ -29,6 +29,7 @@ while getopts "f:d:" opt; do
     f)  solace_tarball=$OPTARG
         ;;
     d)  solace_directory=$OPTARG
+        ;;
     esac
 done
 
@@ -36,12 +37,7 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
-echo "solace_tarball=$solace_tarball ,solace_directory=$solace_directory ,Leftovers: $@"
-
-if [[ -z "${$solace_tarball// }" ]] ; then
-    echo "Did not get an ansible tarball"
-    exit 0
-fi  
+echo "solace_tarball=$solace_tarball ,solace_directory=$solace_directory ,Leftovers: $@"  
 
 cd $solace_directory
 tar zxf $solace_tarball

@@ -1,0 +1,156 @@
+#!/bin/sh
+#
+#       /etc/rc.d/init.d/solace-vmr
+#
+#       Daemon for solace vmr on init.d systems
+#
+# chkconfig:   2345 95 05
+# description: Daemon for solace.com
+
+### BEGIN INIT INFO
+# Required-Start: docker lvm2-lvmetad
+# Required-Stop:
+# Should-Start:
+# Should-Stop:
+# Default-Start: 2 3 4 5
+# Default-Stop:  0 1 6
+# Short-Description: start and stop solace vmr
+# Description: Daemon for solace.com
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+prog="solace-vmr"
+unshare=/usr/bin/unshare
+exec="/usr/bin/docker"
+pidfile="/var/run/$prog.pid"
+lockfile="/var/lock/subsys/$prog"
+logfile="/var/log/$prog"
+
+prestart() {
+    service docker status > /dev/null
+
+    if [[ $? != 0 ]]; then
+        service docker start
+    fi
+
+}
+
+start() {
+    if [ ! -x $exec ]; then
+      if [ ! -e $exec ]; then
+        echo "Docker executable $exec not found"
+      else
+        echo "You do not have permission to execute the Docker executable $exec"
+      fi
+      exit 5
+    fi
+
+    check_for_cleanup
+
+    if ! [ -f $pidfile ]; then
+        prestart
+        printf "Starting $prog:\t"
+        echo "\n$(date)\n" >> $logfile
+        "$unshare" -m -- nohup $exec start -a solace >> $logfile 2>&1 &
+        pid=$!
+        touch $lockfile
+        tries=0
+        PIDFILE_TIMEOUT=60
+        while [ ! -f $pidfile -a $tries -lt ${PIDFILE_TIMEOUT} ]; do
+            sleep 1
+            solace_container_info=`docker ps -a | grep solace`
+            solace_container_id=`echo ${solace_container_info} |  awk '{print $1}'`
+            solace_container_state=` docker inspect --format '{{ .State.Status }}' ${solace_container_id}`
+            if [ ${solace_container_state} == "running" ]; then
+                solace_container_pid=` docker inspect --format '{{ .State.Pid }}' ${solace_container_id}`
+                echo ${solace_container_pid} > $pidfile
+            fi
+            tries=$((tries + 1))
+            echo -n '.'
+        done
+        if [ ! -f $pidfile ]; then
+          failure
+          echo
+          exit 1
+        fi
+        success
+        echo
+    else
+        failure
+        echo
+        printf "$pidfile still exists...\n"
+        exit 7
+    fi
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    $exec stop solace
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    restart
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    status -p $pidfile $prog
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+
+check_for_cleanup() {
+    if [ -f ${pidfile} ]; then
+        /bin/ps -fp $(cat ${pidfile}) > /dev/null || rm ${pidfile}
+    fi
+}
+
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        force_reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        exit 2
+esac
+
+exit $?

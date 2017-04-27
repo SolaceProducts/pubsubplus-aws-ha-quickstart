@@ -393,6 +393,28 @@
                                 "owner": "root",
                                 "group": "root"
                             },
+                            "/etc/init.d/solace_vmr": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    { "Ref": "AWS::Region" },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
+                                            "scripts/init.d/solace_vmr"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000755",
+                                "owner": "root",
+                                "group": "root"
+                            },
                             "/tmp/install-ansible.sh": {
                                 "source": {
                                     "Fn::Join": [
@@ -459,7 +481,7 @@
                                 "owner": "root",
                                 "group": "root"
                             },
-                            "/tmp/solace-ansible.tgz": {
+                            "/tmp/ansible.tgz": {
                                 "source": {
                                     "Fn::Join": [
                                         "/",
@@ -473,7 +495,7 @@
                                             },
                                             { "Ref": "QSS3BucketName" },
                                             { "Ref": "QSS3KeyPrefix" },
-                                            "scripts/solace-ansible.tgz"
+                                            "scripts/ansible.tgz"
                                         ]
                                     ]
                                 },
@@ -731,7 +753,13 @@
                                 {
                                     "Ref": "ParentStackName"
                                 },
-                                " MessageRouterStack Nodes\n",
+                                " MessageRouterPrimaryStack Nodes\n",
+                                "\n",
+                                "$AMI_SBIN/wait-for-child-resource.sh ",
+                                {
+                                    "Ref": "ParentStackName"
+                                },
+                                " MessageRouterBackupStack Nodes\n",
                                 "\n",
                                 "## Now find the private IP addresses of all deployed nodes\n",
                                 "##   (generating /tmp/solacehosts and /tmp/<role> files)\n",
@@ -790,7 +818,7 @@
                                 "$AMI_SBIN/install-docker.sh \n",
                                 "\n",
                                 "## Install Ansible\n",
-                                "$AMI_SBIN/install-ansible.sh -f /tmp/solace-ansible.tgz -d /tmp \n",
+                                "$AMI_SBIN/install-ansible.sh -f /tmp/ansible.tgz -d /tmp \n",
                                 "\n",
                                 "## Install Solace\n",
                                 "$AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/ansible ",

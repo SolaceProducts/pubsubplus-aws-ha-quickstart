@@ -40,19 +40,20 @@ while getopts "c:d:p:u:" opt; do
 done
 
 shift $((OPTIND-1))
-
+vi 
 [ "$1" = "--" ] && shift
 
 
 echo "config_file=$config_file ,solace_directory=$solace_directory ,solace_url=$solace_url ,Leftovers: $@"
 
+mkdir $solace_directory
 cd $solace_directory
 echo "`date` Configure VMRs Started"
 
-wget -O ./soltr-docker.tar.gz  $solace_url
-docker load -i ./soltr-docker.tar.gz
+wget  -q -O soltr-docker.tar.gz $solace_url
+docker load -i $solace_directory/soltr-docker.tar.gz
 
-export VMR_VERSION=`docker images | grep solace | awk '{print $2}'`
+export VMR_VERSION=`docker images | grep solace | awk '{print $3}'`
 
 docker create \
    --uts=host \
@@ -73,24 +74,12 @@ docker create \
    --env "SERVICE_SSH_PORT=2222" \
    --name=solace ${VMR_VERSION}
 
-#Construct systemd for VMR
-tee /etc/systemd/system/solace-docker-vmr.service <<-EOF
-[Unit]
-  Description=solace-docker-vmr
-  Requires=docker.service
-  After=docker.service
-[Service]
-  Restart=always
-  ExecStart=/usr/bin/docker start -a solace
-  ExecStop=/usr/bin/docker stop solace
-[Install]
-  WantedBy=default.target
-EOF
+
 
 #Start the solace service and enable it at system start up.
 systemctl daemon-reload
-systemctl enable solace-docker-vmr
-systemctl start solace-docker-vmr
+systemctl enable solace-vmr
+systemctl start solace-vmr
 
 #Set up the cluster part of the ansible variables file
 for role in Monitor MessageRouterPrimary MessageRouterBackup
