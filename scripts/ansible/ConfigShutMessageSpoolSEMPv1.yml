@@ -2,8 +2,8 @@
 #hardware message-spool shutdown
 - hosts: LOCALHOST
   tasks:
-    -name: Shut Message-spool
-     uri:
+    - name: Shut Message-spool
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"

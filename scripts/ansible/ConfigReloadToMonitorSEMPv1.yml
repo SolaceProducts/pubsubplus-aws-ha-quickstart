@@ -2,8 +2,8 @@
 #reload default-config monitoring-node
 - hosts: LOCALHOST
   tasks:
-    -name: Reboot VMR to Monitor node mode 
-     uri:
+    - name: Reboot VMR to Monitor node mode 
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"

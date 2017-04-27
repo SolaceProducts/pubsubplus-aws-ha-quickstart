@@ -40,10 +40,9 @@ while getopts "c:d:p:u:" opt; do
 done
 
 shift $((OPTIND-1))
-vi 
 [ "$1" = "--" ] && shift
 
-
+verbose=1
 echo "config_file=$config_file ,solace_directory=$solace_directory ,solace_url=$solace_url ,Leftovers: $@"
 
 mkdir $solace_directory
@@ -77,29 +76,30 @@ docker create \
 
 
 #Start the solace service and enable it at system start up.
-systemctl daemon-reload
-systemctl enable solace-vmr
-systemctl start solace-vmr
+chkconfig --add solace-vmr
+service solace-vmr start
+
+cd ${solace_directory}
 
 #Set up the cluster part of the ansible variables file
 for role in Monitor MessageRouterPrimary MessageRouterBackup
 do 
     role_info=`grep ${role} ${config_file}`
-    role_name=${role%% *}
+    role_name=${role_info%% *}
     role_ip=`echo ${role_name} | cut -c 4- | tr "-" .`
     case $role in  
-        ?Monitor* )
-            sed -i "s/SOLACE_MONITOR_NAME/${role_name}/g" group_vars_LOCALHOST/localhost.yml
-            sed -i "s/SOLACE_MONITOR_IP/${role_ip}/g" group_vars_LOCALHOST/localhost.yml
+        Monitor )
+            sed -i "s/SOLACE_MONITOR_NAME/${role_name}/g" group_vars/LOCALHOST/localhost.yml
+            sed -i "s/SOLACE_MONITOR_IP/${role_ip}/g" group_vars/LOCALHOST/localhost.yml
             ;; 
-        ?MessageRouterPrimary* ) 
-            sed -i "s/SOLACE_PRIMARY_NAME/${role_name}/g" group_vars_LOCALHOST/localhost.yml
-            sed -i "s/SOLACE_PRIMARY_IP/${role_ip}/g" group_vars_LOCALHOST/localhost.yml
+        MessageRouterPrimary ) 
+            sed -i "s/SOLACE_PRIMARY_NAME/${role_name}/g" group_vars/LOCALHOST/localhost.yml
+            sed -i "s/SOLACE_PRIMARY_IP/${role_ip}/g" group_vars/LOCALHOST/localhost.yml
             PRIMARY_IP=${role_ip}
             ;; 
-        ?MessageRouterBackup* ) 
-            sed -i "s/SOLACE_BACKUP_NAME/${role_name}/g" group_vars_LOCALHOST/localhost.yml
-            sed -i "s/SOLACE_BACKUP_IP/${role_ip}/g" group_vars_LOCALHOST/localhost.yml
+        MessageRouterBackup ) 
+            sed -i "s/SOLACE_BACKUP_NAME/${role_name}/g" group_vars/LOCALHOST/localhost.yml
+            sed -i "s/SOLACE_BACKUP_IP/${role_ip}/g" group_vars/LOCALHOST/localhost.yml
             BACKUP_IP=${role_ip}
             ;; 
     esac
@@ -108,29 +108,31 @@ done
 host_name=`hostname`
 host_info=`grep ${host_name} ${config_file}`
 
-sed -i "s/SOLACE_LOCAL_NAME/${host_name}/g" group_vars_LOCALHOST/localhost.yml
+sed -i "s/SOLACE_SEMP_PASSWORD/${admin_password}/g" group_vars/LOCALHOST/localhost.yml
 local_role=`echo $host_info | grep -o -e "-M.*Stack-"`
 
+sed -i "s/SOLACE_LOCAL_NAME/${host_name}/g" group_vars/LOCALHOST/localhost.yml
 # Set up the local host part of the ansible varialbes file
 case $local_role in  
     ?Monitor* ) 
-        sed -i "s/SOLACE_LOCAL_ROLE/MONITOR/g" group_vars_LOCALHOST/localhost.yml 
+        sed -i "s/SOLACE_LOCAL_ROLE/MONITOR/g" group_vars/LOCALHOST/localhost.yml
         ansible-playbook ${DEBUG} -i hosts ConfigReloadToMonitorSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
         ;; 
     ?MessageRouterPrimary* ) 
         export VMR_ROLE=primary
         export MATE_IP=${BACKUP_IP}
-        sed -i "s/SOLACE_LOCAL_ROLE/PRIMARY/g" group_vars_LOCALHOST/localhost.yml 
+        sed -i "s/SOLACE_LOCAL_ROLE/PRIMARY/g" group_vars/LOCALHOST/localhost.yml
         ansible-playbook ${DEBUG} -i hosts ConfigShutMessageSpoolSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyMateSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigNoShutMessageSpoolSEMPv1.yml --connection=local
+        echo MessageRouterPrimary
         ;; 
     ?MessageRouterBackup* ) 
         export VMR_ROLE=backup
         export MATE_IP=${PRIMARY_IP}
-        sed -i "s/SOLACE_LOCAL_ROLE/BACKUP/g" group_vars_LOCALHOST/localhost.yml 
+        sed -i "s/SOLACE_LOCAL_ROLE/BACKUP/g" group_vars/LOCALHOST/localhost.yml 
         ansible-playbook ${DEBUG} -i hosts ConfigShutMessageSpoolSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyMateSEMPv1.yml --connection=local

@@ -8,8 +8,8 @@
      ROLE: "{{ lookup('env', 'VMR_ROLE') }}"
 
   tasks:
-    -name: No shut message-spool
-     uri:
+    - name: No shut message-spool
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
@@ -26,8 +26,8 @@
       retries: 60
       delay: 10
 
-    -name: No shut service mate-link
-     uri:
+    - name: No shut service mate-link
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"

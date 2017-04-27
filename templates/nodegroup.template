@@ -393,7 +393,7 @@
                                 "owner": "root",
                                 "group": "root"
                             },
-                            "/etc/init.d/solace_vmr": {
+                            "/etc/init.d/solace-vmr": {
                                 "source": {
                                     "Fn::Join": [
                                         "/",
@@ -407,7 +407,7 @@
                                             },
                                             { "Ref": "QSS3BucketName" },
                                             { "Ref": "QSS3KeyPrefix" },
-                                            "scripts/init.d/solace_vmr"
+                                            "scripts/init.d/solace-vmr"
                                         ]
                                     ]
                                 },
@@ -495,7 +495,7 @@
                                             },
                                             { "Ref": "QSS3BucketName" },
                                             { "Ref": "QSS3KeyPrefix" },
-                                            "scripts/ansible.tgz"
+                                            "scripts/ansible/ansible.tgz"
                                         ]
                                     ]
                                 },

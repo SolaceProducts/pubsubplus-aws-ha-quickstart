@@ -9,9 +9,8 @@
      MATE_IP: "{{ lookup('env', 'MATE_IP') }}"
 
   tasks:
-
-    -name: Redundancy active-standby role
-     uri:
+    - name: Redundancy active-standby role
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
@@ -28,8 +27,8 @@
       retries: 60
       delay: 10
 
-    -name: Redundancy mate-link
-     uri:
+    - name: Redundancy mate-link
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
@@ -46,8 +45,8 @@
       retries: 60
       delay: 10
 
-    -name: Redundancy no shut
-     uri:
+    - name: Redundancy no shut
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"

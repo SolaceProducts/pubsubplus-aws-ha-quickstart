@@ -21,8 +21,8 @@
 - hosts: LOCALHOST
   tasks:
 
-    -name: Redundancy switchover mechanism
-     uri:
+    - name: Redundancy switchover mechanism
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
@@ -39,8 +39,8 @@
       retries: 60
       delay: 10
 
-    -name: Redundancy group Primary node create
-     uri:
+    - name: Redundancy group Primary node create
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
@@ -59,8 +59,8 @@
       retries: 60
       delay: 10
 
-    -name: Redundancy group Primary node configure
-     uri:
+    - name: Redundancy group Primary node configure
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
@@ -81,8 +81,8 @@
       retries: 60
       delay: 10
 
-    -name: Redundancy group Backup node create
-     uri:
+    - name: Redundancy group Backup node create
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
@@ -101,8 +101,8 @@
       retries: 60
       delay: 10
 
-    -name: Redundancy group Backup node
-     uri:
+    - name: Redundancy group Backup node
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
@@ -123,8 +123,8 @@
       retries: 60
       delay: 10
 
-    -name: Redundancy group Monitor node create
-     uri:
+    - name: Redundancy group Monitor node create
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
@@ -143,8 +143,8 @@
       retries: 60
       delay: 10
 
-    -name: Redundancy group Monitor node
-     uri:
+    - name: Redundancy group Monitor node
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
@@ -165,8 +165,8 @@
       retries: 60
       delay: 10
 
-    -name: Redundancy group password
-     uri:
+    - name: Redundancy group password
+      uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
