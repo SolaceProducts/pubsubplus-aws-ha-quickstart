@@ -1,6 +1,7 @@
---
+---
 #reload default-config monitoring-node
 - hosts: LOCALHOST
+
   tasks:
     - name: Reboot VMR to Monitor node mode 
       uri:

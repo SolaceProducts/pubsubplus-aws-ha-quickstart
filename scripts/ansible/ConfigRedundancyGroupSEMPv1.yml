@@ -1,4 +1,4 @@
---
+---
 #enable
 #configure
 #redundancy
@@ -19,8 +19,8 @@
 #password passwd
 
 - hosts: LOCALHOST
-  tasks:
 
+  tasks:
     - name: Redundancy switchover mechanism
       uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
