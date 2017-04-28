@@ -23,6 +23,7 @@ config_file=""
 solace_directory=""
 solace_url=""
 admin_password=""
+DEBUG="-vvvv"
 
 verbose=0
 

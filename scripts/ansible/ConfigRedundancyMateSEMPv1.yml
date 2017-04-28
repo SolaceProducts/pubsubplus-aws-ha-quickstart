@@ -15,7 +15,7 @@
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2'>\
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <redundancy><active-standby-role><{{ VMR_ROLE }}/></active-standby-role></redundancy></rpc>"
          force_basic_auth: yes
          status_code:      200
@@ -33,7 +33,7 @@
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2'>\
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <redundancy><mate-link><connect-via><hostname-or-address>{{ MATE_IP }}</hostname-or-address></connect-via></mate-link></redundancy></rpc>"
          force_basic_auth: yes
          status_code:      200
@@ -51,7 +51,7 @@
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2'>\
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <redundancy><no><shutdown/></no></redundancy></rpc>"
          force_basic_auth: yes
          status_code:      200

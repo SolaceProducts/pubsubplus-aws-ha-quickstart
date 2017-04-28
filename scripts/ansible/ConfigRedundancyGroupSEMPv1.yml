@@ -27,7 +27,7 @@
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2'>\
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <redundancy><switchover-mechanism><hostlist/></switchover-mechanism></redundancy></rpc>"
          force_basic_auth: yes
          status_code:      200
@@ -45,7 +45,7 @@
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2'>\
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <redundancy><group><create><node>\
                            <node-name>{{ PRIMARY_ROUTER.NAME }}</node-name>\
                            </node></create></group></redundancy></rpc>"
@@ -59,17 +59,37 @@
       retries: 60
       delay: 10
 
-    - name: Redundancy group Primary node configure
+    - name: Redundancy group Primary node configure ip
       uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2'>\
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <redundancy><group><node>\
                            <node-name>{{ PRIMARY_ROUTER.NAME }}</node-name>\
-                           <ip>{{ PRIMARY_ROUTER.IP }}</ip>\
-                           <node-type>message-routing-node</node-type>\
+                           <ip><ip>{{ PRIMARY_ROUTER.IP }}</ip></ip>\
+                           </node></group></redundancy></rpc>"
+         force_basic_auth: yes
+         status_code:      200
+         body_format:      raw
+         return_content:   yes
+      register: rpc_reply
+      ignore_errors: True
+      until: rpc_reply|success
+      retries: 60
+      delay: 10
+
+    - name: Redundancy group Primary node configure node-type
+      uri:
+         url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
+         method:           GET
+         user:             "{{ ANSIBLE_USERNAME }}"
+         password:         "{{ ANSIBLE_PASSWORD }}"
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
+                           <redundancy><group><node>\
+                           <node-name>{{ PRIMARY_ROUTER.NAME }}</node-name>\
+                           <node-type><message-routing-node/></node-type>\
                            </node></group></redundancy></rpc>"
          force_basic_auth: yes
          status_code:      200
@@ -87,7 +107,7 @@
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2'>\
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <redundancy><group><create><node>\
                            <node-name>{{ BACKUP_ROUTER.NAME }}</node-name>\
                            </node></create></group></redundancy></rpc>"
@@ -101,17 +121,37 @@
       retries: 60
       delay: 10
 
-    - name: Redundancy group Backup node
+    - name: Redundancy group Backup node ip
       uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2'>\
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <redundancy><group><node>\
                            <node-name>{{ BACKUP_ROUTER.NAME }}</node-name>\
-                           <ip>{{ BACKUP_ROUTER.IP }}</ip>\
-                           <node-type>message-routing-node</node-type>\
+                           <ip><ip>{{ BACKUP_ROUTER.IP }}</ip></ip>\
+                           </node></group></redundancy></rpc>"
+         force_basic_auth: yes
+         status_code:      200
+         body_format:      raw
+         return_content:   yes
+      register: rpc_reply
+      ignore_errors: True
+      until: rpc_reply|success
+      retries: 60
+      delay: 10
+
+    - name: Redundancy group Backup node node-type
+      uri:
+         url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
+         method:           GET
+         user:             "{{ ANSIBLE_USERNAME }}"
+         password:         "{{ ANSIBLE_PASSWORD }}"
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
+                           <redundancy><group><node>\
+                           <node-name>{{ BACKUP_ROUTER.NAME }}</node-name>\
+                           <node-type><message-routing-node/></node-type>\
                            </node></group></redundancy></rpc>"
          force_basic_auth: yes
          status_code:      200
@@ -129,10 +169,31 @@
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2'>\
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <redundancy><group><create><node>\
                            <node-name>{{ MONITOR.NAME }}</node-name>\
                            </node></create></group></redundancy></rpc>"
+         force_basic_auth: yes
+         status_code:      200
+         body_format:      raw
+         return_content:   yes
+      register: rpc_reply
+      ignore_errors: True
+      until: rpc_reply|success
+      retries: 60
+      delay: 10
+
+    - name: Redundancy group Monitor node ip
+      uri:
+         url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
+         method:           GET
+         user:             "{{ ANSIBLE_USERNAME }}"
+         password:         "{{ ANSIBLE_PASSWORD }}"
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
+                           <redundancy><group><node>\
+                           <node-name>{{ MONITOR.NAME }}</node-name>\
+                           <ip><ip>{{ MONITOR.IP }}</ip></ip>\
+                           </node></group></redundancy></rpc>"
          force_basic_auth: yes
          status_code:      200
          body_format:      raw
@@ -149,11 +210,10 @@
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2'>\
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <redundancy><group><node>\
                            <node-name>{{ MONITOR.NAME }}</node-name>\
-                           <ip>{{ MONITOR.IP }}</ip>\
-                           <node-type>monitor-node</node-type>\
+                           <node-type><monitor-node/></node-type>\
                            </node></group></redundancy></rpc>"
          force_basic_auth: yes
          status_code:      200
@@ -171,8 +231,8 @@
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2'>\
-                           <redundancy><group><password>password</password></group></redundancy></rpc>"
+         body:             "<rpc semp-version='soltr/8_2VMR'>\
+                           <redundancy><group><password><password>pA55w0rD</password></password></group></redundancy></rpc>"
          force_basic_auth: yes
          status_code:      200
          body_format:      raw

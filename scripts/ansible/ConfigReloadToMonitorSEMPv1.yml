@@ -9,7 +9,7 @@
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2'><reload><default-config/><monitoring-node/></reload></rpc>"
+         body:             "<rpc semp-version='soltr/8_2VMR'><reload><default-config/><monitoring-node/></reload></rpc>"
          force_basic_auth: yes
          status_code:      200
          body_format:      raw
