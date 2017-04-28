@@ -118,7 +118,10 @@ case $local_role in
     ?Monitor* ) 
         sed -i "s/SOLACE_LOCAL_ROLE/MONITOR/g" group_vars/LOCALHOST/localhost.yml
         ansible-playbook ${DEBUG} -i hosts ConfigReloadToMonitorSEMPv1.yml --connection=local
+        sleep 30
+        service solace-vmr start
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
+        ansible-playbook ${DEBUG} -i hosts ConfigRedundancyNoShutSEMPv1.yml --connection=local
         ;; 
     ?MessageRouterPrimary* ) 
         export VMR_ROLE=primary
@@ -127,6 +130,7 @@ case $local_role in
         ansible-playbook ${DEBUG} -i hosts ConfigShutMessageSpoolSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyMateSEMPv1.yml --connection=local
+        ansible-playbook ${DEBUG} -i hosts ConfigRedundancyNoShutSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigNoShutMessageSpoolSEMPv1.yml --connection=local
         echo MessageRouterPrimary
         ;; 
@@ -137,6 +141,7 @@ case $local_role in
         ansible-playbook ${DEBUG} -i hosts ConfigShutMessageSpoolSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyMateSEMPv1.yml --connection=local
+        ansible-playbook ${DEBUG} -i hosts ConfigRedundancyNoShutSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigNoShutMessageSpoolSEMPv1.yml --connection=local
         ;; 
 esac

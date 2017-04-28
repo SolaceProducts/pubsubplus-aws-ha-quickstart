@@ -20,7 +20,7 @@
                     "Parameters": [
                         "VPCID",
                         "SubnetID",
-                        "VPCCIRD",
+                        "VPCCIDR",
                         "RemoteAccessCIDR",
                         "SSHAccessCIDR"
                     ]

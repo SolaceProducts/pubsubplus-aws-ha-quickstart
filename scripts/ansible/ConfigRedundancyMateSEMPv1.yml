@@ -1,8 +1,7 @@
 ---
 #    active-standby-role primary
 #    mate-link connect-via 192.168.169.101
-#    no shut
-#    end
+
 - hosts: LOCALHOST
   vars:
      VMR_ROLE: "{{ lookup('env', 'VMR_ROLE') }}"
@@ -35,24 +34,6 @@
          password:         "{{ ANSIBLE_PASSWORD }}"
          body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <redundancy><mate-link><connect-via><hostname-or-address>{{ MATE_IP }}</hostname-or-address></connect-via></mate-link></redundancy></rpc>"
-         force_basic_auth: yes
-         status_code:      200
-         body_format:      raw
-         return_content:   yes
-      register: rpc_reply
-      ignore_errors: True
-      until: rpc_reply|success
-      retries: 60
-      delay: 10
-
-    - name: Redundancy no shut
-      uri:
-         url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
-         method:           GET
-         user:             "{{ ANSIBLE_USERNAME }}"
-         password:         "{{ ANSIBLE_PASSWORD }}"
-         body:             "<rpc semp-version='soltr/8_2VMR'>\
-                           <redundancy><no><shutdown/></no></redundancy></rpc>"
          force_basic_auth: yes
          status_code:      200
          body_format:      raw
