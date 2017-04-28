@@ -478,7 +478,7 @@
                     },
                     "VPCCIDR": {
                         "Ref": "VPCCIDR"
-                    }
+                    },
                     "SubnetID": {
                         "Fn::Join": [
                             ",",
