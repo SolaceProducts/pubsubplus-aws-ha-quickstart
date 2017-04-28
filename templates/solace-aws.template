@@ -20,6 +20,7 @@
                     "Parameters": [
                         "VPCID",
                         "SubnetID",
+                        "VPCCIRD",
                         "RemoteAccessCIDR",
                         "SSHAccessCIDR"
                     ]
@@ -103,6 +104,9 @@
                 },
                 "LinuxOSAMI": {
                     "default": "Linux Operating System AMI"
+                },
+                "VPCCIDR": {
+                    "default": "Allowed Internal Access CIDR"
                 },
                 "RemoteAccessCIDR": {
                     "default": "Allowed External Access CIDR"
@@ -216,6 +220,12 @@
             "ConstraintDescription": "Supported versions of Linux AMIs for Solace Message Routers",
             "Default": "Amazon-Linux-HVM",
             "Description": "Operating system AMI for cluster instances; you MUST authorize access to the proper AMI at https://aws.amazon.com/marketplace",
+            "Type": "String"
+        },
+        "VPCCIDR": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "Allowed CIDR block for internal access to cluster nodes",
             "Type": "String"
         },
         "RemoteAccessCIDR": {
@@ -616,6 +626,22 @@
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
+                        "FromPort": "8741",
+                        "ToPort": "8741",
+                        "CidrIp": {
+                            "Ref": "VPCCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "udp",
+                        "FromPort": "5404",
+                        "ToPort": "5405",
+                        "CidrIp": {
+                            "Ref": "VPCCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
                         "FromPort": "55555",
                         "ToPort": "55555",
                         "CidrIp": {
@@ -641,6 +667,14 @@
                 },
                 "GroupDescription": "Message Router Security Group",
                 "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "udp",
+                        "FromPort": "5404",
+                        "ToPort": "5405",
+                        "CidrIp": {
+                            "Ref": "VPCCIDR"
+                        }
+                    },
                     {
                         "IpProtocol": "tcp",
                         "FromPort": "22",
