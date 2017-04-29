@@ -118,7 +118,7 @@ case $local_role in
     ?Monitor* ) 
         sed -i "s/SOLACE_LOCAL_ROLE/MONITOR/g" group_vars/LOCALHOST/localhost.yml
         ansible-playbook ${DEBUG} -i hosts ConfigReloadToMonitorSEMPv1.yml --connection=local
-        sleep 30
+        sleep 60
         service solace-vmr start
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyNoShutSEMPv1.yml --connection=local
