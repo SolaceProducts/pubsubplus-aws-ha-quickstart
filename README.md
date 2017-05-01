@@ -1,5 +1,7 @@
 # Install and configure Solace message routers in an HA tuple using AWS Cloud Formation
 
+![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/Solace-AWS-HA.png "getting started publish/subscribe")
+
 The ...
 
 # How to Deploy a VMR
@@ -12,6 +14,7 @@ This is a ... step process:
 </a>
 
 * Go to ...
+
 
 The following links are for your convenience. Before you launch the Quick Start, please review the architecture, configuration, network security, and other considerations discussed in this guide.
 
@@ -34,6 +37,10 @@ The following links are for your convenience. Before you launch the Quick Start,
 <a href="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace.template" target="_blank">
     <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/view-template-existing.png"/>
 </a>
+
+# About Quick Starts
+
+Quick Starts are automated reference deployments for key workloads on the AWS Cloud. Each Quick Start launches, configures, and runs the AWS compute, network, storage, and other services required to deploy a specific workload on AWS, using AWS best practices for security and availability.
 
 # Testing data access to the ha cluster
 
