@@ -48,7 +48,7 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 |----------------------------|--------------------------------------------------------------------------------|
 | Stack name                 | Default is Solace-HA, any unique name will suffice |
 | AdminPassword              | Password to allow SolOS access to configure the Solace Message Router instances |
-|AvailabilityZones           | Pick 3 AZs from the drop down menue |
+| AvailabilityZones          | Pick 3 AZs from the drop down menue |
 | BootDiskSize               | Default is 24GB minimum is 20GB |
 | KeyPairName                | Pick from your exisitng key pairs, create new AWSW key pair if required |
 | LinuxOSAMI                 | Default is Amazon-Linux-HVM, recommended stay with this selection |
