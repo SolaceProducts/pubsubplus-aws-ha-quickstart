@@ -2,9 +2,9 @@
 
 ![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/Solace-AWS-HA.png "getting started publish/subscribe")
 
-The ...
+This 
 
-# How to Deploy a VMR
+# How to Deploy a VMR HA 
 This is a ... step process:
 
 * Go to the Solace Developer portal and request a Solace Comunity edition VMR. This process will return an email with a Download link. Do a right click "Copy Hyperlink" on the "Download the VMR Community Edition for Docker" hyperlink.  This will be needed in the following section.
@@ -20,11 +20,11 @@ The following links are for your convenience. Before you launch the Quick Start,
 
 * If you have an AWS account and you’re already familiar with AWS services and Solace message router HA, you can launch the Quick Start to deploy Solace into a new virtual private cloud (VPC) in your AWS account. The deployment takes approximately 30 minutes. If you’re new to AWS or Solace Message Router, please review the implementation details and follow the step-by-step instructions.[TODO]
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace-master.template" target="_blank">
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/latest/templates/solace-aws-master.template" target="_blank">
     <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/launch-button-new.png"/>
 </a>
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace.template" target="_blank">
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/latest/templates/solace-aws.template" target="_blank">
     <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/launch-button-existing.png"/>
 </a>
 
