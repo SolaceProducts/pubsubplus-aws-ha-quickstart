@@ -30,11 +30,11 @@ The following links are for your convenience. Before you launch the Quick Start,
 
 * If you want to take a look under the covers, you can view the AWS CloudFormation template that automates the deployment. You can customize the template during launch, or download and extend it for other projects.
 
-<a href="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace-master.template" target="_blank">
+<a href="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace-aws-master.template" target="_blank">
     <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/view-template-new.png"/>
 </a>
 
-<a href="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace.template" target="_blank">
+<a href="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace-aws.template" target="_blank">
     <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/view-template-existing.png"/>
 </a>
 
