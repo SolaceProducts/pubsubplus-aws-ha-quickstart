@@ -2,10 +2,14 @@
 
 ![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/Solace-AWS-HA.png "getting started publish/subscribe")
 
-This 
+This QuickStart template installs Solace Virtual Message Routers (VMRs) in high-availability (HA) redundancy groups for fault tolerance. HA redundancy provides 1:1 router sparing to increase overall service availability. If one of the routers fails or is taken out of service, the other router automatically takes over and provides service to the clients that were previously served by the now-out-of-service router.  To increase availability the meassage routers are deployed across 3 availability zones.
+
+To learn more about VMR redundancy see the [Redundancy Documentation](http://docs.solace.com/Features/VMR-Redundancy.htm).  If you are not familiar with Solace or the high-available configurations it is recommended that you review this document. 
+
+To learn more about connectivity to the HA redundancy group see the AWS [VPC Gateway Documentation](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html).
 
 # How to Deploy a VMR HA 
-This is a ... step process:
+This is a two step process:
 
 * Go to the Solace Developer portal and request a Solace Comunity edition VMR. This process will return an email with a Download link. Do a right click "Copy Hyperlink" on the "Download the VMR Community Edition for Docker" hyperlink.  This will be needed in the following section.
 
@@ -13,12 +17,7 @@ This is a ... step process:
     <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/register.png"/>
 </a>
 
-* Go to ...
-
-
-The following links are for your convenience. Before you launch the Quick Start, please review the architecture, configuration, network security, and other considerations discussed in this guide.
-
-* If you have an AWS account and you’re already familiar with AWS services and Solace message router HA, you can launch the Quick Start to deploy Solace into a new virtual private cloud (VPC) in your AWS account. The deployment takes approximately 30 minutes. If you’re new to AWS or Solace Message Router, please review the implementation details and follow the step-by-step instructions.[TODO]
+* Go to AWS Cloud Formation service and launch template.  The following links are for your convenience and take you directly to the templates for Solace Mesage Routers.
 
 <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/latest/templates/solace-aws-master.template" target="_blank">
     <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/launch-button-new.png"/>
@@ -37,6 +36,45 @@ The following links are for your convenience. Before you launch the Quick Start,
 <a href="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace-aws.template" target="_blank">
     <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/view-template-existing.png"/>
 </a>
+
+# Filling the templates
+Select the Launch Quick Start (for new VPC) above will take you to the AWS "Select Template" tab with the Solace template references, hit the next button in the bottom right corner.
+
+![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/select-template.png "Select Template")
+
+The next screen will allow you to fill in the details of the root AWS stack for this solution:
+
+| Field                      | Value                                                                          |
+|----------------------------|--------------------------------------------------------------------------------|
+| Stack name                 | Default is Solace-HA, any unique name will suffice |
+| AdminPassword              | Password to allow SolOS access to configure the Solace Message Router instances |
+|AvailabilityZones           | Pick 3 AZs from the drop down menue |
+| BootDiskSize               | Default is 24GB minimum is 20GB |
+| KeyPairName                | Pick from your exisitng key pairs, create new AWSW key pair if required |
+| LinuxOSAMI                 | Default is Amazon-Linux-HVM, recommended stay with this selection |
+| MessageRouterNodeInstance  | Default is t2.large which is the minimum |
+| MessageRouterNodeSpotPrice | Default is 0.00 which means not to use spot price |
+| MessageRouterNodeStorage   | Default is 0 which means ephemeral |
+| MonitorNodeInstance        | Default is t2.large which is the minimum | 
+| MonitorNodeeSpotPrice      | Default is 0.00 which means not to use spot price |
+| MonitorNodeStorage         | Default is 0 which means ephemeral |
+| PublicSubnet1CIDR          | Unless specific requirement for internal addressing leave at default |
+| PublicSubnet2CIDR          | Unless specific requirement for internal addressing leave at default |
+| PublicSubnet3CIDR          | Unless specific requirement for internal addressing leave at default |
+| RemoteAccessCIDR           | IP range that can send/recieve messages, use 0.0.0.0/0 if unsure |
+| QSS3BucketName             | Leave at default |
+| QSS3KeyPrefix              | Leave at default |
+| SolaceDockerURL            | URL to Evaluation or Enterprise Solace VMR Docker image |
+| SSHAccessCIDR              | IP range that can configure VMR, use 0.0.0.0/0 if unsure |
+| VPCCIDR                    | Unless specific requirement for internal addressing leave at default, must encapsulate all the above Subnets |
+
+![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/specify-details.png "Specify Details")
+
+Select [next] on the "Options" screen unless you want to add tags, use specific IAM roles, or blend in custom stacks.
+
+Acknoledge that resources will be created and select [Create] in bottom right corner.
+
+![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/capabilities.png "Create Stack")
 
 # About Quick Starts
 
