@@ -40,7 +40,7 @@ This is a two step process:
 # Filling the templates
 Select the Launch Quick Start (for new VPC) above will take you to the AWS "Select Template" tab with the Solace template references, hit the next button in the bottom right corner.
 
-![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/select-template.png "Select Template")
+![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/Select-Template.png "Select Template")
 
 The next screen will allow you to fill in the details of the root AWS stack for this solution:
 
