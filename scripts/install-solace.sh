@@ -51,7 +51,7 @@ cd $solace_directory
 echo "`date` Configure VMRs Started"
 
 wget -q -O solace-redirect ${solace_url}
-REAL_LINK=`egrep -o "https://[a-zA-Z0-9\.\/\_\?\=]*" ${solace-redirect}`
+REAL_LINK=`egrep -o "https://[a-zA-Z0-9\.\/\_\?\=]*" ${solace_directory}/solace-redirect`
 wget -q -O soltr-docker.tar.gz ${REAL_LINK}
 docker load -i ${solace_directory}/soltr-docker.tar.gz
 
