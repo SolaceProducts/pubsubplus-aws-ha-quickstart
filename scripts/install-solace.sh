@@ -50,8 +50,10 @@ mkdir $solace_directory
 cd $solace_directory
 echo "`date` Configure VMRs Started"
 
-wget  -q -O soltr-docker.tar.gz $solace_url
-docker load -i $solace_directory/soltr-docker.tar.gz
+wget -q -O solace-redirect ${solace_url}
+REAL_LINK=`egrep -o "https://[a-zA-Z0-9\.\/\_\?\=]*" ${solace-redirect}`
+wget -q -O soltr-docker.tar.gz ${REAL_LINK}
+docker load -i ${solace_directory}/soltr-docker.tar.gz
 
 export VMR_VERSION=`docker images | grep solace | awk '{print $3}'`
 
