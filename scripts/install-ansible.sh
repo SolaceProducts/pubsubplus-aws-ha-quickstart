@@ -42,6 +42,15 @@ echo "solace_tarball=$solace_tarball ,solace_directory=$solace_directory ,Leftov
 cd $solace_directory
 tar zxf $solace_tarball
 
-if [ ! -f /usr/local/bin/ansible ] ; then
-   pip install ansible
-fi
+retry=30
+while [ ${retry} -gt 0 ]
+do
+    if [ -f /usr/local/bin/ansible ] ; then
+       retry=0
+    fi
+    echo "${retry} more attempts to install ansible"
+    ((retry=retry-1))
+    easy_install --upgrade pip
+    echo `/usr/local/bin/pip2.7 install ansible`
+    sleep 10
+done

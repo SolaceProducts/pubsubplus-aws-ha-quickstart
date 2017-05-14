@@ -21,6 +21,7 @@
                         "VPCID",
                         "SubnetID",
                         "VPCCIDR",
+                        "NumberOfAZs",
                         "RemoteAccessCIDR",
                         "SSHAccessCIDR"
                     ]
@@ -107,6 +108,9 @@
                 },
                 "VPCCIDR": {
                     "default": "Allowed Internal Access CIDR"
+                },
+                "NumberOfAZs": {
+                    "default": "Number of Availability Zones to use"
                 },
                 "RemoteAccessCIDR": {
                     "default": "Allowed External Access CIDR"
@@ -228,6 +232,14 @@
             "Description": "Allowed CIDR block for internal access to cluster nodes",
             "Type": "String"
         },
+        "NumberOfAZs": {
+            "ConstraintDescription": "3 means each node in own az, 2 puts monitor and backup in one az",
+            "Default": "3",
+            "Description": "Number of availability zones to use",
+            "MaxValue": "3",
+            "MinValue": "2",
+            "Type": "Number"
+        },
         "RemoteAccessCIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
@@ -328,6 +340,12 @@
             "Fn::Equals": [
                 "1",
                 "1"
+            ]
+        },
+        "Use3AZs": {
+            "Fn::Equals": [
+                {"Ref": "NumberOfAZs"},
+                "3"
             ]
         }
     },
@@ -607,7 +625,12 @@
                     },
                     "SubnetID": {
                         "Fn::Select": [
-                            2,
+                             {
+                            "Fn::If" : [
+                                "Use3AZs",
+                                "2",
+                                "1"
+                            ]},
                             {
                                 "Ref": "SubnetID"
                             }
