@@ -625,12 +625,7 @@
                     },
                     "SubnetID": {
                         "Fn::Select": [
-                             {
-                            "Fn::If" : [
-                                "Use3AZs",
-                                "2",
-                                "1"
-                            ]},
+                            2,
                             {
                                 "Ref": "SubnetID"
                             }

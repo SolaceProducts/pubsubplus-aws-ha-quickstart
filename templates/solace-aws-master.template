@@ -356,6 +356,14 @@
             }
         }
     },
+    "Conditions": {
+        "Use3AZs": {
+            "Fn::Equals": [
+                {"Ref": "NumberOfAZs"},
+                "3"
+            ]
+        }
+    }, 
     "Resources": {
         "CloudFormationLogs": {
         "Type": "AWS::Logs::LogGroup",
