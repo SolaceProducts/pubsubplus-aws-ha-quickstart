@@ -120,6 +120,8 @@ sed -i "s/SOLACE_LOCAL_NAME/${host_name}/g" group_vars/LOCALHOST/localhost.yml
 case $local_role in  
     ?Monitor* ) 
         sed -i "s/SOLACE_LOCAL_ROLE/MONITOR/g" group_vars/LOCALHOST/localhost.yml
+        ansible-playbook ${DEBUG} -i hosts ShowRedundancyDetailSEMPv1.yml --connection=local
+        sleep 30
         ansible-playbook ${DEBUG} -i hosts ConfigReloadToMonitorSEMPv1.yml --connection=local
         sleep 60
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
