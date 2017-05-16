@@ -1,12 +1,12 @@
 # Install and configure Solace message routers in an HA tuple using AWS Cloud Formation
 
-![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-3AZ.png "Production enviroment for Solace VMR")
+![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-3AZ.png "Production enviroment for Solace VMR")
 
 This QuickStart template installs Solace Virtual Message Routers (VMRs) in high-availability (HA) redundancy groups for fault tolerance. HA redundancy provides 1:1 router sparing to increase overall service availability. If one of the routers fails or is taken out of service, the other router automatically takes over and provides service to the clients that were previously served by the now-out-of-service router.  To increase availability the meassage routers are deployed across 3 availability zones.
 
 To learn more about VMR redundancy see the [Redundancy Documentation](http://docs.solace.com/Features/VMR-Redundancy.htm).  If you are not familiar with Solace or the high-available configurations it is recommended that you review this document. 
 
-![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-2AZ.png "Proof of Concept enviroment for Solace VMR")
+![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-2AZ.png "Proof of Concept enviroment for Solace VMR")
 
 Alternatively this quickstart can create Soalce VMRs into an enviroment sutible for Proof Of Concept testing where loss of an AWS Availability Zone will not cause loss of access to mision critical data.
 
@@ -18,33 +18,33 @@ This is a two step process:
 * Go to the Solace Developer portal and request a Solace Comunity edition VMR. This process will return an email with a Download link. Do a right click "Copy Hyperlink" on the "Download the VMR Community Edition for Docker" hyperlink.  This will be needed in the following section.
 
 <a href="http://dev.solace.com/downloads/download-vmr-evaluation-edition-docker" target="_blank">
-    <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/register.png"/>
+    <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/register.png"/>
 </a>
 
 * Go to AWS Cloud Formation service and launch template.  The following links are for your convenience and take you directly to the templates for Solace Mesage Routers.
 
 <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/latest/templates/solace-aws-master.template" target="_blank">
-    <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/launch-button-new.png"/>
+    <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/launch-button-new.png"/>
 </a>
 
 <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/latest/templates/solace-aws.template" target="_blank">
-    <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/launch-button-existing.png"/>
+    <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/launch-button-existing.png"/>
 </a>
 
 * If you want to take a look under the covers, you can view the AWS CloudFormation template that automates the deployment. You can customize the template during launch, or download and extend it for other projects.
 
-<a href="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace-aws-master.template" target="_blank">
-    <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/view-template-new.png"/>
+<a href="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/templates/solace-aws-master.template" target="_blank">
+    <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/view-template-new.png"/>
 </a>
 
-<a href="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/templates/solace-aws.template" target="_blank">
-    <img src="https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/view-template-existing.png"/>
+<a href="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/templates/solace-aws.template" target="_blank">
+    <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/view-template-existing.png"/>
 </a>
 
 # Filling the templates
 Select the Launch Quick Start (for new VPC) above will take you to the AWS "Select Template" tab with the Solace template references, hit the next button in the bottom right corner.
 
-![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/Select-Template.png "Select Template")
+![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/Select-Template.png "Select Template")
 
 The next screen will allow you to fill in the details of the root AWS stack for this solution:
 
@@ -73,13 +73,13 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | SSHAccessCIDR              | IP range that can configure VMR, use 0.0.0.0/0 if unsure |
 | VPCCIDR                    | Unless specific requirement for internal addressing leave at default, must encapsulate all the above Subnets |
 
-![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/specify-details.png "Specify Details")
+![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/specify-details.png "Specify Details")
 
 Select [next] on the "Options" screen unless you want to add tags, use specific IAM roles, or blend in custom stacks.
 
 Acknoledge that resources will be created and select [Create] in bottom right corner.
 
-![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/capabilities.png "Create Stack")
+![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/capabilities.png "Create Stack")
 
 # About Quick Starts
 
@@ -89,7 +89,7 @@ Quick Starts are automated reference deployments for key workloads on the AWS Cl
 
 To test data traffic though the newly created VMR instances, visit the Solace developer portal and and select your prefered programming langauge to [send and receive messages](http://dev.solace.com/get-started/send-receive-messages/). Under each language there is a Publish/Subscribe tutorial that will help you get started.
 
-![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/solace_tutorial.png "getting started publish/subscribe")
+![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/solace_tutorial.png "getting started publish/subscribe")
 
 ## Contributing
 
@@ -97,7 +97,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Authors
 
-See the list of [contributors](https://github.com/KenBarr/solace-aws-ha-quickstart/graphs/contributors) who participated in this project.
+See the list of [contributors](https://github.com/SolaceLabs/solace-aws-ha-quickstart/graphs/contributors) who participated in this project.
 
 ## License
 
