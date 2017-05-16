@@ -67,28 +67,19 @@ fi
 #	(even with IAM users), but we could do the extra filtering
 #	on KeyName if necessary. 
 #
-aws ec2 describe-instances --output text --region $ThisRegion \
-  --filters 'Name=instance-state-name,Values=running,stopped' \
-  --query 'Reservations[].Instances[].[PrivateDnsName,InstanceId,LaunchTime,AmiLaunchIndex,KeyName,Tags[?Key == `aws:autoscaling:groupName`] | [0].Value ] ' \
-  | grep -w "$ThisStack" | sort -k 3,4 \
-  | awk '{split ($1,fqdn,"."); print fqdn[1]" "$2" "$3" "$4" "$5" "$6}' \
-  > ${SOLACE_HOSTS_FILE}
 
-
-#	cat ${SOLACE_HOSTS_FILE}
-
-# Now we have the hosts from this stack ... divide them into the 
-# our node roles.
-#
-
-# Since this script only runs on nodes we've deployed via Cloudformation,
-# this should never happend ... but let's be REALLY SURE we have nodes
-
+touch ${SOLACE_HOSTS_FILE}
 total_nodes=$(cat ${SOLACE_HOSTS_FILE} | wc -l)
-if [ ${total_nodes:-0} -lt 1 ] ; then
-	echo "No nodes found in  Cloudformation Stack; aborting script"
-	exit 1
-fi
+while [ ${total_nodes} -lt 3 ]; do
+	aws ec2 describe-instances --output text --region $ThisRegion \
+	--filters 'Name=instance-state-name,Values=running,stopped' \
+	--query 'Reservations[].Instances[].[PrivateDnsName,InstanceId,LaunchTime,AmiLaunchIndex,KeyName,Tags[?Key == `aws:autoscaling:groupName`] | [0].Value ] ' \
+	| grep -w "$ThisStack" | sort -k 3,4 \
+	| awk '{split ($1,fqdn,"."); print fqdn[1]" "$2" "$3" "$4" "$5" "$6}' \
+	> ${SOLACE_HOSTS_FILE}
+
+    total_nodes=$(cat ${SOLACE_HOSTS_FILE} | wc -l)
+done
 
 # We have two different Cloudformation models, one flat and one nested.
 # The different models will have slightly different labels for the 
