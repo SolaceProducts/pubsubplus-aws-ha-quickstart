@@ -113,12 +113,12 @@ host_name=`hostname`
 host_info=`grep ${host_name} ${config_file}`
 
 sed -i "s/SOLACE_SEMP_PASSWORD/${admin_password}/g" group_vars/LOCALHOST/localhost.yml
-local_role=`echo $host_info | grep -o -e "-M.*Stack-"`
+local_role=`echo $host_info | grep -o -E 'Monitor|MessageRouterPrimary|MessageRouterBackup'`
 
 sed -i "s/SOLACE_LOCAL_NAME/${host_name}/g" group_vars/LOCALHOST/localhost.yml
 # Set up the local host part of the ansible varialbes file
 case $local_role in  
-    ?Monitor* ) 
+    Monitor ) 
         sed -i "s/SOLACE_LOCAL_ROLE/MONITOR/g" group_vars/LOCALHOST/localhost.yml
         ansible-playbook ${DEBUG} -i hosts ShowRedundancyDetailSEMPv1.yml --connection=local
         sleep 30
@@ -127,7 +127,7 @@ case $local_role in
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyNoShutSEMPv1.yml --connection=local
         ;; 
-    ?MessageRouterPrimary* ) 
+    MessageRouterPrimary ) 
         export VMR_ROLE=primary
         export MATE_IP=${BACKUP_IP}
         sed -i "s/SOLACE_LOCAL_ROLE/PRIMARY/g" group_vars/LOCALHOST/localhost.yml
@@ -139,7 +139,7 @@ case $local_role in
         ansible-playbook ${DEBUG} -i hosts ConfigConfigsyncNoShutSEMPv1.yml --connection=local
         echo MessageRouterPrimary
         ;; 
-    ?MessageRouterBackup* ) 
+    MessageRouterBackup ) 
         export VMR_ROLE=backup
         export MATE_IP=${PRIMARY_IP}
         sed -i "s/SOLACE_LOCAL_ROLE/BACKUP/g" group_vars/LOCALHOST/localhost.yml 

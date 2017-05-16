@@ -1,10 +1,14 @@
 # Install and configure Solace message routers in an HA tuple using AWS Cloud Formation
 
-![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/Solace-AWS-HA.png "getting started publish/subscribe")
+![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-3AZ.png "Production enviroment for Solace VMR")
 
 This QuickStart template installs Solace Virtual Message Routers (VMRs) in high-availability (HA) redundancy groups for fault tolerance. HA redundancy provides 1:1 router sparing to increase overall service availability. If one of the routers fails or is taken out of service, the other router automatically takes over and provides service to the clients that were previously served by the now-out-of-service router.  To increase availability the meassage routers are deployed across 3 availability zones.
 
 To learn more about VMR redundancy see the [Redundancy Documentation](http://docs.solace.com/Features/VMR-Redundancy.htm).  If you are not familiar with Solace or the high-available configurations it is recommended that you review this document. 
+
+![alt text](https://raw.githubusercontent.com/KenBarr/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-2AZ.png "Proof of Concept enviroment for Solace VMR")
+
+Alternatively this quickstart can create Soalce VMRs into an enviroment sutible for Proof Of Concept testing where loss of an AWS Availability Zone will not cause loss of access to mision critical data.
 
 To learn more about connectivity to the HA redundancy group see the AWS [VPC Gateway Documentation](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html).
 
@@ -48,7 +52,7 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 |----------------------------|--------------------------------------------------------------------------------|
 | Stack name                 | Default is Solace-HA, any unique name will suffice |
 | AdminPassword              | Password to allow SolOS access to configure the Solace Message Router instances |
-| AvailabilityZones          | Pick 3 AZs from the drop down menue |
+| AvailabilityZones          | Pick 3 AZs from the drop down menue, alternativey pick 2 for PoC or limited Region |
 | BootDiskSize               | Default is 24GB minimum is 20GB |
 | KeyPairName                | Pick from your exisitng key pairs, create new AWSW key pair if required |
 | LinuxOSAMI                 | Default is Amazon-Linux-HVM, recommended stay with this selection |
@@ -58,6 +62,7 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | MonitorNodeInstance        | Default is t2.large which is the minimum | 
 | MonitorNodeeSpotPrice      | Default is 0.00 which means not to use spot price |
 | MonitorNodeStorage         | Default is 0 which means ephemeral |
+| NumberOfAZs                | Default is 3 unless only 2 AZs are selected above |
 | PublicSubnet1CIDR          | Unless specific requirement for internal addressing leave at default |
 | PublicSubnet2CIDR          | Unless specific requirement for internal addressing leave at default |
 | PublicSubnet3CIDR          | Unless specific requirement for internal addressing leave at default |
