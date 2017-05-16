@@ -56,7 +56,7 @@ elif [ -z "$ThisRegion" ] ; then
 	exit 1
 fi
 
-# Wait for all nodes to come on-line within a group
+# Validate that the resource actually exists before waiting for it to come up
 #
 resourceStatus=$(aws cloudformation describe-stack-resources \
 	--output text \
