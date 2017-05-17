@@ -2,7 +2,7 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "This template creates a new VPC infrastructure for Solace high availability architecture. **WARNING** This template creates Amazon EC2 instance and related resources. You will be billed for the AWS resources used if you create a stack from this template.",
     "Metadata": {
-        "AWS::CloudFormation::Instance": {
+        "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
                 {
                     "Label": {
