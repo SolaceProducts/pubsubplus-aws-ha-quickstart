@@ -51,27 +51,27 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | Field                      | Value                                                                          |
 |----------------------------|--------------------------------------------------------------------------------|
 | Stack name                 | Default is Solace-HA, any unique name will suffice |
+| SolaceDockerURL            | URL to Evaluation or Enterprise Solace VMR Docker image |
 | AdminPassword              | Password to allow SolOS access to configure the Solace Message Router instances |
 | AvailabilityZones          | Pick 3 AZs from the drop down menue, alternativey pick 2 for PoC or limited Region |
-| BootDiskSize               | Default is 24GB minimum is 20GB |
+| NumberOfAZs                | Default is 3 unless only 2 AZs are selected above |
+| VPCCIDR                    | Unless specific requirement for internal addressing leave at default, must encapsulate all the above Subnets |
+| PublicSubnet1CIDR          | Unless specific requirement for internal addressing leave at default |
+| PublicSubnet2CIDR          | Unless specific requirement for internal addressing leave at default |
+| PublicSubnet3CIDR          | Unless specific requirement for internal addressing leave at default |
+| RemoteAccessCIDR           | IP range that can send/recieve messages, use 0.0.0.0/0 if unsure |
+| SSHAccessCIDR              | IP range that can configure VMR, use 0.0.0.0/0 if unsure |
 | KeyPairName                | Pick from your exisitng key pairs, create new AWSW key pair if required |
 | LinuxOSAMI                 | Default is Amazon-Linux-HVM, recommended stay with this selection |
+| BootDiskSize               | Default is 24GB minimum is 20GB |
 | MessageRouterNodeInstance  | Default is t2.large which is the minimum |
 | MessageRouterNodeSpotPrice | Default is 0.00 which means not to use spot price |
 | MessageRouterNodeStorage   | Default is 0 which means ephemeral |
 | MonitorNodeInstance        | Default is t2.large which is the minimum | 
 | MonitorNodeeSpotPrice      | Default is 0.00 which means not to use spot price |
 | MonitorNodeStorage         | Default is 0 which means ephemeral |
-| NumberOfAZs                | Default is 3 unless only 2 AZs are selected above |
-| PublicSubnet1CIDR          | Unless specific requirement for internal addressing leave at default |
-| PublicSubnet2CIDR          | Unless specific requirement for internal addressing leave at default |
-| PublicSubnet3CIDR          | Unless specific requirement for internal addressing leave at default |
-| RemoteAccessCIDR           | IP range that can send/recieve messages, use 0.0.0.0/0 if unsure |
 | QSS3BucketName             | Leave at default |
 | QSS3KeyPrefix              | Leave at default |
-| SolaceDockerURL            | URL to Evaluation or Enterprise Solace VMR Docker image |
-| SSHAccessCIDR              | IP range that can configure VMR, use 0.0.0.0/0 if unsure |
-| VPCCIDR                    | Unless specific requirement for internal addressing leave at default, must encapsulate all the above Subnets |
 
 ![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/specify-details.png "Specify Details")
 
