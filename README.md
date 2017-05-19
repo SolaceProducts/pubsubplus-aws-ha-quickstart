@@ -15,7 +15,7 @@ To learn more about connectivity to the HA redundancy group see the AWS [VPC Gat
 # How to Deploy a VMR HA 
 This is a two step process:
 
-* Go to the Solace Developer portal and request a Solace Comunity edition VMR. This process will return an email with a Download link. Do a right click "Copy Hyperlink" on the "Download the VMR Community Edition for Docker" hyperlink.  This will be needed in the following section.
+* Go to the Solace Developer portal and request a Solace Evaluation edition VMR. This process will return an email with a Download link. Do a right click "Copy Hyperlink" on the "Download the VMR Evaluation Edition for Docker" hyperlink.  This will be needed in the following section.
 
 <a href="http://dev.solace.com/downloads/download-vmr-evaluation-edition-docker" target="_blank">
     <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/register.png"/>
@@ -51,7 +51,7 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | Field                      | Value                                                                          |
 |----------------------------|--------------------------------------------------------------------------------|
 | Stack name                 | Default is Solace-HA, any unique name will suffice |
-| SolaceDockerURL            | URL to Evaluation or Enterprise Solace VMR Docker image |
+| SolaceDockerURL            | URL cut and paste from the registration email |
 | AdminPassword              | Password to allow SolOS access to configure the Solace Message Router instances |
 | AvailabilityZones          | Pick 3 AZs from the drop down menue, alternativey pick 2 for PoC or limited Region |
 | NumberOfAZs                | Default is 3 unless only 2 AZs are selected above |
