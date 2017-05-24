@@ -1,6 +1,6 @@
 # Install and configure Solace message routers in an HA tuple using AWS Cloud Formation
 
-![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-3AZ.png "Production enviroment for Solace VMR")
+![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-wENI-3AZ.png "Production enviroment for Solace VMR")
 
 This QuickStart template installs Solace Virtual Message Routers (VMRs) in high-availability (HA) redundancy groups for fault tolerance. HA redundancy provides 1:1 router sparing to increase overall service availability. If one of the routers fails or is taken out of service, the other router automatically takes over and provides service to the clients that were previously served by the now-out-of-service router.  To increase availability the meassage routers are deployed across 3 availability zones.
 

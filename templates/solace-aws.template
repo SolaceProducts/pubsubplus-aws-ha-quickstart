@@ -263,7 +263,7 @@
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-            "Default": "solace-aws-ha-quickstart",
+            "Default": "quickstart-reference",
             "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
@@ -388,7 +388,80 @@
                 "Roles": [ { "Ref": "RootRole" } ]
             }
         },
+        "MessageRouterPrimaryInterfaceStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DeletionPolicy" : "Retain",
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "/",
+                        [
+                            {
+                                "Fn::FindInMap": [
+                                    "AWSInfoRegionMap",
+                                    {"Ref": "AWS::Region"},
+                                    "QuickStartS3URL"
+                                ]
+                            },
+                            {"Ref": "QSS3BucketName"},
+                            {"Ref": "QSS3KeyPrefix"},
+                            "templates/interfacecreate.template"
+                        ]
+                    ]
+                },
+                "Parameters": {
+                    "internalIp": "10.0.128.135",
+                    "role": "MessageRouterPrimary" ,
+                    "securityGrp": { "Ref" : "MessageRouterSecurityGroup" },
+                    "subnetId": {                        
+                        "Fn::Select": [
+                            3,
+                            {"Ref": "SubnetID"}
+                        ]
+                    }
+                }
+            }
+        },
+        "MessageRouterBackupInterfaceStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DeletionPolicy" : "Retain",
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "/",
+                        [
+                            {
+                                "Fn::FindInMap": [
+                                    "AWSInfoRegionMap",
+                                    {"Ref": "AWS::Region"},
+                                    "QuickStartS3URL"
+                                ]
+                            },
+                            {
+                                "Ref": "QSS3BucketName"
+                            },
+                            {
+                                "Ref": "QSS3KeyPrefix"
+                            },
+                            "templates/interfacecreate.template"
+                        ]
+                    ]
+                },
+                "Parameters": {
+                    "internalIp": "10.0.129.135" ,
+                    "role": "MessageRouterBackup" ,
+                    "securityGrp": { "Ref" : "MessageRouterSecurityGroup" },
+                    "subnetId": {
+                        "Fn::Select": [
+                            4,
+                            {"Ref": "SubnetID"}
+                        ]
+                    }
+                }
+            }
+        },
         "MessageRouterPrimaryStack": {
+            "DependsOn": "MessageRouterPrimaryInterfaceStack",
             "Type": "AWS::CloudFormation::Stack",
             "DeletionPolicy" : "Retain",
             "Properties": {
@@ -471,6 +544,7 @@
             }
         },
         "MessageRouterBackupStack": {
+            "DependsOn": "MessageRouterBackupInterfaceStack",
             "Type": "AWS::CloudFormation::Stack",
             "DeletionPolicy" : "Retain",            
             "Properties": {

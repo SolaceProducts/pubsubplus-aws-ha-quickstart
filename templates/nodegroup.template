@@ -12,7 +12,7 @@
         },
         "BootDiskSize": {
             "ConstraintDescription": "Deployment supports 8 to 128 GB for boot volumes",
-            "Default": "24",
+        "Default": "24",
             "Description": "Allocated EBS storage for boot disk",
             "MaxValue": "128",
             "MinValue": "8",
@@ -101,7 +101,7 @@
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-]+(/[0-9a-zA-Z-]+)*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
-            "Default": "solace-aws-ha-quickstart/latest",
+            "Default": "latest",
             "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
             "Type": "String"
         },
@@ -452,6 +452,50 @@
                                             { "Ref": "QSS3BucketName" },
                                             { "Ref": "QSS3KeyPrefix" },
                                             "scripts/install-docker.sh"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000755",
+                                "owner": "root",
+                                "group": "root"
+                            },
+                            "/tmp/overlay-networkInterface.sh": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    { "Ref": "AWS::Region" },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
+                                            "scripts/overlay-networkInterface.sh"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000755",
+                                "owner": "root",
+                                "group": "root"
+                            },
+                            "/tmp/apply-solace.sh": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "AWSInfoRegionMap",
+                                                    { "Ref": "AWS::Region" },
+                                                    "QuickStartS3URL"
+                                                ]
+                                            },
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
+                                            "scripts/apply-solace.sh"
                                         ]
                                     ]
                                 },
@@ -831,6 +875,10 @@
                                     "Ref": "AdminPassword"
                                 }, 
                                 "\n",
+                                "$AMI_SBIN/overlay-networkInterface.sh -c /tmp/solacehosts -d /tmp/ansible ",
+                                "\n",
+                                "$AMI_SBIN/apply-solace.sh -c /tmp/solacehosts -d /tmp/ansible",
+                                "\n",                                
                                 "\n"
                             ]
                         ]
