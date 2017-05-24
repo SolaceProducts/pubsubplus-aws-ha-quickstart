@@ -1,0 +1,56 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudFormation sub-template for network interface with elasticIP deployment",
+    "Parameters": { 
+        "internalIp": {
+            "Description": "Internal Router IP address",
+            "Type": "String"
+        },
+        "role": {
+            "AllowedValues": [
+                "MessageRouterPrimary",
+                "MessageRouterBackup"
+            ],
+            "Description": "MessageRouterPrimary or MessageRouterBackup",
+            "Default": "MessageRouterPrimary",
+            "Type": "String"
+        },        
+        "securityGrp": {
+            "Description": "String representation of the security group",
+            "Type": "List<AWS::EC2::SecurityGroup::Id>"           
+        },
+        "subnetId": {
+            "Description": "String representation of the subnet id",
+            "Type": "AWS::EC2::Subnet::Id"            
+        }
+    },
+    "Mappings":   {    },
+    "Conditions": {    },
+    "Resources":  {
+        "elasticIP": {
+            "Type" : "AWS::EC2::EIP",
+            "Properties" : {
+                "Domain" : "vpc"
+            }
+        },
+        "networkInterface": {
+            "Type" : "AWS::EC2::NetworkInterface",
+            "Properties" : {
+                "Description" : "Static External and internal IPs for Primary or Backup message router",
+                "GroupSet"         : { "Ref" : "securityGrp" },
+                "PrivateIpAddress" : { "Ref" : "internalIp" },
+                "SubnetId"         : { "Ref" : "subnetId" },
+                "Tags" : [ {"Key" : "Name", "Value" : { "Ref" : "role" } } ]
+            }
+        },
+        "associateIP" : {
+            "DependsOn": "networkInterface",
+            "DependsOn": "elasticIP",            
+            "Type" : "AWS::EC2::EIPAssociation",
+            "Properties" : {
+                "AllocationId" : { "Fn::GetAtt" : [ "elasticIP", "AllocationId" ]},
+                "NetworkInterfaceId" : { "Ref" : "networkInterface" }
+            }
+        }
+    }
+}
