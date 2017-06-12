@@ -18,6 +18,6 @@
          return_content:   yes
       register: rpc_reply
       ignore_errors: True
-      until: rpc_reply|success
+      until: rrpc_reply.content.find("code=\"ok\"") != -1
       retries: 60
       delay: 10

@@ -11,14 +11,14 @@
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
          body:             "<rpc semp-version='soltr/8_2VMR'>\
-                           <ip><vrf><name>managment</name><interface><ip-interface>intf0:1</ip-interface><shutdown/></interface></vrf></ip></rpc>"
+                           <ip><vrf><name>management</name><interface><ip-interface>intf0:1</ip-interface><shutdown/></interface></vrf></ip></rpc>"
          force_basic_auth: yes
          status_code:      200
          body_format:      raw
          return_content:   yes
       register: rpc_reply
       ignore_errors: True
-      until: rpc_reply|success
+      until: rpc_reply.content.find("code=\"ok\"") != -1
       retries: 60
       delay: 10
 
@@ -29,14 +29,16 @@
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
          body:             "<rpc semp-version='soltr/8_2VMR'>\
-                           <interface><phy-interface>intf0</phy-interface><os-physical-interface>eth1</os-physical-interface></interface></rpc>"
+                           <interface><phy-interface>intf0</phy-interface><os-physical-interface>\
+                           <os-physical-interface-name>eth1</os-physical-interface-name>\
+                           </os-physical-interface></interface></rpc>"
          force_basic_auth: yes
          status_code:      200
          body_format:      raw
          return_content:   yes
       register: rpc_reply
       ignore_errors: True
-      until: rpc_reply|success
+      until: rpc_reply.content.find("code=\"ok\"") != -1
       retries: 60
       delay: 10
 
@@ -47,13 +49,13 @@
          user:             "{{ ANSIBLE_USERNAME }}"
          password:         "{{ ANSIBLE_PASSWORD }}"
          body:             "<rpc semp-version='soltr/8_2VMR'>\
-                           <ip><vrf><name>managment</name><interface><ip-interface>intf0:1</ip-interface><no><shutdown/></no></interface></vrf></ip></rpc>"
+                           <ip><vrf><name>management</name><interface><ip-interface>intf0:1</ip-interface><no><shutdown/></no></interface></vrf></ip></rpc>"
          force_basic_auth: yes
          status_code:      200
          body_format:      raw
          return_content:   yes
       register: rpc_reply
       ignore_errors: True
-      until: rpc_reply|success
+      until: rpc_reply.content.find("code=\"ok\"") != -1
       retries: 60
       delay: 10
