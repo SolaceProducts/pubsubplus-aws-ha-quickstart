@@ -60,6 +60,9 @@ case $local_role in
         export VMR_ROLE=primary
         export MATE_IP=${BACKUP_IP}
         sed -i "s/SOLACE_LOCAL_ROLE/PRIMARY/g" group_vars/LOCALHOST/localhost.yml
+        ansible-playbook ${DEBUG} -i hosts ShowRedundancyDetailSEMPv1.yml --connection=local
+        ansible-playbook ${DEBUG} -i hosts ConfigSetActiveOSInterfaceSEMPv1.yml --connection=local
+        ansible-playbook ${DEBUG} -i hosts ConfigSetRouterNameSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigShutMessageSpoolSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyMateSEMPv1.yml --connection=local
@@ -72,6 +75,9 @@ case $local_role in
         export VMR_ROLE=backup
         export MATE_IP=${PRIMARY_IP}
         sed -i "s/SOLACE_LOCAL_ROLE/BACKUP/g" group_vars/LOCALHOST/localhost.yml 
+        ansible-playbook ${DEBUG} -i hosts ShowRedundancyDetailSEMPv1.yml --connection=local
+        ansible-playbook ${DEBUG} -i hosts ConfigSetActiveOSInterfaceSEMPv1.yml --connection=local
+        ansible-playbook ${DEBUG} -i hosts ConfigSetRouterNameSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigShutMessageSpoolSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyMateSEMPv1.yml --connection=local
