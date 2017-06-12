@@ -58,7 +58,7 @@ case $local_role in
         ;; 
     MessageRouterPrimary ) 
         export VMR_ROLE=primary
-        export MATE_IP=${BACKUP_IP}
+        export MATE_IP="10.0.129.135"
         sed -i "s/SOLACE_LOCAL_ROLE/PRIMARY/g" group_vars/LOCALHOST/localhost.yml
         ansible-playbook ${DEBUG} -i hosts ShowRedundancyDetailSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigSetActiveOSInterfaceSEMPv1.yml --connection=local
@@ -74,7 +74,7 @@ case $local_role in
         ;; 
     MessageRouterBackup ) 
         export VMR_ROLE=backup
-        export MATE_IP=${PRIMARY_IP}
+        export MATE_IP="10.0.128.135"
         sed -i "s/SOLACE_LOCAL_ROLE/BACKUP/g" group_vars/LOCALHOST/localhost.yml 
         ansible-playbook ${DEBUG} -i hosts ShowRedundancyDetailSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigSetActiveOSInterfaceSEMPv1.yml --connection=local
