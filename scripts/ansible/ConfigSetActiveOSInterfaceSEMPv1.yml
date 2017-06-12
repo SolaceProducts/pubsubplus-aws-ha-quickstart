@@ -22,7 +22,7 @@
       retries: 60
       delay: 10
 
-  - name: Change active interface
+    - name: Change active interface
       uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
@@ -40,7 +40,7 @@
       retries: 60
       delay: 10
 
-  - name:  No shut management vrf interface
+    - name:  No shut management vrf interface
       uri:
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
