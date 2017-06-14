@@ -71,6 +71,7 @@ case $local_role in
         ansible-playbook ${DEBUG} -i hosts ConfigNoShutMessageSpoolSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigConfigsyncNoShutSEMPv1.yml --connection=local
         echo MessageRouterPrimary
+        ifdown eth0
         ;; 
     MessageRouterBackup ) 
         export VMR_ROLE=backup
@@ -86,5 +87,6 @@ case $local_role in
         ansible-playbook ${DEBUG} -i hosts ConfigRedundancyNoShutSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigNoShutMessageSpoolSEMPv1.yml --connection=local
         ansible-playbook ${DEBUG} -i hosts ConfigConfigsyncNoShutSEMPv1.yml --connection=local
+        ifdown eth0
         ;; 
 esac
