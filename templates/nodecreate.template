@@ -1,14 +1,18 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "CloudFormation sub-template for ec2 creation",
+    "Description": "CloudFormation sub-template for Single Node EC2 deployment within Solace HA Cluster",
     "Parameters": {
         "SolaceDockerURL": {
             "Description": "Require URL to enterprise or Evaluation VMR, not Community",
             "Type": "String"
         },
+        "AdminPassword": {
+            "Description": "Require password to access SolOS admin console and SEMP",
+            "Type": "String"
+        },
         "BootDiskSize": {
             "ConstraintDescription": "Deployment supports 8 to 128 GB for boot volumes",
-            "Default": "24",
+        "Default": "24",
             "Description": "Allocated EBS storage for boot disk",
             "MaxValue": "128",
             "MinValue": "8",
@@ -25,17 +29,6 @@
         "KeyPairName": {
             "Description": "Name of an existing EC2 key pair within the AWS region; all instances will launch with this key pair",
             "Type": "AWS::EC2::KeyPair::KeyName"
-        },
-        "LinuxOSAMI": {
-            "AllowedValues": [
-                "Amazon-Linux-HVM",
-                "CentOS-7-HVM",
-                "Ubuntu-Server-16.04-LTS-HVM"
-            ],
-            "ConstraintDescription": "Supported versions of Linux AMIs for Solace Message Routers",
-            "Default": "Amazon-Linux-HVM",
-            "Description": "Operating system AMI for cluster instances",
-            "Type": "String"
         },
         "NodeDesignation": {
             "Default": "unspecified",
@@ -54,7 +47,7 @@
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Solace Router and Monitor nodes.",
+            "Description": "Instance Type for Kafka brokers; select m3/m4 or i2 instance types for us-west-1 and sa-east-1",
             "Type": "String"
         },
         "NodeSecurityGroup": {
@@ -95,166 +88,63 @@
             "Type": "String"
         },
         "SubnetID": {
-            "Description": "VPC subnet ID for the node; VPC must exist with proper configuration for Solace cluster access (internal and external)and the subnet must be in the same VPC as the security groups",
-            "Type": "String"
+            "Description": "Comma separated list of VPC subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solacet cluster access (internal and external)and the subnets must be in the same VPC as the security groups",
+            "Type": "AWS::EC2::Subnet::Id"
         }
     },
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "AMZNLINUXHVM": "amzn-ami-hvm-2017.03.0.20170401-x86_64-gp2",
-                "CENTOS7HVM": "CentOS Linux 7 x86_64 HVM EBS 1602-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-d7e1d2bd.3",
-                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20170330"
+                "AMZNLINUXHVM": "amzn-ami-hvm-2017.03.0.20170417-x86_64"
             },
             "ap-northeast-1": {
-                "AMZNLINUXHVM": "ami-859bbfe2",
-                "CENTOS7HVM": "ami-eec1c380",
-                "US1604HVM": "ami-53624634"
+                "AMZNLINUXHVM": "ami-923d12f5"
             },
             "ap-northeast-2": {
-                "AMZNLINUXHVM": "ami-8369baed",
-                "CENTOS7HVM": "ami-c74789a9",
-                "US1604HVM": "ami-8a7face4"
+                "AMZNLINUXHVM": "ami-9d15c7f3"
             },
             "ap-south-1": {
-                "AMZNLINUXHVM": "ami-815625ee",
-                "CENTOS7HVM": "ami-95cda6fa",
-                "US1604HVM": "ami-6c681b03"
+                "AMZNLINUXHVM": "ami-52c7b43d"
             },
             "ap-southeast-1": {
-                "AMZNLINUXHVM": "ami-a2bc03c1",
-                "CENTOS7HVM": "ami-f068a193",
-                "US1604HVM": "ami-dd07bbbe"
+                "AMZNLINUXHVM": "ami-fc5ae39f"
             },
             "ap-southeast-2": {
-                "AMZNLINUXHVM": "ami-8bf2fde8",
-                "CENTOS7HVM": "ami-fedafc9d",
-                "US1604HVM": "ami-c3dfd0a0"
+                "AMZNLINUXHVM": "ami-162c2575"
             },
             "ca-central-1": {
-                "AMZNLINUXHVM": "ami-8601bce2",
-                "CENTOS7HVM": "ami-af62d0cb",
-                "US1604HVM": "ami-af0fb2cb"
-            },
-            "eu-central-1": {
-                "AMZNLINUXHVM": "ami-5b06d634",
-                "CENTOS7HVM": "ami-9bf712f4",
-                "US1604HVM": "ami-e9c01086"
+                "AMZNLINUXHVM": "ami-b968bad6"
             },
             "eu-west-1": {
-                "AMZNLINUXHVM": "ami-e5083683",
-                "CENTOS7HVM": "ami-7abd0209",
-                "US1604HVM": "ami-c0cff0a6"
+                "AMZNLINUXHVM": "ami-01ccc867"
             },
             "eu-west-2": {
-                "AMZNLINUXHVM": "ami-11130775",
-                "CENTOS7HVM": "ami-bb373ddf",
-                "US1604HVM": "ami-036b7f67"
+                "AMZNLINUXHVM": "ami-b6daced2"
             },
             "sa-east-1": {
-                "AMZNLINUXHVM": "ami-a97013c5",
-                "CENTOS7HVM": "ami-26b93b4a",
-                "US1604HVM": "ami-c21370ae"
+                "AMZNLINUXHVM": "ami-37cfad5b"
             },
             "us-east-1": {
-                "AMZNLINUXHVM": "ami-22ce4934",
-                "CENTOS7HVM": "ami-6d1c2007",
-                "US1604HVM": "ami-4dd2575b"
+                "AMZNLINUXHVM": "ami-c58c1dd3"
             },
             "us-east-2": {
-                "AMZNLINUXHVM": "ami-7bfcd81e",
-                "CENTOS7HVM": "ami-6a2d760f",
-                "US1604HVM": "ami-38f5d15d"
+                "AMZNLINUXHVM": "ami-4191b524"
             },
             "us-west-1": {
-                "AMZNLINUXHVM": "ami-9e247efe",
-                "CENTOS7HVM": "ami-af4333cf",
-                "US1604HVM": "ami-e6095386"
+                "AMZNLINUXHVM": "ami-7a85a01a"
             },
             "us-west-2": {
-                "AMZNLINUXHVM": "ami-8ca83fec",
-                "CENTOS7HVM": "ami-d2c924b2",
-                "US1604HVM": "ami-fa27b39a"
-            }
-        },
-        "AWSInfoRegionMap": {
-            "ap-northeast-1": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "ap-northeast-2": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "ap-south-1": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "ap-southeast-1": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "ap-southeast-2": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "ca-central-1": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "eu-central-1": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "eu-west-1": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "eu-west-2": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "sa-east-1": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "us-east-1": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "us-east-2": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "us-west-1": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
-            },
-            "us-west-2": {
-                "Partition": "aws",
-                "QuickStartS3URL": "https://s3.amazonaws.com"
+                "AMZNLINUXHVM": "ami-4836a428"
             }
         },
         "LinuxAMINameMap": {
             "Amazon-Linux-HVM": {
                 "Code": "AMZNLINUXHVM"
-            },
-            "CentOS-7-HVM": {
-                "Code": "CENTOS7HVM"
-            },
-            "Ubuntu-Server-16.04-LTS-HVM": {
-                "Code": "US1604HVM"
             }
         },
         "Linux2BootDisk": {
             "Amazon-Linux-HVM": {
                 "BootDisk": "/dev/xvda"
-            },
-            "CentOS-7-HVM": {
-                "BootDisk": "/dev/sda1"
-            },
-            "Ubuntu-Server-16.04-LTS-HVM": {
-                "BootDisk": "/dev/sda1"
             }
         }
     },
@@ -277,42 +167,158 @@
         }
     },
     "Resources": {
-        "NodesReadyHandle": {
-            "Type": "AWS::CloudFormation::WaitConditionHandle"
-        },
-        "NodesReadyCondition": {
-            "Type": "AWS::CloudFormation::WaitCondition",
+
+        "CloudFormationLogs": {
+            "Type": "AWS::Logs::LogGroup",
             "Properties": {
-                "Handle": {"Ref": "NodesReadyHandle"},
-                "Timeout": "9000"
+                "RetentionInDays": 7
+            }
+        },
+        "RecoveryTestAlarm": {
+            "Type": "AWS::CloudWatch::Alarm",
+            "Properties": {
+                "AlarmDescription": "Trigger a recovery when instance status check fails for 3 consecutive minutes.",
+                "Namespace": "AWS/EC2" ,
+                "MetricName": "StatusCheckFailed_System",
+                "Statistic": "Minimum",
+                "Period": "60",
+                "EvaluationPeriods": "3",
+                "ComparisonOperator": "GreaterThanThreshold",
+                "Threshold": "0",
+                "AlarmActions": [ {"Fn::Join" : ["", ["arn:aws:automate:", { "Ref" : "AWS::Region" }, ":ec2:recover" ]]} ],
+                "Dimensions": [{"Name": "InstanceId","Value": {"Ref": "NodeLaunchConfig"}}]
             }
         },
         "NodeLaunchConfig": {
             "Type": "AWS::EC2::Instance",
             "Metadata": {
                 "AWS::CloudFormation::Init": {
-                    "config" : {
+                    "configSets" : {
+                        "install_all" : [ "install_awscli", "install_logs", "install_docker", "install_ansible", "install_solace" ]
+                    },
+
+                "install_awscli": {
+                    "packages" : {
+                        "python" : {
+                            "awscli" : []
+                        }
+                    }
+                },
+
+                "install_logs": {
+                    "packages" : {
+                        "yum" : {
+                            "awslogs" : []
+                        }
+                    },
+
+                    "files": {
+                    "/etc/awslogs/awslogs.conf": {
+                        "content": { "Fn::Join": [ "", [
+                        "[general]\n",
+                        "state_file= /var/awslogs/state/agent-state\n",
+
+                        "[/var/log/cloud-init.log]\n",
+                        "file = /var/log/cloud-init.log\n",
+                        "log_group_name = ", { "Ref": "CloudFormationLogs" }, "\n",
+                        "log_stream_name = {instance_id}/cloud-init.log\n",
+                        "datetime_format = \n",
+
+                        "[/var/log/cloud-init-output.log]\n",
+                        "file = /var/log/cloud-init-output.log\n",
+                        "log_group_name = ", { "Ref": "CloudFormationLogs" }, "\n",
+                        "log_stream_name = {instance_id}/cloud-init-output.log\n",
+                        "datetime_format = \n",
+
+                        "[/var/log/cfn-init.log]\n",
+                        "file = /var/log/cfn-init.log\n",
+                        "log_group_name = ", { "Ref": "CloudFormationLogs" }, "\n",
+                        "log_stream_name = {instance_id}/cfn-init.log\n",
+                        "datetime_format = \n",
+
+                        "[/var/log/cfn-hup.log]\n",
+                        "file = /var/log/cfn-hup.log\n",
+                        "log_group_name = ", { "Ref": "CloudFormationLogs" }, "\n",
+                        "log_stream_name = {instance_id}/cfn-hup.log\n",
+                        "datetime_format = \n",
+
+                        "[/var/log/cfn-wire.log]\n",
+                        "file = /var/log/cfn-wire.log\n",
+                        "log_group_name = ", { "Ref": "CloudFormationLogs" }, "\n",
+                        "log_stream_name = {instance_id}/cfn-wire.log\n",
+                        "datetime_format = \n"
+                        ] ] },
+                        "mode": "000444",
+                        "owner": "root",
+                        "group": "root"
+                    },
+                    "/etc/awslogs/awscli.conf": {
+                        "content": { "Fn::Join": [ "", [
+                        "[plugins]\n",
+                        "cwlogs = cwlogs\n",
+                        "[default]\n",
+                        "region = ", { "Ref" : "AWS::Region" }, "\n"
+                        ] ] },
+                        "mode": "000444",
+                        "owner": "root",
+                        "group": "root"
+                    }
+                    },
+                    "commands" : {
+                    "01_create_state_directory" : {
+                        "command" : "mkdir -p /var/awslogs/state"
+                    }
+                    },
+                    "services" : {
+                    "sysvinit" : {
+                        "awslogs"    : { "enabled" : "true", "ensureRunning" : "true",
+                                        "files" : [ "/etc/awslogs/awslogs.conf" ] }
+                    }
+                    }
+                },
+
+                "install_docker": {
+                    "packages" : {
+                        "yum" : {
+                            "docker" : [],
+                            "wget" : [],
+                            "lvm2" : []
+                        }
+                    },
+                    "services" : {
+                        "sysvinit" : {
+                            "docker" : {
+                                "enabled" : "true",
+                                "ensureRunning" : "true"
+                            }
+                        }
+                    }
+                },
+
+                "install_ansible": {
+                    "packages" : {
+                    "yum" : {
+                        "epel-release" : [],
+                        "jq" : []
+                    },
+                    "python" : {
+                        "ansible" : []
+                    }
+                    }
+                },
+                "install_solace" : {
                         "files": {
+                            "/tmp/solOSpasswd": {
+                                "content" : { "Ref": "AdminPassword" }
+                            },
                             "/tmp/gen-cluster-hosts.sh": {
                                 "source": {
                                     "Fn::Join": [
                                         "/",
                                         [
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "AWSInfoRegionMap",
-                                                    {
-                                                        "Ref": "AWS::Region"
-                                                    },
-                                                    "QuickStartS3URL"
-                                                ]
-                                            },
-                                            {
-                                                "Ref": "QSS3BucketName"
-                                            },
-                                            {
-                                                "Ref": "QSS3KeyPrefix"
-                                            },
+                                            "https://s3.amazonaws.com",
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
                                             "scripts/gen-cluster-hosts.sh"
                                         ]
                                     ]
@@ -326,21 +332,9 @@
                                     "Fn::Join": [
                                         "/",
                                         [
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "AWSInfoRegionMap",
-                                                    {
-                                                        "Ref": "AWS::Region"
-                                                    },
-                                                    "QuickStartS3URL"
-                                                ]
-                                            },
-                                            {
-                                                "Ref": "QSS3BucketName"
-                                            },
-                                            {
-                                                "Ref": "QSS3KeyPrefix"
-                                            },
+                                            "https://s3.amazonaws.com",
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
                                             "scripts/wait-for-child-resource.sh"
                                         ]
                                     ]
@@ -354,22 +348,58 @@
                                     "Fn::Join": [
                                         "/",
                                         [
-                                            {
-                                                "Fn::FindInMap": [
-                                                    "AWSInfoRegionMap",
-                                                    {
-                                                        "Ref": "AWS::Region"
-                                                    },
-                                                    "QuickStartS3URL"
-                                                ]
-                                            },
-                                            {
-                                                "Ref": "QSS3BucketName"
-                                            },
-                                            {
-                                                "Ref": "QSS3KeyPrefix"
-                                            },
+                                            "https://s3.amazonaws.com",
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
                                             "scripts/wait-for-resource.sh"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000755",
+                                "owner": "root",
+                                "group": "root"
+                            },
+                            "/etc/init.d/solace-vmr": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            "https://s3.amazonaws.com",
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
+                                            "scripts/init.d/solace-vmr"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000755",
+                                "owner": "root",
+                                "group": "root"
+                            },
+                            "/tmp/install-solace.sh": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            "https://s3.amazonaws.com",
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
+                                            "scripts/install-solace.sh"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000755",
+                                "owner": "root",
+                                "group": "root"
+                            },
+                            "/tmp/ansible.tgz": {
+                                "source": {
+                                    "Fn::Join": [
+                                        "/",
+                                        [
+                                            "https://s3.amazonaws.com",
+                                            { "Ref": "QSS3BucketName" },
+                                            { "Ref": "QSS3KeyPrefix" },
+                                            "scripts/ansible/ansible.tgz"
                                         ]
                                     ]
                                 },
@@ -390,9 +420,7 @@
                                 "DeviceName": {
                                     "Fn::FindInMap": [
                                         "Linux2BootDisk",
-                                        {
-                                            "Ref": "LinuxOSAMI"
-                                        },
+                                        "Amazon-Linux-HVM",
                                         "BootDisk"
                                     ]
                                 },
@@ -402,10 +430,6 @@
                                     },
                                     "DeleteOnTermination": "True"
                                 }
-                            },
-                            {
-                                "DeviceName": "/dev/sdb",
-                                "VirtualName": "ephemeral0"
                             }
                         ],
                         [
@@ -413,9 +437,7 @@
                                 "DeviceName": {
                                     "Fn::FindInMap": [
                                         "Linux2BootDisk",
-                                        {
-                                            "Ref": "LinuxOSAMI"
-                                        },
+                                        "Amazon-Linux-HVM",
                                         "BootDisk"
                                     ]
                                 },
@@ -423,16 +445,7 @@
                                     "VolumeSize": {
                                         "Ref": "BootDiskSize"
                                     },
-                                    "DeleteOnTermination": "True"
-                                }
-                            },
-                            {
-                                "DeviceName": "/dev/sdb",
-                                "Ebs": {
-                                    "VolumeSize": {
-                                        "Ref": "PersistentStorage"
-                                    },
-                                    "DeleteOnTermination": "True"
+                                    "DeleteOnTermination": "False"
                                 }
                             }
                         ]
@@ -441,29 +454,10 @@
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        {
-                            "Fn::FindInMap": [
-                                "LinuxAMINameMap",
-                                {
-                                    "Ref": "LinuxOSAMI"
-                                },
-                                "Code"
-                            ]
-                        }
+                        { "Ref": "AWS::Region" },
+                        "AMZNLINUXHVM"
                     ]
                 },
-                "NetworkInterfaces" : [
-                    {
-                        "DeleteOnTermination" : true,
-                        "Description"         : "Main interface",
-                        "DeviceIndex"         : "0",
-                        "GroupSet"            : { "Ref" : "NodeSecurityGroup" },
-                        "SubnetId"            : { "Ref" : "SubnetID" }
-                    }
-                ],
                 "InstanceType": {
                     "Ref": "NodeInstanceType"
                 },
@@ -481,147 +475,75 @@
                 "KeyName": {
                     "Ref": "KeyPairName"
                 },
+                "NetworkInterfaces" : [
+                    {
+                        "AssociatePublicIpAddress" : true,
+                        "DeleteOnTermination" : true,
+                        "Description"         : "Main interface",
+                        "DeviceIndex"         : "0",
+                        "GroupSet"            : { "Ref": "NodeSecurityGroup" },
+                        "SubnetId"            : { "Ref" : "SubnetID" }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "InstanceProfile"
+                },
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
                             "",
                             [
-                                "#!/bin/bash\n",
+                                "#!/bin/bash -xe\n",
+                                "AMI_SBIN=/tmp\n",
+                                "yum install -y aws-cfn-bootstrap\n",
                                 "\n",
-                                "function error_exit\n",
-                                "{\n",
-                                " cfn-signal -e 1 --stack ",
-                                {
-                                    "Ref": "AWS::StackName"
-                                },
-                                " --region ",
-                                {
-                                    "Ref": "AWS::Region"
-                                },
-                                " --resource Nodes\n",
-                                " exit 1\n",
-                                "}\n",
-                                "\n",
-                                "PATH=$PATH:/usr/local/bin \n",
-                                "\n",
-                                "## Install core O/S packages\n",
-                                "if [ ! -f /usr/bin/sshpass ] ; then \n",
-                                "  [ `which yum` ] && yum install -y sshpass \n",
-                                "  [ `which apt-get` ] && apt-get -y install sshpass \n",
-                                "fi \n",
-                                "\n",
-                                "if [ ! -f /usr/bin/jq ] ; then \n",
-                                "  [ `which yum` ] && yum install -y jq \n",
-                                "  [ `which apt-get` ] && apt-get -y install jq \n",
-                                "fi \n",
-                                "\n",
-                                "which pip &> /dev/null \n",
-                                "if [ $? -ne 0 ] ; then \n",
-                                "  [ `which yum` ] && $(yum install -y epel-release; yum install -y python-pip)\n",
-                                "  [ `which apt-get` ] && apt-get -y update && apt-get -y install python-pip\n",
-                                "fi \n",
-                                "pip install --upgrade pip\n",
-                                "pip install awscli --ignore-installed six\n",
-                                "\n",
-                                "## Install and Update CloudFormation\n",
-                                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
-                                "\n",
-                                "## Signal that the node is up\n",
-                                "cfn-signal -e 0 --stack ",
-                                {
-                                    "Ref": "AWS::StackName"
-                                },
-                                " --region ",
-                                {
-                                    "Ref": "AWS::Region"
-                                },
-                                " --resource Nodes\n",
-                                "\n",
+                                "yum install -y docker\n",
+                                "service docker start\n",
                                 "## Retrieve scripts to deploy Solace on the instances \n",
-                                "##  cfn-init downloads everything \n",
-                                "##  and then we're off to the races \n",
-                                "cfn-init -v ",
-                                "         --stack ",
-                                {
-                                    "Ref": "AWS::StackName"
-                                },
-                                "         --resource NodeLaunchConfig ",
-                                "         --region ",
-                                {
-                                    "Ref": "AWS::Region"
-                                },
-                                "\n",
-                                "AMI_SBIN=/tmp \n",
+                                "/opt/aws/bin/cfn-init -v ",
+                                "    --stack ", { "Ref": "AWS::StackName" },
+                                "    --resource NodeLaunchConfig ",
+                                "    --configsets install_all ",
+                                "    --region ", { "Ref": "AWS::Region" },
                                 "\n",
                                 "## Wait for all nodes to come on-line\n",
                                 "$AMI_SBIN/wait-for-child-resource.sh ",
-                                {
-                                    "Ref": "ParentStackName"
-                                },
-                                " MonitorStack Nodes\n",
+                                { "Ref": "ParentStackName" },
+                                " MonitorStack NodeLaunchConfig\n",
+                                "\n",
                                 "$AMI_SBIN/wait-for-child-resource.sh ",
-                                {
-                                    "Ref": "ParentStackName"
-                                },
-                                " MessageRouterStack Nodes\n",
+                                { "Ref": "ParentStackName" },
+                                " MessageRouterPrimaryStack NodeLaunchConfig\n",
+                                "\n",
+                                "$AMI_SBIN/wait-for-child-resource.sh ",
+                                {  "Ref": "ParentStackName" },
+                                " MessageRouterBackupStack NodeLaunchConfig\n",
                                 "\n",
                                 "## Now find the private IP addresses of all deployed nodes\n",
-                                "##   (generating /tmp/cphosts and /tmp/<role> files)\n",
+                                "##   (generating /tmp/solacehosts and /tmp/<role> files)\n",
                                 "$AMI_SBIN/gen-cluster-hosts.sh ",
-                                {
-                                    "Ref": "ParentStackName"
-                                },
-                                "\n",
+                                { "Ref": "ParentStackName" },
                                 "\n",
                                 "## Tag the instance (now that we're sure of launch index)\n",
-                                "##   NOTE: ami_launch_index is correct onlyi within a single subnet)\n",
                                 "instance_id=$(curl -f http://instance-data/latest/meta-data/instance-id)\n",
-                                "ami_launch_index=$(curl -f http://instance-data/latest/meta-data/ami-launch-index)\n",
-                                "launch_node=$(grep -w `hostname` /tmp/",
-                                {
-                                    "Ref": "NodeDesignation"
-                                },
-                                "s | awk '{print $2}')\n",
-                                "if [ -n \"$launch_node\" ] ; then\n",
-                                "  launch_index=${launch_node#*NODE}\n",
-                                "else\n",
-                                "  launch_index=${ami_launch_index}\n",
-                                "fi\n",
-                                "if [ -n \"$instance_id\" ] ; then\n",
-                                "  instance_tag=",
-                                {
-                                    "Ref": "NodeDesignation"
-                                },
-                                "-${launch_index}\n",
-                                "  aws ec2 create-tags",
-                                " --region ",
-                                {
-                                    "Ref": "AWS::Region"
-                                },
-                                " --resources $instance_id --tags Key=Name,Value=$instance_tag\n",
-                                "fi\n",
-                                "\n",
-                                "## [ OPTIONAL ] Open up ssh to allow direct login\n",
-                                "#sed -i 's/ChallengeResponseAuthentication .*no$/ChallengeResponseAuthentication yes/' /etc/ssh/sshd_config\n",
-                                "#service sshd restart\n",
-                                "\n",
-                                "## If all went well, signal success (must be done by ALL nodes in group)\n",
-                                "cfn-signal -e 0 -r 'Solace node deployment complete' '",
-                                {
-                                    "Ref": "NodesReadyHandle"
-                                },
-                                "'\n",
-                                "\n",
-                                "## Wait for all nodes to issue the signal\n",
-                                "$AMI_SBIN/wait-for-resource.sh NodesReadyCondition \n",
+                                "instance_tag=",{ "Ref": "ParentStackName" },"-",{ "Ref": "NodeDesignation" },"\n",
+                                " \n",
+                                "aws ec2 create-tags",
+                                "    --region ",{ "Ref": "AWS::Region" },
+                                "    --resources $instance_id --tags Key=Name,Value=$instance_tag\n",
                                 "\n",
                                 "## Signal back information for outputs (now that all nodes are up) \n",
-                                "cfn-signal -e 0 -r 'Solace HA deployment complete' '",
-                                {
-                                    "Ref": "ClusterInfoHandle"
-                                },
-                                "'\n",
-                                "\n"
+                                "/opt/aws/bin/cfn-signal -e 0 -r 'Solace HA deployment complete' '",
+                                   { "Ref": "ClusterInfoHandle" },
+                                   "'\n",
+                                "\n",
+                                "cd /tmp\n",
+                                "tar zxf ansible.tgz\n",
+                                "$AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/ansible ",
+                                "  -u ",
+                                    { "Ref": "SolaceDockerURL" },
+                                "  -p /tmp/solOSpasswd",
+                                " \n"
                             ]
                         ]
                     }

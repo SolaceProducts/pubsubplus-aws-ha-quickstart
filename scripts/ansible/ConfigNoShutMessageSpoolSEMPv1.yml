@@ -13,7 +13,7 @@
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
-         password:         "{{ ANSIBLE_PASSWORD }}"
+         password:         "{{ lookup('env','admin_password') }}"
          body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <hardware><message-spool><no><shutdown><{{ ROLE }}/></shutdown></no></message-spool></hardware></rpc>"
          force_basic_auth: yes
@@ -31,7 +31,7 @@
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
-         password:         "{{ ANSIBLE_PASSWORD }}"
+         password:         "{{ lookup('env','admin_password') }}"
          body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <service><mate-link><no><shutdown/></no></mate-link></service></rpc>"
          force_basic_auth: yes

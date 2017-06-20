@@ -9,7 +9,7 @@
          url:              "http://{{ ANSIBLE_VMR_IP }}:{{ ANSIBLE_VMR_SEMP_PORT }}/SEMP"
          method:           GET
          user:             "{{ ANSIBLE_USERNAME }}"
-         password:         "{{ ANSIBLE_PASSWORD }}"
+         password:         "{{ lookup('env','admin_password') }}"
          body:             "<rpc semp-version='soltr/8_2VMR'>\
                            <router-name><name>{{ LOCAL_INFO.ROLE }}</name></router-name></rpc>"
          force_basic_auth: yes

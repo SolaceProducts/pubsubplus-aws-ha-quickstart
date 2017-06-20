@@ -22,7 +22,7 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 config_file=""
 solace_directory=""
 solace_url=""
-admin_password=""
+admin_password_file=""
 DEBUG="-vvvv"
 
 verbose=0
@@ -33,7 +33,7 @@ while getopts "c:d:p:u:" opt; do
         ;;
     d)  solace_directory=$OPTARG
         ;;
-    p)  admin_password=$OPTARG
+    p)  admin_password_file=$OPTARG
         ;;
     u)  solace_url=$OPTARG
         ;;
@@ -44,8 +44,10 @@ shift $((OPTIND-1))
 [ "$1" = "--" ] && shift
 
 verbose=1
-echo "config_file=$config_file ,solace_directory=$solace_directory ,solace_url=$solace_url ,Leftovers: $@"
+echo "config_file=$config_file ,solace_directory=$solace_directory ,admin_password_file=admin_password_file, solace_url=$solace_url ,Leftovers: $@"
 
+export admin_password=`cat ${admin_password_file}`
+rm ${admin_password_file}
 mkdir $solace_directory
 cd $solace_directory
 echo "`date` Configure VMRs Started"
@@ -53,6 +55,15 @@ echo "`date` Configure VMRs Started"
 wget -q -O solace-redirect ${solace_url}
 REAL_LINK=`egrep -o "https://[a-zA-Z0-9\.\/\_\?\=]*" ${solace_directory}/solace-redirect`
 wget -q -O soltr-docker.tar.gz ${REAL_LINK}
+
+# Make sure Docker is actually up
+docker_running=""
+while [[ ${docker_running} != "running" ]]; do 
+    echo "ERROR: Tried to launch Solace but Docker was not up"
+    sleep 10
+    docker_running=`service docker status | grep -o running`
+done
+
 docker load -i ${solace_directory}/soltr-docker.tar.gz
 
 export VMR_VERSION=`docker images | grep solace | awk '{print $3}'`
@@ -112,19 +123,54 @@ done
 host_name=`hostname`
 host_info=`grep ${host_name} ${config_file}`
 
-sed -i "s/SOLACE_SEMP_PASSWORD/${admin_password}/g" group_vars/LOCALHOST/localhost.yml
 local_role=`echo $host_info | grep -o -E 'Monitor|MessageRouterPrimary|MessageRouterBackup'`
 
 sed -i "s/SOLACE_LOCAL_NAME/${host_name}/g" group_vars/LOCALHOST/localhost.yml
 # Set up the local host part of the ansible varialbes file
+
+# Make sure Docker is actually up
+ansible_exists=""
+while [[ ! -f /usr/local/bin/ansible-playbook ]]; do 
+    echo "ERROR: Ansible does not yet exists"
+    sleep 10
+done
+
+
 case $local_role in  
     Monitor ) 
         sed -i "s/SOLACE_LOCAL_ROLE/MONITOR/g" group_vars/LOCALHOST/localhost.yml
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ShowRedundancyDetailSEMPv1.yml --connection=local
+        sleep 30
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigReloadToMonitorSEMPv1.yml --connection=local
+        sleep 60
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyNoShutSEMPv1.yml --connection=local
         ;; 
     MessageRouterPrimary ) 
+        export VMR_ROLE=primary
+        export MATE_IP=${BACKUP_IP}
         sed -i "s/SOLACE_LOCAL_ROLE/PRIMARY/g" group_vars/LOCALHOST/localhost.yml
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ShowRedundancyDetailSEMPv1.yml --connection=local
+        sleep 30
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigShutMessageSpoolSEMPv1.yml --connection=local
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyMateSEMPv1.yml --connection=local
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyNoShutSEMPv1.yml --connection=local
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigNoShutMessageSpoolSEMPv1.yml --connection=local
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigConfigsyncNoShutSEMPv1.yml --connection=local
+        echo MessageRouterPrimary
         ;; 
     MessageRouterBackup ) 
+        export VMR_ROLE=backup
+        export MATE_IP=${PRIMARY_IP}
         sed -i "s/SOLACE_LOCAL_ROLE/BACKUP/g" group_vars/LOCALHOST/localhost.yml 
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ShowRedundancyDetailSEMPv1.yml --connection=local
+        sleep 30
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigShutMessageSpoolSEMPv1.yml --connection=local
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyMateSEMPv1.yml --connection=local
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyNoShutSEMPv1.yml --connection=local
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigNoShutMessageSpoolSEMPv1.yml --connection=local
+        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigConfigsyncNoShutSEMPv1.yml --connection=local
         ;; 
 esac
