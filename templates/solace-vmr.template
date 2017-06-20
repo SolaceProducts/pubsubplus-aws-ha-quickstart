@@ -1,0 +1,679 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudFormation template to deploy Solace HA Message Routers on AWS",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Solace Parameters"
+                    },
+                    "Parameters": [
+                        "SolaceDockerURL",
+                        "AdminPassword"
+                    ]
+                },                
+                {
+                    "Label": {
+                        "default": "Network Configuration"
+                    },
+                    "Parameters": [
+                        "VPCID",
+                        "SubnetID",
+                        "VPCCIDR",
+                        "NumberOfAZs",
+                        "RemoteAccessCIDR",
+                        "SSHAccessCIDR"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Common Amazon EC2 Configuration"
+                    },
+                    "Parameters": [
+                        "KeyPairName",
+                        "BootDiskSize"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "MessageRouterInstance Configuration"
+                    },
+                    "Parameters": [
+                        "MessageRouterNodeInstanceType",
+                        "MessageRouterNodeStorage",
+                        "MessageRouterNodeSpotPrice"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "MonitorInstance Configuration"
+                    },
+                    "Parameters": [
+                        "MonitorNodeInstanceType",
+                        "MonitorNodeStorage",
+                        "MonitorNodeSpotPrice"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "AWS Quick Start Configuration"
+                    },
+                    "Parameters": [
+                        "QSS3BucketName",
+                        "QSS3KeyPrefix"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "SolaceDockerURL": {
+                    "default": "Solace Docker URL"
+                },
+                "AdminPassword": {
+                    "default": "Password to access SolOS admin console and SEMP"
+                },                
+                "BootDiskSize": {
+                    "default": "Boot Disk Capacity (GiB)"
+                },
+                "MessageRouterNodeInstanceType": {
+                    "default": "Instance Type"
+                },
+                "MessageRouterNodeSpotPrice": {
+                    "default": "Spot Price (optional)"
+                },
+                "MessageRouterNodeStorage": {
+                    "default": "Persistent Storage"
+                },
+                "MessageRouterNumberOfNodes": {
+                    "default": "Number of Message Router"
+                },
+                "MonitorNodeInstanceType": {
+                    "default": "Instance Type"
+                },
+                "MonitorNodeNodeSpotPrice": {
+                    "default": "Spot Price (optional)"
+                },
+                "MonitorNodeNodeStorage": {
+                    "default": "Persistent Storage"
+                },
+                "MonitorNumberOfNodes": {
+                    "default": "Number of Monitor"
+                },
+                "KeyPairName": {
+                    "default": "Key Pair Name"
+                },
+                "VPCCIDR": {
+                    "default": "Allowed Internal Access CIDR"
+                },
+                "NumberOfAZs": {
+                    "default": "Number of Availability Zones to use"
+                },
+                "RemoteAccessCIDR": {
+                    "default": "Allowed External Access CIDR"
+                },
+                "SSHAccessCIDR": {
+                    "default": "Allowed SSH Access CIDR"
+                },
+                "VPCID": {
+                    "default": "VPC CIDR"
+                },
+                "SubnetID": {
+                    "default": "Subnet ID"
+                },
+                "QSS3BucketName": {
+                    "default": "Quick Start S3 Bucket Name"
+                },
+                "QSS3KeyPrefix": {
+                    "default": "Quick Start S3 Key Prefix"
+                }
+            }
+        }
+    },
+    "Parameters": {
+        "SolaceDockerURL": {
+            "Description": "Require URL to enterprise or Evaluation VMR, not Community",
+            "Type": "String"
+        },
+        "AdminPassword": {
+            "Description": "Require password to access SolOS admin console and SEMP",
+            "Type": "String"
+        },
+        "BootDiskSize": {
+            "ConstraintDescription": "Deployment supports 8 to 128 GB for boot volumes",
+            "Default": "24",
+            "Description": "Allocated EBS storage for boot disk",
+            "MaxValue": "128",
+            "MinValue": "8",
+            "Type": "Number"
+        },
+        "MessageRouterNodeInstanceType": {
+            "AllowedValues": [
+                "t2.large",
+                "t2.xlarge",
+                "m3.large",
+                "m3.xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "c4.xlarge"
+            ],
+            "ConstraintDescription": "Must be a valid EC2 instance type.",
+            "Default": "t2.large",
+            "Description": "Instance Type for Kafka brokers; select m3/m4 or i2 instance types for us-west-1 and sa-east-1",
+            "Type": "String"
+        },
+        "MessageRouterNodeStorage": {
+            "ConstraintDescription": "No more than 1024 GiB per device (4 TiB per node).",
+            "Default": "0",
+            "Description": "Allocated EBS storage for each block device (in GiB; 4 devs per node); 0 indicates ephemeral storage only",
+            "MaxValue": "1024",
+            "MinValue": "0",
+            "Type": "Number"
+        },
+        "MessageRouterNodeSpotPrice": {
+            "AllowedPattern": "([0-9]{1}[.]{1}[0-9]{2})",
+            "ConstraintDescription": "Must be decimal numeric value",
+            "Default": "0.00",
+            "Description": "Spot Price to bid for requested instances (0.00 will result in using on-demand instances)",
+            "Type": "String"
+        },
+        "MonitorNodeInstanceType": {
+            "AllowedValues": [
+                "t2.medium",
+                "t2.large",
+                "t2.xlarge",
+                "m3.large",
+                "m3.xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "c4.xlarge"
+            ],
+            "ConstraintDescription": "Must be a valid EC2 instance type.",
+            "Default": "t2.large",
+            "Description": "Instance Type for Solace Message Router",
+            "Type": "String"
+        },
+        "MonitorNodeSpotPrice": {
+            "AllowedPattern": "([0-9]{1}[.]{1}[0-9]{2})",
+            "ConstraintDescription": "Must be decimal numeric value",
+            "Default": "0.00",
+            "Description": "Spot Price to bid for requested instances (0.00 will result in using on-demand instances)",
+            "Type": "String"
+        },
+        "MonitorNodeStorage": {
+            "ConstraintDescription": "No more than 1024 GiB per device (4 TiB per node).",
+            "Default": "0",
+            "Description": "Allocated EBS storage for each block device (in GiB; 4 devs per node); 0 indicates ephemeral storage only",
+            "MaxValue": "1024",
+            "MinValue": "0",
+            "Type": "Number"
+        },
+        "KeyPairName": {
+            "Description": "Name of an existing EC2 key pair within the AWS region; all instances will launch with this key pair",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "VPCCIDR": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "Allowed CIDR block for internal access to cluster nodes",
+            "Type": "String"
+        },
+        "NumberOfAZs": {
+            "ConstraintDescription": "3 means each node in own az, 2 puts monitor and backup in one az",
+            "Default": "3",
+            "Description": "Number of availability zones to use",
+            "MaxValue": "3",
+            "MinValue": "2",
+            "Type": "Number"
+        },
+        "RemoteAccessCIDR": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "Allowed CIDR block for external access to cluster nodes",
+            "Type": "String"
+        },
+        "SSHAccessCIDR": {
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "Allowed CIDR block for SSH access to cluster nodes",
+            "Type": "String"
+        },
+        "SubnetID": {
+            "Description": "Comma separated list of VPC subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access (internal and external)",
+            "Type": "List<AWS::EC2::Subnet::Id>"
+        },
+        "VPCID": {
+            "Description": "ID of the VPC (e.g. vpc-0343606e)",
+            "Type": "AWS::EC2::VPC::Id"
+        },
+        "QSS3BucketName": {
+            "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
+            "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Default": "solace-aws-ha-quickstart",
+            "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Type": "String"
+        },
+        "QSS3KeyPrefix": {
+            "AllowedPattern": "^[0-9a-zA-Z-]+(/[0-9a-zA-Z-]+)*$",
+            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
+            "Default": "forMikeH",
+            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
+            "Type": "String"
+        }
+    },
+    "Mappings": {
+        "AWSInfoRegionMap": {
+            "ap-northeast-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ap-northeast-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ap-south-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ap-southeast-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ap-southeast-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "ca-central-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "eu-central-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "eu-west-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "eu-west-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "sa-east-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "us-east-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "us-east-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "us-west-1": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            },
+            "us-west-2": {
+                "Partition": "aws",
+                "QuickStartS3URL": "https://s3.amazonaws.com"
+            }
+        }
+    },
+    "Conditions": {
+        "EnableWaitConditions": {
+            "Fn::Equals": [
+                "1",
+                "1"
+            ]
+        },
+        "Use3AZs": {
+            "Fn::Equals": [
+                {"Ref": "NumberOfAZs"},
+                "3"
+            ]
+        }
+    },
+    "Resources": {
+        "RootRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                "Version" : "2012-10-17",
+                "Statement": [ {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": [ "ec2.amazonaws.com" ]
+                    },
+                    "Action": [ "sts:AssumeRole" ]
+                } ]
+                },
+                "Path": "/"
+            }
+        },
+        "RolePolicies": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "root",
+                "PolicyDocument": {
+                "Version" : "2012-10-17",
+                "Statement": [ {
+                    "Effect": "Allow",
+                    "Action": "*",
+                    "Resource": "*"
+                } ]
+                },
+                "Roles": [ { "Ref": "RootRole" } ]
+            }
+         },
+        "InstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Path": "/",
+                "Roles": [ { "Ref": "RootRole" } ]
+            }
+        },
+        "MessageRouterPrimaryStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DeletionPolicy" : "Retain",
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "/",
+                        [
+                            "https://s3.amazonaws.com",
+                            { "Ref": "QSS3BucketName" },
+                            { "Ref": "QSS3KeyPrefix" },
+                            "templates/nodecreate.template"
+                        ]
+                    ]
+                },
+                "Parameters": {
+                    "SolaceDockerURL": {
+                        "Ref": "SolaceDockerURL"
+                    },
+                    "AdminPassword": {
+                        "Ref": "AdminPassword"
+                    },
+                    "BootDiskSize": {
+                        "Ref": "BootDiskSize"
+                    },
+                    "ClusterInfoHandle": {
+                        "Ref": "ClusterInfoHandle"
+                    },
+                    "InstanceProfile": {
+                        "Ref": "InstanceProfile"
+                    },
+                    "KeyPairName": {
+                        "Ref": "KeyPairName"
+                    },
+                    "NodeDesignation": "message-router-primary",
+                    "NodeInstanceType": {
+                        "Ref": "MessageRouterNodeInstanceType"
+                    },
+                    "NodeSecurityGroup": {
+                        "Ref" : "MessageRouterSecurityGroup"
+                    },
+                    "NodeSpotPrice": {
+                        "Ref": "MessageRouterNodeSpotPrice"
+                    },
+                    "ParentStackName": {
+                        "Ref": "AWS::StackName"
+                    },
+                    "PersistentStorage": {
+                        "Ref": "MessageRouterNodeStorage"
+                    },
+                    "QSS3BucketName": {
+                        "Ref": "QSS3BucketName"
+                    },
+                    "QSS3KeyPrefix": {
+                        "Ref": "QSS3KeyPrefix"
+                    },
+                    "SubnetID": {
+                        "Fn::Select": [
+                            0,
+                            {
+                                "Ref": "SubnetID"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "MessageRouterBackupStack": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DeletionPolicy" : "Retain",            
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "/",
+                        [
+                            "https://s3.amazonaws.com",
+                            { "Ref": "QSS3BucketName" },
+                            { "Ref": "QSS3KeyPrefix" },
+                            "templates/nodecreate.template"
+                        ]
+                    ]
+                },
+                "Parameters": {
+                    "SolaceDockerURL": {
+                        "Ref": "SolaceDockerURL"
+                    },
+                    "AdminPassword": {
+                        "Ref": "AdminPassword"
+                    },
+                    "BootDiskSize": {
+                        "Ref": "BootDiskSize"
+                    },
+                    "ClusterInfoHandle": {
+                        "Ref": "ClusterInfoHandle"
+                    },
+                    "InstanceProfile": {
+                        "Ref": "InstanceProfile"
+                    },
+                    "KeyPairName": {
+                        "Ref": "KeyPairName"
+                    },
+                    "NodeDesignation": "message-router-backup",
+                    "NodeInstanceType": {
+                        "Ref": "MessageRouterNodeInstanceType"
+                    },
+                    "NodeSecurityGroup": {
+                        "Ref" : "MessageRouterSecurityGroup"
+                    },
+                    "NodeSpotPrice": {
+                        "Ref": "MessageRouterNodeSpotPrice"
+                    },
+                    "ParentStackName": {
+                        "Ref": "AWS::StackName"
+                    },
+                    "PersistentStorage": {
+                        "Ref": "MessageRouterNodeStorage"
+                    },
+                    "QSS3BucketName": {
+                        "Ref": "QSS3BucketName"
+                    },
+                    "QSS3KeyPrefix": {
+                        "Ref": "QSS3KeyPrefix"
+                    },
+                    "SubnetID": {
+                        "Fn::Select": [
+                            1,
+                            {
+                                "Ref": "SubnetID"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "MonitorStack" :{
+            "Type": "AWS::CloudFormation::Stack",
+            "DeletionPolicy" : "Retain",
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Join": [
+                        "/",
+                        [
+                            "https://s3.amazonaws.com",
+                            { "Ref": "QSS3BucketName" },
+                            { "Ref": "QSS3KeyPrefix" },
+                            "templates/nodecreate.template"
+                        ]
+                    ]
+                },
+                "Parameters": {
+                    "SolaceDockerURL": {
+                        "Ref": "SolaceDockerURL"
+                    },
+                    "AdminPassword": {
+                        "Ref": "AdminPassword"
+                    },
+                    "BootDiskSize": {
+                        "Ref": "BootDiskSize"
+                    },
+                    "ClusterInfoHandle": {
+                        "Ref": "ClusterInfoHandle"
+                    },
+                    "InstanceProfile": {
+                        "Ref": "InstanceProfile"
+                    },
+                    "KeyPairName": {
+                        "Ref": "KeyPairName"
+                    },
+                    "NodeDesignation": "monitor",
+                    "NodeInstanceType": {
+                        "Ref": "MonitorNodeInstanceType"
+                    },
+                    "NodeSecurityGroup": {
+                        "Ref" : "MonitorSecurityGroup"
+                    },
+                    "NodeSpotPrice": {
+                        "Ref": "MonitorNodeSpotPrice"
+                    },
+                    "ParentStackName": {
+                        "Ref": "AWS::StackName"
+                    },
+                    "PersistentStorage": {
+                        "Ref": "MonitorNodeStorage"
+                    },
+                    "QSS3BucketName": {
+                        "Ref": "QSS3BucketName"
+                    },
+                    "QSS3KeyPrefix": {
+                        "Ref": "QSS3KeyPrefix"
+                    },
+                    "SubnetID": {
+                        "Fn::Select": [
+                            2,
+                            {
+                                "Ref": "SubnetID"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "MessageRouterSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "GroupDescription": "Message Router Security Group",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "8741",
+                        "ToPort": "8741",
+                        "CidrIp": {
+                            "Ref": "VPCCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "udp",
+                        "FromPort": "5404",
+                        "ToPort": "5405",
+                        "CidrIp": {
+                            "Ref": "VPCCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "1883",
+                        "ToPort": "1883",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "55555",
+                        "ToPort": "55555",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "SSHAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "8080",
+                        "ToPort": "8080",
+                        "CidrIp": {
+                            "Ref": "SSHAccessCIDR"
+                        }
+                    }
+                ]
+            }
+        },
+        "MonitorSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "GroupDescription": "Message Router Security Group",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "udp",
+                        "FromPort": "5404",
+                        "ToPort": "5405",
+                        "CidrIp": {
+                            "Ref": "VPCCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "SSHAccessCIDR"
+                        }
+                    }
+                ]
+            }
+        },
+        "ClusterInfoHandle": {
+            "Type": "AWS::CloudFormation::WaitConditionHandle"
+        },
+        "ClusterInfoCondition": {
+            "Type": "AWS::CloudFormation::WaitCondition",
+            "Condition": "EnableWaitConditions",
+            "DependsOn": ["MessageRouterPrimaryStack", "MessageRouterBackupStack", "MonitorStack"],
+            "Properties": {
+                "Handle": {
+                    "Ref": "ClusterInfoHandle"
+                },
+                "Timeout": "120",
+                "Count": "1"
+            }
+        }
+    }
+}
