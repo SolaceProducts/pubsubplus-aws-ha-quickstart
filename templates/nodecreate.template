@@ -313,14 +313,17 @@
                             },
                             "/tmp/gen-cluster-hosts.sh": {
                                 "source": {
-                                    "Fn::Join": [
-                                        "/",
-                                        [
-                                            "https://s3.amazonaws.com",
-                                            { "Ref": "QSS3BucketName" },
-                                            { "Ref": "QSS3KeyPrefix" },
-                                            "scripts/gen-cluster-hosts.sh"
-                                        ]
+                                    "Fn::Sub": [
+                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/scripts/gen-cluster-hosts.sh",
+                                        {
+                                            "QSS3Region": {
+                                                "Fn::If": [
+                                                    "GovCloudCondition",
+                                                    "s3-us-gov-west-1",
+                                                    "s3"
+                                                ]
+                                            }
+                                         }
                                     ]
                                 },
                                 "mode": "000755",
@@ -329,14 +332,17 @@
                             },
                             "/tmp/wait-for-child-resource.sh": {
                                 "source": {
-                                    "Fn::Join": [
-                                        "/",
-                                        [
-                                            "https://s3.amazonaws.com",
-                                            { "Ref": "QSS3BucketName" },
-                                            { "Ref": "QSS3KeyPrefix" },
-                                            "scripts/wait-for-child-resource.sh"
-                                        ]
+                                    "Fn::Sub": [
+                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/scripts/wait-for-child-resource.sh",
+                                        {
+                                            "QSS3Region": {
+                                                "Fn::If": [
+                                                    "GovCloudCondition",
+                                                    "s3-us-gov-west-1",
+                                                    "s3"
+                                                ]
+                                            }
+                                         }
                                     ]
                                 },
                                 "mode": "000755",
@@ -345,14 +351,17 @@
                             },
                             "/tmp/wait-for-resource.sh": {
                                 "source": {
-                                    "Fn::Join": [
-                                        "/",
-                                        [
-                                            "https://s3.amazonaws.com",
-                                            { "Ref": "QSS3BucketName" },
-                                            { "Ref": "QSS3KeyPrefix" },
-                                            "scripts/wait-for-resource.sh"
-                                        ]
+                                     "Fn::Sub": [
+                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/scripts/wait-for-resource.sh",
+                                        {
+                                            "QSS3Region": {
+                                                "Fn::If": [
+                                                    "GovCloudCondition",
+                                                    "s3-us-gov-west-1",
+                                                    "s3"
+                                                ]
+                                            }
+                                         }
                                     ]
                                 },
                                 "mode": "000755",
@@ -361,14 +370,17 @@
                             },
                             "/etc/init.d/solace-vmr": {
                                 "source": {
-                                    "Fn::Join": [
-                                        "/",
-                                        [
-                                            "https://s3.amazonaws.com",
-                                            { "Ref": "QSS3BucketName" },
-                                            { "Ref": "QSS3KeyPrefix" },
-                                            "scripts/init.d/solace-vmr"
-                                        ]
+                                    "Fn::Sub": [
+                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/scripts/init.d/solace-vmr",
+                                        {
+                                            "QSS3Region": {
+                                                "Fn::If": [
+                                                    "GovCloudCondition",
+                                                    "s3-us-gov-west-1",
+                                                    "s3"
+                                                ]
+                                            }
+                                         }
                                     ]
                                 },
                                 "mode": "000755",
@@ -377,15 +389,18 @@
                             },
                             "/tmp/install-solace.sh": {
                                 "source": {
-                                    "Fn::Join": [
-                                        "/",
-                                        [
-                                            "https://s3.amazonaws.com",
-                                            { "Ref": "QSS3BucketName" },
-                                            { "Ref": "QSS3KeyPrefix" },
-                                            "scripts/install-solace.sh"
-                                        ]
-                                    ]
+                                    "Fn::Sub": [
+                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/scripts/install-solace.sh",
+                                        {
+                                            "QSS3Region": {
+                                                "Fn::If": [
+                                                    "GovCloudCondition",
+                                                    "s3-us-gov-west-1",
+                                                    "s3"
+                                                ]
+                                            }
+                                         }
+                                    ]                         
                                 },
                                 "mode": "000755",
                                 "owner": "root",
@@ -393,15 +408,18 @@
                             },
                             "/tmp/ansible.tgz": {
                                 "source": {
-                                    "Fn::Join": [
-                                        "/",
-                                        [
-                                            "https://s3.amazonaws.com",
-                                            { "Ref": "QSS3BucketName" },
-                                            { "Ref": "QSS3KeyPrefix" },
-                                            "scripts/ansible/ansible.tgz"
-                                        ]
-                                    ]
+                                    "Fn::Sub": [
+                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/scripts/ansible/ansible.tgz",
+                                        {
+                                            "QSS3Region": {
+                                                "Fn::If": [
+                                                    "GovCloudCondition",
+                                                    "s3-us-gov-west-1",
+                                                    "s3"
+                                                ]
+                                            }
+                                         }
+                                    ] 
                                 },
                                 "mode": "000755",
                                 "owner": "root",
