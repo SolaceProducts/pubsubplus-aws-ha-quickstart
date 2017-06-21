@@ -289,6 +289,14 @@
                 {"Ref": "NumberOfAZs"},
                 "3"
             ]
+        },
+        "GovCloudCondition": {
+            "Fn::Equals": [
+                {
+                    "Ref": "AWS::Region"
+                },
+                "us-gov-west-1"
+            ]
         }
     }, 
     "Resources": {
@@ -303,15 +311,17 @@
             "DeletionPolicy": "Retain",
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Join": [
-                        "/",
-                        [
-                            "https://s3.amazonaws.com",
-                            { "Ref": "QSS3BucketName" },
-                            { "Ref": "QSS3KeyPrefix" },
-                            "submodules/quickstart-aws-vpc",
-                            "templates/aws-vpc.template"
-                        ]
+                    "Fn::Sub": [
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/submodules/quickstart-aws-vpc/templates/aws-vpc.template",
+                        {
+                            "QSS3Region": {
+                                "Fn::If": [
+                                    "GovCloudCondition",
+                                    "s3-us-gov-west-1",
+                                    "s3"
+                                ]
+                            }
+                        }
                     ]
                 },
                 "Parameters": {
@@ -351,14 +361,17 @@
             "DeletionPolicy": "Retain",
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Join": [
-                        "/",
-                        [
-                            "https://s3.amazonaws.com",
-                            { "Ref": "QSS3BucketName" },
-                            { "Ref": "QSS3KeyPrefix" },
-                            "templates/solace-vmr.template"
-                        ]
+                    "Fn::Sub": [
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/templates/solace-vmr.template",
+                        {
+                            "QSS3Region": {
+                                "Fn::If": [
+                                    "GovCloudCondition",
+                                    "s3-us-gov-west-1",
+                                    "s3"
+                                ]
+                            }
+                        }
                     ]
                 },
                 "Parameters": {

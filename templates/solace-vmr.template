@@ -332,6 +332,14 @@
                 {"Ref": "NumberOfAZs"},
                 "3"
             ]
+        },
+        "GovCloudCondition": {
+            "Fn::Equals": [
+                {
+                    "Ref": "AWS::Region"
+                },
+                "us-gov-west-1"
+            ]
         }
     },
     "Resources": {
@@ -373,19 +381,90 @@
                 "Roles": [ { "Ref": "RootRole" } ]
             }
         },
+        "BastionHosts": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DependsOn": [
+                "VPCStack"
+            ],
+            "Properties": {
+                "TemplateURL": {
+                    "Fn::Sub": [
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/submodules/quickstart-linux-bastion/templates/linux-bastion.template",
+                        {
+                            "QSS3Region": {
+                                "Fn::If": [
+                                    "GovCloudCondition",
+                                    "s3-us-gov-west-1",
+                                    "s3"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Parameters": {
+                    "BastionInstanceType": "t2.micro",
+                    "BastionAMIOS": "Amazon-Linux-HVM",
+                    "BastionBanner": {
+                    "Fn::Sub": [
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/scripts/solace-banner.txt",
+                        {
+                            "QSS3Region": {
+                                "Fn::If": [
+                                    "GovCloudCondition",
+                                    "s3-us-gov-west-1",
+                                    "s3"
+                                ]
+                            }
+                        }
+                    ]
+                    },
+                    "NumBastionHosts": "2",
+                    "KeyPairName": {
+                        "Ref": "KeyPairName"
+                    },
+                    "SourceCIDR": {
+                        "Ref": "SourceCIDR"
+                    },
+                    "PublicSubnet1ID": {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.PublicSubnet1ID"
+                        ]
+                    },
+                    "PublicSubnet2ID": {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.PublicSubnet2ID"
+                        ]
+                    },
+                    "RemoteAccessCIDR" :{
+                        "Ref": "SSHAccessCIDR"
+                    },
+                    "VPCID": {
+                        "Fn::GetAtt": [
+                            "VPCStack",
+                            "Outputs.VPCID"
+                        ]
+                    }
+                }
+            }
+        },
         "MessageRouterPrimaryStack": {
             "Type": "AWS::CloudFormation::Stack",
             "DeletionPolicy" : "Retain",
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Join": [
-                        "/",
-                        [
-                            "https://s3.amazonaws.com",
-                            { "Ref": "QSS3BucketName" },
-                            { "Ref": "QSS3KeyPrefix" },
-                            "templates/nodecreate.template"
-                        ]
+                    "Fn::Sub": [
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/templates/nodecreate.template",
+                        {
+                            "QSS3Region": {
+                                "Fn::If": [
+                                    "GovCloudCondition",
+                                    "s3-us-gov-west-1",
+                                    "s3"
+                                ]
+                            }
+                        }
                     ]
                 },
                 "Parameters": {
@@ -445,14 +524,17 @@
             "DeletionPolicy" : "Retain",            
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Join": [
-                        "/",
-                        [
-                            "https://s3.amazonaws.com",
-                            { "Ref": "QSS3BucketName" },
-                            { "Ref": "QSS3KeyPrefix" },
-                            "templates/nodecreate.template"
-                        ]
+                    "Fn::Sub": [
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/templates/nodecreate.template",
+                        {
+                            "QSS3Region": {
+                                "Fn::If": [
+                                    "GovCloudCondition",
+                                    "s3-us-gov-west-1",
+                                    "s3"
+                                ]
+                            }
+                        }
                     ]
                 },
                 "Parameters": {
@@ -512,14 +594,17 @@
             "DeletionPolicy" : "Retain",
             "Properties": {
                 "TemplateURL": {
-                    "Fn::Join": [
-                        "/",
-                        [
-                            "https://s3.amazonaws.com",
-                            { "Ref": "QSS3BucketName" },
-                            { "Ref": "QSS3KeyPrefix" },
-                            "templates/nodecreate.template"
-                        ]
+                    "Fn::Sub": [
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/templates/nodecreate.template",
+                        {
+                            "QSS3Region": {
+                                "Fn::If": [
+                                    "GovCloudCondition",
+                                    "s3-us-gov-west-1",
+                                    "s3"
+                                ]
+                            }
+                        }
                     ]
                 },
                 "Parameters": {
