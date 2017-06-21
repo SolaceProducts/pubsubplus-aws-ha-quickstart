@@ -164,6 +164,14 @@
                 },
                 "0.00"
             ]
+        },
+        "GovCloudCondition": {
+            "Fn::Equals": [
+                {
+                    "Ref": "AWS::Region"
+                },
+                "us-gov-west-1"
+            ]
         }
     },
     "Resources": {
