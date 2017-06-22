@@ -21,6 +21,7 @@
                         "AvailabilityZones",
                         "NumberOfAZs",
                         "VPCCIDR",
+                        "CreatePrivateSubnets",
                         "PublicSubnet1CIDR",
                         "PrivateSubnet1ACIDR",
                         "PrivateSubnet1BCIDR",
@@ -79,7 +80,7 @@
                 },
                 "AdminPassword": {
                     "default": "Password to access SolOS admin console and SEMP"
-                }, 
+                },
                 "AvailabilityZones": {
                     "default": "Availability Zones"
                 },
@@ -109,6 +110,9 @@
                 },
                 "KeyPairName": {
                     "default": "Key Pair Name"
+                },
+                "CreatePrivateSubnets": {
+                    "default": "Boolean on whether to create private subnets"
                 },
                 "PublicSubnet1CIDR": {
                     "default": "Public Subnet 1 CIDR"
@@ -219,6 +223,15 @@
             "Description": "Name of an existing EC2 key pair within the AWS region; all instances will launch with this key pair",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
+        "CreatePrivateSubnets": {
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Default": "true",
+            "Description": "Whether to create and use Private Subnets with fronting ELBs",
+            "Type": "String"
+        },
         "PublicSubnet1CIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
@@ -260,7 +273,7 @@
             "Default": "10.0.129.128/25",
             "Description": "CIDR Block for the bootstrap subnet 1 located in Availability Zone 1",
             "Type": "String"
-        },       
+        },
         "PublicSubnet3CIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
@@ -347,13 +360,22 @@
             "Type": "String"
         }
     },
-    "Mappings": {
-    },
+    "Mappings": {},
     "Conditions": {
         "Use3AZs": {
             "Fn::Equals": [
-                {"Ref": "NumberOfAZs"},
+                {
+                    "Ref": "NumberOfAZs"
+                },
                 "3"
+            ]
+        },
+        "UsePrivateSubnets": {
+            "Fn::Equals": [
+                {
+                    "Ref": "CreatePrivateSubnets"
+                },
+                "true"
             ]
         },
         "GovCloudCondition": {
@@ -364,7 +386,7 @@
                 "us-gov-west-1"
             ]
         }
-    }, 
+    },
     "Resources": {
         "VPCStack": {
             "Type": "AWS::CloudFormation::Stack",
@@ -393,7 +415,9 @@
                             }
                         ]
                     },
-                    "CreatePrivateSubnets": "true",
+                    "CreatePrivateSubnets": {
+                        "Ref": "CreatePrivateSubnets"
+                    },
                     "KeyPairName": {
                         "Ref": "KeyPairName"
                     },
@@ -433,8 +457,10 @@
                 }
             }
         },
+
         "BastionStack": {
             "Type": "AWS::CloudFormation::Stack",
+            "Condition": "UsePrivateSubnets",
             "DeletionPolicy": "Retain",
             "DependsOn": [
                 "VPCStack"
@@ -457,19 +483,20 @@
                 "Parameters": {
                     "BastionInstanceType": "t2.micro",
                     "BastionAMIOS": "Amazon-Linux-HVM",
+                    "EnableBanner": "true",
                     "BastionBanner": {
-                    "Fn::Sub": [
-                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/scripts/solace-banner.txt",
-                        {
-                            "QSS3Region": {
-                                "Fn::If": [
-                                    "GovCloudCondition",
-                                    "s3-us-gov-west-1",
-                                    "s3"
-                                ]
+                        "Fn::Sub": [
+                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/scripts/solace-banner.txt",
+                            {
+                                "QSS3Region": {
+                                    "Fn::If": [
+                                        "GovCloudCondition",
+                                        "s3-us-gov-west-1",
+                                        "s3"
+                                    ]
+                                }
                             }
-                        }
-                    ]
+                        ]
                     },
                     "NumBastionHosts": "2",
                     "KeyPairName": {
@@ -487,7 +514,7 @@
                             "Outputs.PublicSubnet2ID"
                         ]
                     },
-                    "RemoteAccessCIDR" :{
+                    "RemoteAccessCIDR": {
                         "Ref": "SSHAccessCIDR"
                     },
                     "VPCID": {
@@ -563,7 +590,10 @@
                     "RemoteAccessCIDR": {
                         "Ref": "RemoteAccessCIDR"
                     },
-                    "SSHAccessCIDR": {
+                    "UsePrivateSubnets": {
+                        "Ref": "CreatePrivateSubnets"  
+                    },
+                   "SSHAccessCIDR": {
                         "Ref": "SSHAccessCIDR"
                     },
                     "VPCCIDR": {
@@ -576,53 +606,113 @@
                         "Fn::If": [
                             "Use3AZs",
                             {
-                                    "Fn::Join": [
-                                    ",",
-                                    [
-                                        {
-                                            "Fn::GetAtt": [
-                                                "VPCStack",
-                                                "Outputs.PrivateSubnet1AID"
+                                "Fn::If": [
+                                    "UsePrivateSubnets",
+                                    {
+                                        "Fn::Join": [
+                                            ",",
+                                            [
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PrivateSubnet1AID"
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PrivateSubnet2AID"
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PrivateSubnet3AID"
+                                                    ]
+                                                }
                                             ]
-                                        },
-                                        {
-                                            "Fn::GetAtt": [
-                                                "VPCStack",
-                                                "Outputs.PrivateSubnet2AID"
+                                        ]
+                                    },
+                                    {
+                                        "Fn::Join": [
+                                            ",",
+                                            [
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PublicSubnet1ID"
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PublicSubnet2ID"
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PublicSubnet3ID"
+                                                    ]
+                                                }
                                             ]
-                                        },
-                                        {
-                                            "Fn::GetAtt": [
-                                                "VPCStack",
-                                                "Outputs.PrivateSubnet3AID"
-                                            ]
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 ]
                             },
                             {
-                                "Fn::Join": [
-                                    ",",
-                                    [
-                                        {
-                                            "Fn::GetAtt": [
-                                                "VPCStack",
-                                                "Outputs.PrivateSubnet1AID"
+                                "Fn::If": [
+                                    "UsePrivateSubnets",
+                                    {
+                                        "Fn::Join": [
+                                            ",",
+                                            [
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PrivateSubnet1AID"
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PrivateSubnet2AID"
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PrivateSubnet2AID"
+                                                    ]
+                                                }
                                             ]
-                                        },
-                                        {
-                                            "Fn::GetAtt": [
-                                                "VPCStack",
-                                                "Outputs.PrivateSubnet2AID"
+                                        ]
+                                    },
+                                    {
+                                        "Fn::Join": [
+                                            ",",
+                                            [
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PublicSubnet1ID"
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PublicSubnet2ID"
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PublicSubnet2ID"
+                                                    ]
+                                                }
                                             ]
-                                        },
-                                        {
-                                            "Fn::GetAtt": [
-                                                "VPCStack",
-                                                "Outputs.PrivateSubnet2AID"
-                                            ]
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 ]
                             }
                         ]

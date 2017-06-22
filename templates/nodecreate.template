@@ -576,5 +576,16 @@
                 }
             }
         }
+    },
+    "Outputs": {
+        "ec2intance": {
+            "Description": "Reference to created ec2 instance",
+            "Value": { "Ref": "NodeLaunchConfig" },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-EC2ID"
+                }
+            }
+        }
     }
 }
