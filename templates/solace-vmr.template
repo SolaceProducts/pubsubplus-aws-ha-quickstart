@@ -709,8 +709,8 @@
             "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
             "DependsOn": ["MessageRouterPrimaryStack"],
             "Condition": "UsePrivateSubnetsConditions",
-            "SecurityGroups": "MessageRouterSecurityGroup",
             "Properties":{
+                "SecurityGroups": [{ "Ref" : "MessageRouterSecurityGroup"}],
                 "Subnets" : [
                     {"Fn::Select":
                         [
@@ -743,8 +743,8 @@
             "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
             "DependsOn": ["MessageRouterBackupStack"],
             "Condition": "UsePrivateSubnetsConditions",
-            "SecurityGroups": "MessageRouterSecurityGroup",
             "Properties":{
+                "SecurityGroups": [{ "Ref" : "MessageRouterSecurityGroup"}],
                 "Subnets" : [
                     {"Fn::Select":
                         [
