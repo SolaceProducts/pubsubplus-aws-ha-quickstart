@@ -112,7 +112,7 @@
                     "default": "Key Pair Name"
                 },
                 "CreatePrivateSubnets": {
-                    "default": "Boolean on whether to create private subnets"
+                    "default": "Create production ready enviroment"
                 },
                 "PublicSubnet1CIDR": {
                     "default": "Public Subnet 1 CIDR"
