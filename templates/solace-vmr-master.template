@@ -629,6 +629,18 @@
                                                         "VPCStack",
                                                         "Outputs.PrivateSubnet3AID"
                                                     ]
+                                                },
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PublicSubnet1ID"
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PublicSubnet2ID"
+                                                    ]
                                                 }
                                             ]
                                         ]
@@ -683,6 +695,18 @@
                                                     "Fn::GetAtt": [
                                                         "VPCStack",
                                                         "Outputs.PrivateSubnet2AID"
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PublicSubnet1ID"
+                                                    ]
+                                                },
+                                                {
+                                                    "Fn::GetAtt": [
+                                                        "VPCStack",
+                                                        "Outputs.PublicSubnet2ID"
                                                     ]
                                                 }
                                             ]

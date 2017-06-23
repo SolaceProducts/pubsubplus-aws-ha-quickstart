@@ -782,6 +782,16 @@
             "DependsOn": ["MessageRouterPrimaryStack"],
             "Condition": "UsePrivateSubnetsConditions",
             "Properties":{
+                "Subnets" : [
+                    {"Fn::Select":
+                        [
+                            3,
+                            {
+                                "Ref": "SubnetID"
+                            }
+                        ]
+                    }
+                ],
                 "Instances" : [{"Fn::GetAtt": ["MessageRouterPrimaryStack","Outputs.EC2ID"]}],          
                 "Listeners" : [ 
                     {
@@ -805,6 +815,16 @@
             "DependsOn": ["MessageRouterBackupStack"],
             "Condition": "UsePrivateSubnetsConditions",
             "Properties":{
+                "Subnets" : [
+                    {"Fn::Select":
+                        [
+                            4,
+                            {
+                                "Ref": "SubnetID"
+                            }
+                        ]
+                    }
+                ],
                 "Instances" : [{"Fn::GetAtt": ["MessageRouterBackupStack","Outputs.EC2ID"]}],
                 "Listeners" : [ 
                     {

@@ -578,7 +578,7 @@
         }
     },
     "Outputs": {
-        "ec2intance": {
+        "EC2ID": {
             "Description": "Reference to created ec2 instance",
             "Value": { "Ref": "NodeLaunchConfig" },
             "Export": {
