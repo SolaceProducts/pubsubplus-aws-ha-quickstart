@@ -354,14 +354,6 @@
                 "true"
             ]
         },
-        "UsePublicSubnetsConditions": {
-            "Fn::Equals": [
-                {
-                    "Ref": "UsePrivateSubnets"
-                },
-                "false"
-            ]
-        },
         "GovCloudCondition": {
             "Fn::Equals": [
                 {
@@ -627,98 +619,48 @@
                     "Ref": "VPCID"
                 },
                 "GroupDescription": "Message Router Security Group",
-                
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
                         "FromPort": "8741",
                         "ToPort": "8741",
-                        "CidrIp": { "Ref" : "VPCCIDR" }
+                        "CidrIp": {
+                            "Ref": "VPCCIDR"
+                        }
                     },
                     {
                         "IpProtocol": "udp",
                         "FromPort": "5404",
                         "ToPort": "5405",
-                        "CidrIp": { "Ref": "VPCCIDR" }
+                        "CidrIp": {
+                            "Ref": "VPCCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "55555",
+                        "ToPort": "55555",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "1883",
+                        "ToPort": "1883",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "SSHAccessCIDR"
+                        }
                     }
                 ]
-            }
-        },
-        "MessageRouterSMFSecurityRulePublic": {
-            "Type" : "AWS::EC2::SecurityGroupIngress",
-            "Condition": "UsePublicSubnetsConditions",
-            "Properties": {
-                "GroupId": { "Ref": "MessageRouterSecurityGroup" },
-                "IpProtocol": "tcp",
-                "FromPort": "55555",
-                "ToPort": "55555",
-                "CidrIp": { "Ref": "RemoteAccessCIDR" }
-            }
-        },
-        "MessageRouterSMFSecurityRulePrivate": {
-            "Type" : "AWS::EC2::SecurityGroupIngress",
-            "Condition": "UsePrivateSubnetsConditions",
-            "Properties": {
-                "GroupId": { "Ref": "MessageRouterSecurityGroup" },
-                "IpProtocol": "tcp",
-                "FromPort": "55555",
-                "ToPort": "55555",
-                "CidrIp": { "Ref": "VPCCIDR" }
-            }
-        },
-        "MessageRouterMQTTSecurityRulePublic": {
-            "Type" : "AWS::EC2::SecurityGroupIngress",
-            "Condition": "UsePublicSubnetsConditions",
-            "Properties": {
-                "GroupId": { "Ref": "MessageRouterSecurityGroup" },
-                "IpProtocol": "tcp",
-                "FromPort": "1883",
-                "ToPort": "1883",
-                "CidrIp": { "Ref": "RemoteAccessCIDR" }
-            }
-        },
-        "MessageRouterMQTTSecurityRulePrivate": {
-            "Type" : "AWS::EC2::SecurityGroupIngress",
-            "Condition": "UsePrivateSubnetsConditions",
-            "Properties": {
-                "GroupId": { "Ref": "MessageRouterSecurityGroup" },
-                "IpProtocol": "tcp",
-                "FromPort": "1883",
-                "ToPort": "1883",
-                "CidrIp": { "Ref": "VPCCIDR" }
-            }
-        },
-        "MessageRouterSSHSecurityRulePublic": {
-            "Type" : "AWS::EC2::SecurityGroupIngress",
-            "Condition": "UsePublicSubnetsConditions",
-            "Properties": {
-                "GroupId": { "Ref": "MessageRouterSecurityGroup" },
-                "IpProtocol": "tcp",
-                "FromPort": "22",
-                "ToPort": "22",
-                "CidrIp": { "Ref": "SSHAccessCIDR" }
-            }
-        },
-        "MessageRouterSSHSecurityRulePrivate": {
-            "Type" : "AWS::EC2::SecurityGroupIngress",
-            "Condition": "UsePrivateSubnetsConditions",
-            "Properties": {
-                "GroupId": { "Ref": "MessageRouterSecurityGroup" },
-                "IpProtocol": "tcp",
-                "FromPort": "22",
-                "ToPort": "22",
-                "CidrIp": { "Ref": "VPCCIDR" }
-            }
-        },
-        "MessageRouterSEMPSecurityRulePublic": {
-            "Type" : "AWS::EC2::SecurityGroupIngress",
-            "Condition": "UsePublicSubnetsConditions",
-            "Properties": {
-                "GroupId": { "Ref": "MessageRouterSecurityGroup" },
-                "IpProtocol": "tcp",
-                "FromPort": "8080",
-                "ToPort": "8080",
-                "CidrIp": { "Ref": "SSHAccessCIDR" }
             }
         },
         "MonitorSecurityGroup": {
@@ -736,30 +678,16 @@
                         "CidrIp": {
                             "Ref": "VPCCIDR"
                         }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "SSHAccessCIDR"
+                        }
                     }
                 ]
-            }
-        },
-        "MonitorSSHSecurityRulePublic": {
-            "Type" : "AWS::EC2::SecurityGroupIngress",
-            "Condition": "UsePublicSubnetsConditions",
-            "Properties": {
-                "GroupId": { "Ref": "MonitorSecurityGroup" },
-                "IpProtocol": "tcp",
-                "FromPort": "22",
-                "ToPort": "22",
-                "CidrIp": { "Ref": "SSHAccessCIDR" }
-            }
-        },
-        "MonitorSSHSecurityRulePrivate": {
-            "Type" : "AWS::EC2::SecurityGroupIngress",
-            "Condition": "UsePrivateSubnetsConditions",
-            "Properties": {
-                "GroupId": { "Ref": "MonitorSecurityGroup" },
-                "IpProtocol": "tcp",
-                "FromPort": "22",
-                "ToPort": "22",
-                "CidrIp": { "Ref": "VPCCIDR" }
             }
         },
         "ClusterInfoHandle": {
@@ -781,6 +709,7 @@
             "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
             "DependsOn": ["MessageRouterPrimaryStack"],
             "Condition": "UsePrivateSubnetsConditions",
+            "SecurityGroups": "MessageRouterSecurityGroup",
             "Properties":{
                 "Subnets" : [
                     {"Fn::Select":
@@ -814,6 +743,7 @@
             "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
             "DependsOn": ["MessageRouterBackupStack"],
             "Condition": "UsePrivateSubnetsConditions",
+            "SecurityGroups": "MessageRouterSecurityGroup",
             "Properties":{
                 "Subnets" : [
                     {"Fn::Select":
