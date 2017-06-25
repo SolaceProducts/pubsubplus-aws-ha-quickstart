@@ -53,23 +53,38 @@ git commit -a -m "Your Commit Message"
 
 Note: the optional commit `-a` command line option will automatically "add" and "rm" edited files.
 
-#### Step 4: Rebase (if possible) 
+#### Step 4a: Rebase (if you have not yet pushed your branch to origin, else goto step 4b.)
 
 Assuming you have not yet pushed your branch to origin, use `git rebase` (not `git merge`) to synchronize your work with the main
 repository.
+
+If you have not set the upstream, do so as follows:
+
+```sh
+$ git remote add upstream https://github.com/aws-quickstart/quickstart-solace-vmr
+```
+
+then:
 
 ```sh
 $ git fetch upstream
 $ git rebase upstream/master
 ```
 
-If you have not set the upstream, do so as follows:
+#### Step 4b: Merge (if you have already pushed our branch to origin)
+
+Assuming you have already pushed your branch to origin, use `git merge` (not `git rebase`) to synchronize your work with the main
+repository.
+
+First ensure there are not any changes to master that you need to pick up, then merge in your changes.
+You may need to resolve any conflicts on either of the merge steps.
 
 ```sh
-$ git remote add upstream https://github.com/SolaceLabs/solace-aws-ha-quickstart
+$ git merge master
+$ git checkout master
+$ git merge my-fix-branch
 ```
 
-If you have already pushed your fork, then do not rebase. Instead merge any changes from master that are not already part of your branch.
 
 #### Step 5: Push
 

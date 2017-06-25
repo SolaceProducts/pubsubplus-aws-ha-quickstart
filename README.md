@@ -8,7 +8,7 @@ To learn more about VMR redundancy see the [Redundancy Documentation](http://doc
 
 ![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-2AZ.png "Proof of Concept enviroment for Solace VMR")
 
-Alternatively this quickstart can create Soalce VMRs into an enviroment sutible for Proof Of Concept testing where loss of an AWS Availability Zone will not cause loss of access to mision critical data.
+Alternatively this quickstart can create Solace VMRs in an enviroment suitable for Proof Of Concept testing where loss of an AWS Availability Zone will not cause loss of access to mission critical data.
 
 To learn more about connectivity to the HA redundancy group see the AWS [VPC Gateway Documentation](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html).
 
