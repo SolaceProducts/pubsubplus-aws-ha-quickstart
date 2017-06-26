@@ -1,12 +1,12 @@
 # Install and configure Solace message routers in an HA tuple using AWS Cloud Formation
 
-![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/forMikeH/images/Solace-AWS-HA-wENI-3AZ.png "Production enviroment for Solace VMR")
+![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-Prod-3AZ.png "Production enviroment for Solace VMR")
 
 This QuickStart template installs Solace Virtual Message Routers (VMRs) in high-availability (HA) redundancy groups for fault tolerance. HA redundancy provides 1:1 router sparing to increase overall service availability. If one of the routers fails or is taken out of service, the other router automatically takes over and provides service to the clients that were previously served by the now-out-of-service router.  To increase availability the meassage routers are deployed across 3 availability zones.
 
 To learn more about VMR redundancy see the [Redundancy Documentation](http://docs.solace.com/Features/VMR-Redundancy.htm).  If you are not familiar with Solace or the high-available configurations it is recommended that you review this document. 
 
-![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-2AZ.png "Proof of Concept enviroment for Solace VMR")
+![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-PoC-2AZ.png "Proof of Concept enviroment for Solace VMR")
 
 Alternatively this quickstart can create Solace VMRs in an enviroment suitable for Proof Of Concept testing where loss of an AWS Availability Zone will not cause loss of access to mission critical data.
 
@@ -23,11 +23,11 @@ This is a two step process:
 
 * Go to AWS Cloud Formation service and launch template.  The following links are for your convenience and take you directly to the templates for Solace Mesage Routers.
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/forMikeH/templates/solace-aws-master.template" target="_blank">
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/latest/templates/solace-aws-master.template" target="_blank">
     <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/launch-button-new.png"/>
 </a>
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/forMikeH/templates/solace-aws.template" target="_blank">
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/latest/templates/solace-aws.template" target="_blank">
     <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/launch-button-existing.png"/>
 </a>
 
@@ -51,16 +51,25 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | Field                      | Value                                                                          |
 |----------------------------|--------------------------------------------------------------------------------|
 | Stack name                 | Default is Solace-HA, any unique name will suffice |
+| **Solace Parameters**      |  |
 | SolaceDockerURL            | URL cut and paste from the registration email |
 | AdminPassword              | Password to allow SolOS access to configure the Solace Message Router instances |
+| **Network Parameters**     |  |
 | AvailabilityZones          | Pick 3 AZs from the drop down menue, alternativey pick 2 for PoC or limited Region |
 | NumberOfAZs                | Default is 3 unless only 2 AZs are selected above |
 | VPCCIDR                    | Unless specific requirement for internal addressing leave at default, must encapsulate all the above Subnets |
 | PublicSubnet1CIDR          | Unless specific requirement for internal addressing leave at default |
 | PublicSubnet2CIDR          | Unless specific requirement for internal addressing leave at default |
 | PublicSubnet3CIDR          | Unless specific requirement for internal addressing leave at default |
+| PrivateSubnet1ACIDR        | Unless specific requirement for internal addressing leave at default |
+| PrivateSubnet2ACIDR        | Unless specific requirement for internal addressing leave at default |
+| PrivateSubnet3ACIDR        | Unless specific requirement for internal addressing leave at default |
+| PrivateSubnet1BCIDR        | Unless specific requirement for internal addressing leave at default |
+| PrivateSubnet2BCIDR        | Unless specific requirement for internal addressing leave at default |
+| PrivateSubnet3BCIDR        | Unless specific requirement for internal addressing leave at default |
 | RemoteAccessCIDR           | IP range that can send/recieve messages, use 0.0.0.0/0 if unsure |
 | SSHAccessCIDR              | IP range that can configure VMR, use 0.0.0.0/0 if unsure |
+| **EC2 Parameters**         |  |
 | KeyPairName                | Pick from your exisitng key pairs, create new AWSW key pair if required |
 | LinuxOSAMI                 | Default is Amazon-Linux-HVM, recommended stay with this selection |
 | BootDiskSize               | Default is 24GB minimum is 20GB |
@@ -70,6 +79,7 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | MonitorNodeInstance        | Default is t2.large which is the minimum | 
 | MonitorNodeeSpotPrice      | Default is 0.00 which means not to use spot price |
 | MonitorNodeStorage         | Default is 0 which means ephemeral |
+| **AWS QuickStart Config**  |  |
 | QSS3BucketName             | Leave at default |
 | QSS3KeyPrefix              | Leave at default |
 
