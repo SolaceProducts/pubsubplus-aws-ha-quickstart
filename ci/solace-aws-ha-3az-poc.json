@@ -1,0 +1,94 @@
+[
+    {
+        "ParameterKey": "SolaceDockerURL",
+        "ParameterValue": "http://em.solace.com/DCx500W0IBC00o01dY0V0i0"
+    },
+    {
+        "ParameterKey": "AdminPassword",
+        "ParameterValue": "admin"
+    },
+    {
+        "ParameterKey": "AvailabilityZones",
+        "ParameterValue": "$[alfred_genaz_3]" 
+    },
+    {
+        "ParameterKey": "NumberOfAZs",
+        "ParameterValue": "3"
+    },
+    {
+        "ParameterKey": "BootDiskSize",
+        "ParameterValue": "24"
+    },
+    {
+        "ParameterKey": "MessageRouterNodeInstanceType",
+        "ParameterValue": "t2.large"
+    },
+    {
+        "ParameterKey": "MessageRouterNodeSpotPrice",
+        "ParameterValue": "0.00"
+    },
+    {
+        "ParameterKey": "MessageRouterNodeStorage",
+        "ParameterValue": "0"
+    },
+    {
+        "ParameterKey": "MonitorNodeInstanceType",
+        "ParameterValue": "t2.large"
+    },
+    {
+        "ParameterKey": "MonitorNodeSpotPrice",
+        "ParameterValue": "0.00"
+    },
+    {
+        "ParameterKey": "MonitorNodeStorage",
+        "ParameterValue": "0"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "$[alfred_getkeypair]"
+    },
+    {
+        "ParameterKey": "CreatePrivateSubnets",
+        "ParameterValue": "false"
+    },
+    {
+        "ParameterKey": "PrivateSubnet1ACIDR",
+        "ParameterValue": "10.0.128.64/26"
+    },
+    {
+        "ParameterKey": "PrivateSubnet1BCIDR",
+        "ParameterValue": "10.0.128.128/25"
+    },
+    {
+        "ParameterKey": "PrivateSubnet2ACIDR",
+        "ParameterValue": "10.0.129.64/26"
+    },
+    {
+        "ParameterKey": "PrivateSubnet2BCIDR",
+        "ParameterValue": "10.0.129.128/25"
+    },
+    {
+        "ParameterKey": "PrivateSubnet3ACIDR",
+        "ParameterValue": "10.0.130.64/26"
+    },
+    {
+        "ParameterKey": "PrivateSubnet3BCIDR",
+        "ParameterValue": "10.0.130.128/25"
+    },
+    {
+        "ParameterKey": "PublicSubnet1CIDR",
+        "ParameterValue": "10.0.128.0/26"
+    },
+    {
+        "ParameterKey": "PublicSubnet2CIDR",
+        "ParameterValue": "10.0.129.0/26"
+    },
+    {
+        "ParameterKey": "PublicSubnet3CIDR",
+        "ParameterValue": "10.0.130.0/26"
+    },
+    {
+        "ParameterKey": "VPCCIDR",
+        "ParameterValue": "10.0.128.0/22"
+    }
+]
