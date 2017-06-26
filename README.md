@@ -23,21 +23,21 @@ This is a two step process:
 
 * Go to AWS Cloud Formation service and launch template.  The following links are for your convenience and take you directly to the templates for Solace Mesage Routers.
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/latest/templates/solace-aws-master.template" target="_blank">
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/latest/templates/solace-vmr-master.template" target="_blank">
     <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/launch-button-new.png"/>
 </a>
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/latest/templates/solace-aws.template" target="_blank">
+<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/latest/templates/solace-vmr.template" target="_blank">
     <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/launch-button-existing.png"/>
 </a>
 
 * If you want to take a look under the covers, you can view the AWS CloudFormation template that automates the deployment. You can customize the template during launch, or download and extend it for other projects.
 
-<a href="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/templates/solace-aws-master.template" target="_blank">
+<a href="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/templates/solace-vmr-master.template" target="_blank">
     <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/view-template-new.png"/>
 </a>
 
-<a href="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/templates/solace-aws.template" target="_blank">
+<a href="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/templates/solace-vmr.template" target="_blank">
     <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/view-template-existing.png"/>
 </a>
 
