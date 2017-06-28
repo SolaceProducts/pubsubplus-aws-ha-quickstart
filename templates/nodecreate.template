@@ -121,6 +121,9 @@
             "eu-west-2": {
                 "AMZNLINUXHVM": "ami-b6daced2"
             },
+            "eu-central-1": {
+                "AMZNLINUXHVM": "ami-82be18ed"
+            },
             "sa-east-1": {
                 "AMZNLINUXHVM": "ami-37cfad5b"
             },
