@@ -23,7 +23,7 @@
                         "VPCCIDR",
                         "NumberOfAZs",
                         "RemoteAccessCIDR",
-                        "SSHAccessCIDR",
+                        "SSHSecurityGroupID",
                         "UsePrivateSubnets"
                     ]
                 },
@@ -112,8 +112,8 @@
                 "RemoteAccessCIDR": {
                     "default": "Allowed External Access CIDR"
                 },
-                "SSHAccessCIDR": {
-                    "default": "Allowed SSH Access CIDR"
+                "SSHSecurityGroupID": {
+                    "default": "Security group allowed to access console ssh"
                 },
                 "UsePrivateSubnets": {
                     "default": "Relay on mgmt security group of Bastion"
@@ -235,11 +235,9 @@
             "Description": "Allowed CIDR block for external access to cluster nodes",
             "Type": "String"
         },
-        "SSHAccessCIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-            "Description": "Allowed CIDR block for SSH access to cluster nodes",
-            "Type": "String"
+        "SSHSecurityGroupID": {
+            "Description": "ID of the Bastion Security Group (e.g., sg-7f16e910)",
+            "Type": "AWS::EC2::SecurityGroup::Id"
         },
         "UsePrivateSubnets": {
             "AllowedValues": [
@@ -656,8 +654,8 @@
                         "IpProtocol": "tcp",
                         "FromPort": "22",
                         "ToPort": "22",
-                        "CidrIp": {
-                            "Ref": "SSHAccessCIDR"
+                        "SourceSecurityGroupId": {
+                            "Ref": "SSHSecurityGroupID"
                         }
                     }
                 ]
@@ -683,8 +681,8 @@
                         "IpProtocol": "tcp",
                         "FromPort": "22",
                         "ToPort": "22",
-                        "CidrIp": {
-                            "Ref": "SSHAccessCIDR"
+                        "SourceSecurityGroupId": {
+                            "Ref": "SSHSecurityGroupID"
                         }
                     }
                 ]
