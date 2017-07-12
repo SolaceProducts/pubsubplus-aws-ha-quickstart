@@ -236,7 +236,7 @@
             "Type": "String"
         },
         "SSHSecurityGroupID": {
-            "Description": "ID of the Bastion Security Group (e.g., sg-7f16e910)",
+            "Description": "ID of the SSH Security Group (e.g., sg-7f16e910)",
             "Type": "AWS::EC2::SecurityGroup::Id"
         },
         "UsePrivateSubnets": {
