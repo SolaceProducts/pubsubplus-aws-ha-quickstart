@@ -162,7 +162,7 @@
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Kafka brokers; select m3/m4 or i2 instance types for us-west-1 and sa-east-1",
+            "Description": "Instance Type for Solace Message Router",
             "Type": "String"
         },
         "MessageRouterNodeStorage": {
@@ -645,6 +645,14 @@
                         "IpProtocol": "tcp",
                         "FromPort": "1883",
                         "ToPort": "1883",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "8080",
+                        "ToPort": "8080",
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }

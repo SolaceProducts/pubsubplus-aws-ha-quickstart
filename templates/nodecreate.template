@@ -47,7 +47,7 @@
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Kafka brokers; select m3/m4 or i2 instance types for us-west-1 and sa-east-1",
+            "Description": "Instance Type for Solace Message Router",
             "Type": "String"
         },
         "NodeSecurityGroup": {
