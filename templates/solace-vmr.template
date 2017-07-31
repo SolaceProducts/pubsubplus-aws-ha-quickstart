@@ -19,12 +19,13 @@
                     },
                     "Parameters": [
                         "VPCID",
-                        "SubnetID",
-                        "VPCCIDR",
                         "NumberOfAZs",
+                        "UsePrivateSubnets",                    
+                        "PublicSubnetIDs",
+                        "PrivateSubnetIDs",                       
+                        "VPCCIDR",
                         "RemoteAccessCIDR",
-                        "SSHSecurityGroupID",
-                        "UsePrivateSubnets"
+                        "SSHSecurityGroupID"
                     ]
                 },
                 {
@@ -121,8 +122,11 @@
                 "VPCID": {
                     "default": "VPC CIDR"
                 },
-                "SubnetID": {
-                    "default": "Subnet ID"
+                "PrivateSubnetIDs": {
+                    "default": "Subnet IDs"
+                },
+                "PublicSubnetIDs": {
+                    "default": "Subnet IDs"
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 Bucket Name"
@@ -249,8 +253,12 @@
             "Description": "Whether to use Private Subnets with fronting Bastion Servers",
             "Type": "String"
         },
-        "SubnetID": {
-            "Description": "Comma separated list of VPC subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access (internal and external)",
+        "PrivateSubnetIDs": {
+            "Description": "Comma separated list of VPC private subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access",
+            "Type": "List<AWS::EC2::Subnet::Id>"
+        },
+         "PublicSubnetIDs": {
+            "Description": "Comma separated list of VPC public subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access",
             "Type": "List<AWS::EC2::Subnet::Id>"
         },
         "VPCID": {
@@ -345,7 +353,7 @@
                 "3"
             ]
         },
-        "UsePrivateSubnetsConditions": {
+        "UsePrivateSubnetsCondition": {
             "Fn::Equals": [
                 {
                     "Ref": "UsePrivateSubnets"
@@ -463,8 +471,12 @@
                     "SubnetID": {
                         "Fn::Select": [
                             0,
-                            {
-                                "Ref": "SubnetID"
+                            { 
+                                "Fn::If": [
+                                    "UsePrivateSubnetsCondition",
+                                    { "Ref": "PrivateSubnetIDs" }, 
+                                    { "Ref": "PublicSubnetIDs" }
+                                    ] 
                             }
                         ]
                     }
@@ -533,8 +545,12 @@
                     "SubnetID": {
                         "Fn::Select": [
                             1,
-                            {
-                                "Ref": "SubnetID"
+                            { 
+                                "Fn::If": [
+                                    "UsePrivateSubnetsCondition",
+                                    { "Ref": "PrivateSubnetIDs" }, 
+                                    { "Ref": "PublicSubnetIDs" }
+                                    ] 
                             }
                         ]
                     }
@@ -603,7 +619,13 @@
                     "SubnetID": {
                         "Fn::Select": [
                             { "Fn::If": ["Use3AZs", 2, 1] },
-                            { "Ref": "SubnetID" }
+                            { 
+                                "Fn::If": [
+                                    "UsePrivateSubnetsCondition",
+                                    { "Ref": "PrivateSubnetIDs" }, 
+                                    { "Ref": "PublicSubnetIDs" }
+                                    ] 
+                            }
                         ]
                     }
                 }
@@ -662,15 +684,11 @@
                         "FromPort": "22",
                         "ToPort": "22",
                         "SourceSecurityGroupId": {
-                            "Ref": "SSHSecurityGroupID"
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": {
-                            "Ref": "RemoteAccessCIDR"
+                            "Fn::If": [
+                                "UsePrivateSubnetsCondition",
+                                { "Ref": "SSHSecurityGroupID" }, 
+                                { "Ref": "RemoteAccessCIDR" }
+                            ] 
                         }
                     }
                 ]
@@ -697,15 +715,11 @@
                         "FromPort": "22",
                         "ToPort": "22",
                         "SourceSecurityGroupId": {
-                            "Ref": "SSHSecurityGroupID"
-                        }
-                    },
-                    {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "CidrIp": {
-                            "Ref": "RemoteAccessCIDR"
+                            "Fn::If": [
+                                "UsePrivateSubnetsCondition",
+                                { "Ref": "SSHSecurityGroupID" }, 
+                                { "Ref": "RemoteAccessCIDR" }
+                            ] 
                         }
                     }
                 ]
@@ -729,15 +743,15 @@
         "PrimaryELB": {
             "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
             "DependsOn": ["MessageRouterPrimaryStack"],
-            "Condition": "UsePrivateSubnetsConditions",
+            "Condition": "UsePrivateSubnetsCondition",
             "Properties":{
                 "SecurityGroups": [{ "Ref" : "MessageRouterSecurityGroup"}],
                 "Subnets" : [
                     {"Fn::Select":
                         [
-                            3,
+                            0,
                             {
-                                "Ref": "SubnetID"
+                                "Ref": "PublicSubnetIDs"
                             }
                         ]
                     }
@@ -763,15 +777,15 @@
          "BackupELB": {
             "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
             "DependsOn": ["MessageRouterBackupStack"],
-            "Condition": "UsePrivateSubnetsConditions",
+            "Condition": "UsePrivateSubnetsCondition",
             "Properties":{
                 "SecurityGroups": [{ "Ref" : "MessageRouterSecurityGroup"}],
                 "Subnets" : [
                     {"Fn::Select":
                         [
-                            4,
+                            1,
                             {
-                                "Ref": "SubnetID"
+                                "Ref": "PublicSubnetIDs"
                             }
                         ]
                     }

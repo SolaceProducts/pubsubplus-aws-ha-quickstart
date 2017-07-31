@@ -605,12 +605,12 @@
                             "Outputs.VPCCIDR"
                         ]
                     },
-                    "SubnetID": {
+                    "PrivateSubnets" : {
                         "Fn::If": [
-                            "Use3AZs",
+                            "UsePrivateSubnets",
                             {
                                 "Fn::If": [
-                                    "UsePrivateSubnets",
+                                    "Use3AZs",
                                     {
                                         "Fn::Join": [
                                             ",",
@@ -632,52 +632,10 @@
                                                         "VPCStack",
                                                         "Outputs.PrivateSubnet3AID"
                                                     ]
-                                                },
-                                                {
-                                                    "Fn::GetAtt": [
-                                                        "VPCStack",
-                                                        "Outputs.PublicSubnet1ID"
-                                                    ]
-                                                },
-                                                {
-                                                    "Fn::GetAtt": [
-                                                        "VPCStack",
-                                                        "Outputs.PublicSubnet2ID"
-                                                    ]
                                                 }
                                             ]
                                         ]
                                     },
-                                    {
-                                        "Fn::Join": [
-                                            ",",
-                                            [
-                                                {
-                                                    "Fn::GetAtt": [
-                                                        "VPCStack",
-                                                        "Outputs.PublicSubnet1ID"
-                                                    ]
-                                                },
-                                                {
-                                                    "Fn::GetAtt": [
-                                                        "VPCStack",
-                                                        "Outputs.PublicSubnet2ID"
-                                                    ]
-                                                },
-                                                {
-                                                    "Fn::GetAtt": [
-                                                        "VPCStack",
-                                                        "Outputs.PublicSubnet3ID"
-                                                    ]
-                                                }
-                                            ]
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
-                                "Fn::If": [
-                                    "UsePrivateSubnets",
                                     {
                                         "Fn::Join": [
                                             ",",
@@ -693,54 +651,57 @@
                                                         "VPCStack",
                                                         "Outputs.PrivateSubnet2AID"
                                                     ]
-                                                },
-                                                {
-                                                    "Fn::GetAtt": [
-                                                        "VPCStack",
-                                                        "Outputs.PrivateSubnet2AID"
-                                                    ]
-                                                },
-                                                {
-                                                    "Fn::GetAtt": [
-                                                        "VPCStack",
-                                                        "Outputs.PublicSubnet1ID"
-                                                    ]
-                                                },
-                                                {
-                                                    "Fn::GetAtt": [
-                                                        "VPCStack",
-                                                        "Outputs.PublicSubnet2ID"
-                                                    ]
-                                                }
-                                            ]
-                                        ]
-                                    },
-                                    {
-                                        "Fn::Join": [
-                                            ",",
-                                            [
-                                                {
-                                                    "Fn::GetAtt": [
-                                                        "VPCStack",
-                                                        "Outputs.PublicSubnet1ID"
-                                                    ]
-                                                },
-                                                {
-                                                    "Fn::GetAtt": [
-                                                        "VPCStack",
-                                                        "Outputs.PublicSubnet2ID"
-                                                    ]
-                                                },
-                                                {
-                                                    "Fn::GetAtt": [
-                                                        "VPCStack",
-                                                        "Outputs.PublicSubnet2ID"
-                                                    ]
                                                 }
                                             ]
                                         ]
                                     }
                                 ]
+                            },
+                            {}
+                        ]
+                    },
+                    "PublicSubnets" : {
+                        "Fn::If": [
+                            "Use3AZs",
+                            {
+                                "Fn::Join": [
+                                    ",",
+                                    {
+                                        "Fn::GetAtt": [
+                                            "VPCStack",
+                                            "Outputs.PublicSubnet1ID"
+                                        ]
+                                    },
+                                    {
+                                        "Fn::GetAtt": [
+                                            "VPCStack",
+                                            "Outputs.PublicSubnet2ID"
+                                        ]
+                                    },
+                                     {
+                                        "Fn::GetAtt": [
+                                            "VPCStack",
+                                            "Outputs.PublicSubnet3ID"
+                                        ]
+                                    }                                   
+                                ]
+                            },
+                            {
+                                "Fn::Join": [
+                                    ",",
+                                    {
+                                        "Fn::GetAtt": [
+                                            "VPCStack",
+                                            "Outputs.PublicSubnet1ID"
+                                        ]
+                                    },
+                                    {
+                                        "Fn::GetAtt": [
+                                            "VPCStack",
+                                            "Outputs.PublicSubnet2ID"
+                                        ]
+                                    }                                  
+                                ]                                
                             }
                         ]
                     },
