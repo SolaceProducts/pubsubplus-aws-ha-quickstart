@@ -68,33 +68,12 @@ docker load -i ${solace_directory}/soltr-docker.tar.gz
 
 export VMR_VERSION=`docker images | grep solace | awk '{print $3}'`
 
-docker create \
-   --uts=host \
-   --shm-size 2g \
-   --ulimit core=-1 \
-   --ulimit memlock=-1 \
-   --ulimit nofile=2448:38048 \
-   --cap-add=IPC_LOCK \
-   --cap-add=SYS_NICE \
-   --net=host \
-   --restart=always \
-   -v jail:/usr/sw/jail \
-   -v var:/usr/sw/var \
-   -v internalSpool:/usr/sw/internalSpool \
-   -v adbBackup:/usr/sw/adb \
-   -v softAdb:/usr/sw/internalSpool/softAdb \
-   --env "username_admin_globalaccesslevel=admin" \
-   --env "username_admin_password=${admin_password}" \
-   --env "SERVICE_SSH_PORT=2222" \
-   --name=solace ${VMR_VERSION}
-
-
-
-#Start the solace service and enable it at system start up.
-chkconfig --add solace-vmr
-service solace-vmr start
-
 cd ${solace_directory}
+
+host_name=`hostname`
+host_info=`grep ${host_name} ${config_file}`
+local_role=`echo $host_info | grep -o -E 'Monitor|MessageRouterPrimary|MessageRouterBackup'`
+sed -i "s/SOLACE_LOCAL_NAME/${host_name}/g" group_vars/LOCALHOST/localhost.yml
 
 #Set up the cluster part of the ansible variables file
 for role in Monitor MessageRouterPrimary MessageRouterBackup
@@ -106,6 +85,7 @@ do
         Monitor )
             sed -i "s/SOLACE_MONITOR_NAME/${role_name}/g" group_vars/LOCALHOST/localhost.yml
             sed -i "s/SOLACE_MONITOR_IP/${role_ip}/g" group_vars/LOCALHOST/localhost.yml
+            MONITOR_IP=${role_ip}
             ;; 
         MessageRouterPrimary ) 
             sed -i "s/SOLACE_PRIMARY_NAME/${role_name}/g" group_vars/LOCALHOST/localhost.yml
@@ -120,57 +100,59 @@ do
     esac
 done
 
-host_name=`hostname`
-host_info=`grep ${host_name} ${config_file}`
-
-local_role=`echo $host_info | grep -o -E 'Monitor|MessageRouterPrimary|MessageRouterBackup'`
-
-sed -i "s/SOLACE_LOCAL_NAME/${host_name}/g" group_vars/LOCALHOST/localhost.yml
-# Set up the local host part of the ansible varialbes file
-
-# Make sure Docker is actually up
-ansible_exists=""
-while [[ ! -f /usr/local/bin/ansible-playbook ]]; do 
-    echo "ERROR: Ansible does not yet exists"
-    sleep 10
-done
-
-
 case $local_role in  
-    Monitor ) 
-        sed -i "s/SOLACE_LOCAL_ROLE/MONITOR/g" group_vars/LOCALHOST/localhost.yml
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ShowRedundancyDetailSEMPv1.yml --connection=local
-        sleep 30
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigReloadToMonitorSEMPv1.yml --connection=local
-        sleep 60
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyNoShutSEMPv1.yml --connection=local
+    Monitor )
+        NODE_TYPE="monitoring"
+        ROUTER_NAME="monitor"
+        REDUNDANCY_CFG=""
         ;; 
     MessageRouterPrimary ) 
-        export VMR_ROLE=primary
-        export MATE_IP=${BACKUP_IP}
-        sed -i "s/SOLACE_LOCAL_ROLE/PRIMARY/g" group_vars/LOCALHOST/localhost.yml
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ShowRedundancyDetailSEMPv1.yml --connection=local
-        sleep 30
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigShutMessageSpoolSEMPv1.yml --connection=local
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyMateSEMPv1.yml --connection=local
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyNoShutSEMPv1.yml --connection=local
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigNoShutMessageSpoolSEMPv1.yml --connection=local
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigConfigsyncNoShutSEMPv1.yml --connection=local
-        echo MessageRouterPrimary
+        NODE_TYPE="message_routing"
+        ROUTER_NAME="primary"
+        REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${BACKUP_IP} --env redundancy_activestandbyrole=primary --env configsync_enable=yes"
         ;; 
     MessageRouterBackup ) 
-        export VMR_ROLE=backup
-        export MATE_IP=${PRIMARY_IP}
-        sed -i "s/SOLACE_LOCAL_ROLE/BACKUP/g" group_vars/LOCALHOST/localhost.yml 
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ShowRedundancyDetailSEMPv1.yml --connection=local
-        sleep 30
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigShutMessageSpoolSEMPv1.yml --connection=local
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyGroupSEMPv1.yml --connection=local
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyMateSEMPv1.yml --connection=local
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigRedundancyNoShutSEMPv1.yml --connection=local
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigNoShutMessageSpoolSEMPv1.yml --connection=local
-        /usr/local/bin/ansible-playbook ${DEBUG} -i hosts ConfigConfigsyncNoShutSEMPv1.yml --connection=local
+        NODE_TYPE="message_routing"
+        ROUTER_NAME="backup"
+        REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${PRIMARY_IP} --env redundancy_activestandbyrole=backup --env configsync_enable=yes"
         ;; 
 esac
+
+# Set up the local host part of the ansible varialbes file
+
+docker create \
+   --uts=host \
+   --shm-size 2g \
+   --ulimit core=-1 \
+   --ulimit memlock=-1 \
+   --ulimit nofile=2448:1048576 \
+   --cap-add=IPC_LOCK \
+   --cap-add=SYS_NICE \
+   --net=host \
+   --restart=always \
+   -v jail:/usr/sw/jail \
+   -v var:/usr/sw/var \
+   -v internalSpool:/usr/sw/internalSpool \
+   -v adbBackup:/usr/sw/adb \
+   -v softAdb:/usr/sw/internalSpool/softAdb \
+   --env "nodetype=${NODE_TYPE}" \
+   --env "routername=${ROUTER_NAME}" \
+   --env "username_admin_globalaccesslevel=admin" \
+   --env "username_admin_password=${admin_password}" \
+   --env "service_ssh_port=2222" \
+   ${REDUNDANCY_CFG} \
+   --env "redundancy_group_password=${admin_password}" \
+   --env "redundancy_enable=yes" \
+   --env "redundancy_group_node_primary_nodetype=message_routing" \
+   --env "redundancy_group_node_primary_connectvia=${PRIMARY_IP}" \
+   --env "redundancy_group_node_backup_nodetype=message_routing" \
+   --env "redundancy_group_node_backup_connectvia=${BACKUP_IP}" \
+   --env "redundancy_group_node_monitor_nodetype=monitoring" \
+   --env "redundancy_group_node_monitor_connectvia=${MONITOR_IP}" \
+   --name=solace ${VMR_VERSION}
+
+
+
+#Start the solace service and enable it at system start up.
+chkconfig --add solace-vmr
+service solace-vmr start

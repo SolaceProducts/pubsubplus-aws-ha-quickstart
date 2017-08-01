@@ -47,19 +47,12 @@
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Solace Message Router",
+            "Description": "Instance Type for Kafka brokers; select m3/m4 or i2 instance types for us-west-1 and sa-east-1",
             "Type": "String"
         },
         "NodeSecurityGroup": {
             "Description": "Comma separated list of security groups for the members of the cluster (e.g. sg-7f16e910,sg-4be93ca2); The security groups must be in the same VPC as the subnets",
             "Type": "List<AWS::EC2::SecurityGroup::Id>"
-        },
-        "NodeSpotPrice": {
-            "AllowedPattern": "([0-9]{1}[.]{1}[0-9]{2})",
-            "ConstraintDescription": "Must be decimal numeric value",
-            "Default": "0.00",
-            "Description": "Spot Price to bid for requested instances (0.00 will result in using on-demand instances)",
-            "Type": "String"
         },
         "ParentStackName": {
             "Description": "Wrapper stack for this deployment",
@@ -160,14 +153,6 @@
                 "0"
             ]
         },
-        "OnDemandInstances": {
-            "Fn::Equals": [
-                {
-                    "Ref": "NodeSpotPrice"
-                },
-                "0.00"
-            ]
-        },
         "GovCloudCondition": {
             "Fn::Equals": [
                 {
@@ -205,7 +190,7 @@
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "configSets" : {
-                        "install_all" : [ "install_awscli", "install_logs", "install_docker", "install_ansible", "install_solace" ]
+                        "install_all" : [ "install_awscli", "install_logs", "install_docker", "install_extras", "install_solace" ]
                     },
 
                 "install_awscli": {
@@ -296,25 +281,34 @@
                             "lvm2" : []
                         }
                     },
+                    "files": {
+                        "/etc/awslogs/awslogs.conf": {
+                            "content": { "Fn::Join": [ "", [
+                                "OPTIONS=\"--default-ulimit nofile=1024:4096 --iptables=false --storage-driver=devicemapper\"\n",
+                                "DAEMON_PIDFILE_TIMEOUT=10\n"
+                            ] ] },
+                            "mode": "000444",
+                            "owner": "root",
+                            "group": "root"
+                        }
+                    },
                     "services" : {
                         "sysvinit" : {
                             "docker" : {
                                 "enabled" : "true",
-                                "ensureRunning" : "true"
+                                "ensureRunning" : "true",
+                                "files" :[ "/etc/sysconfig/docker" ]
                             }
                         }
                     }
                 },
 
-                "install_ansible": {
+                "install_extras": {
                     "packages" : {
-                    "yum" : {
-                        "epel-release" : [],
-                        "jq" : []
-                    },
-                    "python" : {
-                        "ansible" : []
-                    }
+                        "yum" : {
+                            "epel-release" : [],
+                            "jq" : []
+                        }
                     }
                 },
                 "install_solace" : {
@@ -490,17 +484,6 @@
                 "InstanceType": {
                     "Ref": "NodeInstanceType"
                 },
-                "SpotPrice": {
-                    "Fn::If": [
-                        "OnDemandInstances",
-                        {
-                            "Ref": "AWS::NoValue"
-                        },
-                        {
-                            "Ref": "NodeSpotPrice"
-                        }
-                    ]
-                },
                 "KeyName": {
                     "Ref": "KeyPairName"
                 },
@@ -526,8 +509,6 @@
                                 "AMI_SBIN=/tmp\n",
                                 "yum install -y aws-cfn-bootstrap\n",
                                 "\n",
-                                "yum install -y docker\n",
-                                "service docker start\n",
                                 "## Retrieve scripts to deploy Solace on the instances \n",
                                 "/opt/aws/bin/cfn-init -v ",
                                 "    --stack ", { "Ref": "AWS::StackName" },

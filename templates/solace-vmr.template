@@ -43,8 +43,7 @@
                     },
                     "Parameters": [
                         "MessageRouterNodeInstanceType",
-                        "MessageRouterNodeStorage",
-                        "MessageRouterNodeSpotPrice"
+                        "MessageRouterNodeStorage"
                     ]
                 },
                 {
@@ -53,8 +52,7 @@
                     },
                     "Parameters": [
                         "MonitorNodeInstanceType",
-                        "MonitorNodeStorage",
-                        "MonitorNodeSpotPrice"
+                        "MonitorNodeStorage"
                     ]
                 },
                 {
@@ -80,26 +78,14 @@
                 "MessageRouterNodeInstanceType": {
                     "default": "Instance Type"
                 },
-                "MessageRouterNodeSpotPrice": {
-                    "default": "Spot Price (optional)"
-                },
                 "MessageRouterNodeStorage": {
                     "default": "Persistent Storage"
-                },
-                "MessageRouterNumberOfNodes": {
-                    "default": "Number of Message Router"
                 },
                 "MonitorNodeInstanceType": {
                     "default": "Instance Type"
                 },
-                "MonitorNodeNodeSpotPrice": {
-                    "default": "Spot Price (optional)"
-                },
-                "MonitorNodeNodeStorage": {
+                "MonitorNodeStorage": {
                     "default": "Persistent Storage"
-                },
-                "MonitorNumberOfNodes": {
-                    "default": "Number of Monitor"
                 },
                 "KeyPairName": {
                     "default": "Key Pair Name"
@@ -123,10 +109,10 @@
                     "default": "VPC CIDR"
                 },
                 "PrivateSubnetIDs": {
-                    "default": "Subnet IDs"
+                    "default": "Private Subnet IDs"
                 },
                 "PublicSubnetIDs": {
-                    "default": "Subnet IDs"
+                    "default": "Public Subnet IDs"
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 Bucket Name"
@@ -177,13 +163,6 @@
             "MinValue": "0",
             "Type": "Number"
         },
-        "MessageRouterNodeSpotPrice": {
-            "AllowedPattern": "([0-9]{1}[.]{1}[0-9]{2})",
-            "ConstraintDescription": "Must be decimal numeric value",
-            "Default": "0.00",
-            "Description": "Spot Price to bid for requested instances (0.00 will result in using on-demand instances)",
-            "Type": "String"
-        },
         "MonitorNodeInstanceType": {
             "AllowedValues": [
                 "t2.medium",
@@ -198,13 +177,6 @@
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
             "Description": "Instance Type for Solace Message Router",
-            "Type": "String"
-        },
-        "MonitorNodeSpotPrice": {
-            "AllowedPattern": "([0-9]{1}[.]{1}[0-9]{2})",
-            "ConstraintDescription": "Must be decimal numeric value",
-            "Default": "0.00",
-            "Description": "Spot Price to bid for requested instances (0.00 will result in using on-demand instances)",
             "Type": "String"
         },
         "MonitorNodeStorage": {
@@ -255,7 +227,8 @@
         },
         "PrivateSubnetIDs": {
             "Description": "Comma separated list of VPC private subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access",
-            "Type": "List<AWS::EC2::Subnet::Id>"
+            "Type": "List<AWS::EC2::Subnet::Id>",
+            "Default": ""
         },
          "PublicSubnetIDs": {
             "Description": "Comma separated list of VPC public subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access",
@@ -268,14 +241,14 @@
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-            "Default": "solace-aws-ha-quickstart",
+            "Default": "quickstart-reference",
             "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-]+(/[0-9a-zA-Z-]+)*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
-            "Default": "latest",
+            "Default": "solace/vmr/latest",
             "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
             "Type": "String"
         }
@@ -411,7 +384,6 @@
         },
         "MessageRouterPrimaryStack": {
             "Type": "AWS::CloudFormation::Stack",
-            "DeletionPolicy" : "Retain",
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
@@ -453,9 +425,6 @@
                     "NodeSecurityGroup": {
                         "Ref" : "MessageRouterSecurityGroup"
                     },
-                    "NodeSpotPrice": {
-                        "Ref": "MessageRouterNodeSpotPrice"
-                    },
                     "ParentStackName": {
                         "Ref": "AWS::StackName"
                     },
@@ -485,7 +454,6 @@
         },
         "MessageRouterBackupStack": {
             "Type": "AWS::CloudFormation::Stack",
-            "DeletionPolicy" : "Retain",            
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
@@ -527,9 +495,6 @@
                     "NodeSecurityGroup": {
                         "Ref" : "MessageRouterSecurityGroup"
                     },
-                    "NodeSpotPrice": {
-                        "Ref": "MessageRouterNodeSpotPrice"
-                    },
                     "ParentStackName": {
                         "Ref": "AWS::StackName"
                     },
@@ -559,7 +524,6 @@
         },
         "MonitorStack" :{
             "Type": "AWS::CloudFormation::Stack",
-            "DeletionPolicy" : "Retain",
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
@@ -600,9 +564,6 @@
                     },
                     "NodeSecurityGroup": {
                         "Ref" : "MonitorSecurityGroup"
-                    },
-                    "NodeSpotPrice": {
-                        "Ref": "MonitorNodeSpotPrice"
                     },
                     "ParentStackName": {
                         "Ref": "AWS::StackName"
@@ -648,9 +609,9 @@
                         }
                     },
                     {
-                        "IpProtocol": "udp",
-                        "FromPort": "5404",
-                        "ToPort": "5405",
+                        "IpProtocol": "-1",
+                        "FromPort": "8300",
+                        "ToPort": "8302",
                         "CidrIp": {
                             "Ref": "VPCCIDR"
                         }
@@ -680,16 +641,21 @@
                         }
                     },
                     {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "SourceSecurityGroupId": {
-                            "Fn::If": [
-                                "UsePrivateSubnetsCondition",
-                                { "Ref": "SSHSecurityGroupID" }, 
-                                { "Ref": "RemoteAccessCIDR" }
-                            ] 
-                        }
+                        "Fn::If": [
+                            "UsePrivateSubnetsCondition",
+                            {
+                                "IpProtocol": "tcp",
+                                "FromPort": "22",
+                                "ToPort": "22", 
+                                "SourceSecurityGroupId": { "Ref": "SSHSecurityGroupID" } 
+                            },
+                            {
+                                "IpProtocol": "tcp",
+                                "FromPort": "22",
+                                "ToPort": "22",                             
+                                "CidrIp": { "Ref": "RemoteAccessCIDR" } 
+                            }
+                        ]
                     }
                 ]
             }
@@ -703,24 +669,29 @@
                 "GroupDescription": "Message Router Security Group",
                 "SecurityGroupIngress": [
                     {
-                        "IpProtocol": "udp",
-                        "FromPort": "5404",
-                        "ToPort": "5405",
+                        "IpProtocol": "-1",
+                        "FromPort": "8300",
+                        "ToPort": "8302",
                         "CidrIp": {
                             "Ref": "VPCCIDR"
                         }
                     },
                     {
-                        "IpProtocol": "tcp",
-                        "FromPort": "22",
-                        "ToPort": "22",
-                        "SourceSecurityGroupId": {
-                            "Fn::If": [
-                                "UsePrivateSubnetsCondition",
-                                { "Ref": "SSHSecurityGroupID" }, 
-                                { "Ref": "RemoteAccessCIDR" }
-                            ] 
-                        }
+                        "Fn::If": [
+                            "UsePrivateSubnetsCondition",
+                            {
+                                "IpProtocol": "tcp",
+                                "FromPort": "22",
+                                "ToPort": "22", 
+                                "SourceSecurityGroupId": { "Ref": "SSHSecurityGroupID" } 
+                            },
+                            {
+                                "IpProtocol": "tcp",
+                                "FromPort": "22",
+                                "ToPort": "22",                             
+                                "CidrIp": { "Ref": "RemoteAccessCIDR" } 
+                            }
+                        ]
                     }
                 ]
             }
