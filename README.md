@@ -58,6 +58,7 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | AvailabilityZones          | Pick 3 AZs from the drop down menue, alternativey pick 2 for PoC or limited Region |
 | NumberOfAZs                | Default is 3 unless only 2 AZs are selected above |
 | VPCCIDR                    | Unless specific requirement for internal addressing leave at default, must encapsulate all the above Subnets |
+| CreatePrivateSubnets       | Default is true, create a production enviroment or false to create simple POC env |                    
 | PublicSubnet1CIDR          | Unless specific requirement for internal addressing leave at default |
 | PublicSubnet2CIDR          | Unless specific requirement for internal addressing leave at default |
 | PublicSubnet3CIDR          | Unless specific requirement for internal addressing leave at default |
@@ -74,10 +75,8 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | LinuxOSAMI                 | Default is Amazon-Linux-HVM, recommended stay with this selection |
 | BootDiskSize               | Default is 24GB minimum is 20GB |
 | MessageRouterNodeInstance  | Default is t2.large which is the minimum |
-| MessageRouterNodeSpotPrice | Default is 0.00 which means not to use spot price |
 | MessageRouterNodeStorage   | Default is 0 which means ephemeral |
 | MonitorNodeInstance        | Default is t2.large which is the minimum | 
-| MonitorNodeeSpotPrice      | Default is 0.00 which means not to use spot price |
 | MonitorNodeStorage         | Default is 0 which means ephemeral |
 | **AWS QuickStart Config**  |  |
 | QSS3BucketName             | Leave at default |
