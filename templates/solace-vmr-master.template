@@ -171,10 +171,12 @@
             "ConstraintDescription": "3 means each node in own az, 2 puts monitor and backup in one az",
             "Default": "3",
             "Description": "Number of availability zones to use",
-            "MaxValue": "3",
-            "MinValue": "2",
+            "AllowedValues": [
+                "2",
+                "3"
+            ],
             "Type": "Number"
-        },
+            },
         "BootDiskSize": {
             "ConstraintDescription": "Deployment supports 8 to 128 GB for boot volumes",
             "Default": "24",
@@ -200,11 +202,18 @@
             "Type": "String"
         },
         "MessageRouterNodeStorage": {
-            "ConstraintDescription": "No more than 1024 GiB per device (4 TiB per node).",
+            "ConstraintDescription": "No more than 640 GiB per device.",
             "Default": "0",
-            "Description": "Allocated EBS storage for each block device (in GiB; 4 devs per node); 0 indicates ephemeral storage only",
-            "MaxValue": "1024",
-            "MinValue": "0",
+            "Description": "Allocated EBS storage for each block device (in GiB); 0 indicates ephemeral storage only",
+            "AllowedValues": [
+                "0",
+                "20",
+                "40",
+                "80",
+                "160",
+                "320",
+                "640"
+            ],
             "Type": "Number"
         },
         "KeyPairName": {
