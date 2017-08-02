@@ -62,8 +62,15 @@
             "ConstraintDescription": "No more than 1024 GB per device (4 TB per node).",
             "Default": "0",
             "Description": "Allocated EBS storage for each block device (in GB; 4 devs per node); 0 indicates ephemeral storage only",
-            "MaxValue": "1024",
-            "MinValue": "0",
+            "AllowedValues": [
+                "0",
+                "20",
+                "40",
+                "80",
+                "160",
+                "320",
+                "640"
+            ],
             "Type": "Number"
         },
         "QSS3BucketName": {
@@ -142,7 +149,39 @@
             "Amazon-Linux-HVM": {
                 "BootDisk": "/dev/xvda"
             }
+        },
+        "Linux2SpoolDisk": {
+            "Amazon-Linux-HVM": {
+                "SpoolDisk": "/dev/xvdb"
+            }
+        },
+        "IOPsMap": {
+            "0": {
+                "IOPs" : "0"
+            },
+            "20": {
+                "IOPs" : "1000"
+            },
+            "40": {
+                "IOPs" : "2000"
+            },
+            "80": {
+                "IOPs": "4000"
+            },
+            "160": {
+                "IOPs": "8000"
+            },
+            "320": {
+                "IOPs": "16000"
+            },
+            "640": {
+                "IOPs": "20000"
+            }
         }
+
+
+
+
     },
     "Conditions": {
         "EphemeralStorage": {
@@ -282,10 +321,10 @@
                         }
                     },
                     "files": {
-                        "/etc/awslogs/awslogs.conf": {
+                        "/etc/sysconfig/docker": {
                             "content": { "Fn::Join": [ "", [
-                                "OPTIONS=\"--default-ulimit nofile=1024:4096 --iptables=false --storage-driver=devicemapper\"\n",
-                                "DAEMON_PIDFILE_TIMEOUT=10\n"
+                                "DAEMON_PIDFILE_TIMEOUT=10\n",
+                                "OPTIONS=\"--default-ulimit nofile=1024:4096 --iptables=false --storage-driver overlay2\"\n"
                             ] ] },
                             "mode": "000444",
                             "owner": "root",
@@ -410,25 +449,6 @@
                                 "mode": "000755",
                                 "owner": "root",
                                 "group": "root"
-                            },
-                            "/tmp/ansible.tgz": {
-                                "source": {
-                                    "Fn::Sub": [
-                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/scripts/ansible/ansible.tgz",
-                                        {
-                                            "QSS3Region": {
-                                                "Fn::If": [
-                                                    "GovCloudCondition",
-                                                    "s3-us-gov-west-1",
-                                                    "s3"
-                                                ]
-                                            }
-                                         }
-                                    ] 
-                                },
-                                "mode": "000755",
-                                "owner": "root",
-                                "group": "root"
                             }
                         }
                     }
@@ -470,6 +490,29 @@
                                     },
                                     "DeleteOnTermination": "False"
                                 }
+                            },
+                            {
+                                 "DeviceName": {
+                                    "Fn::FindInMap": [
+                                        "Linux2SpoolDisk",
+                                        "Amazon-Linux-HVM",
+                                        "SpoolDisk"
+                                    ]
+                                },
+                                "Ebs": {
+                                    "VolumeSize": {
+                                        "Ref": "PersistentStorage"
+                                    },
+                                    "DeleteOnTermination": "False",
+                                    "VolumeType": "io1",
+                                    "Iops":{
+                                        "Fn::FindInMap": [
+                                            "IOPsMap",
+                                            { "Ref": "PersistentStorage" },
+                                            "IOPs"
+                                        ]
+                                    }
+                                }                               
                             }
                         ]
                     ]
@@ -542,18 +585,21 @@
                                 "    --region ",{ "Ref": "AWS::Region" },
                                 "    --resources $instance_id --tags Key=Name,Value=$instance_tag\n",
                                 "\n",
+                                "cd /tmp\n",
+                                "# Install Solace\n",
+                                "$AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/solace",
+                                "  -u ",
+                                    { "Ref": "SolaceDockerURL" },
+                                "  -p /tmp/solOSpasswd",
+                                "  -s ",
+                                   { "Ref": "PersistentStorage" },
+                                "  -v /dev/xvdb",
+                                " \n",
                                 "## Signal back information for outputs (now that all nodes are up) \n",
                                 "/opt/aws/bin/cfn-signal -e 0 -r 'Solace HA deployment complete' '",
                                    { "Ref": "ClusterInfoHandle" },
                                    "'\n",
-                                "\n",
-                                "cd /tmp\n",
-                                "tar zxf ansible.tgz\n",
-                                "$AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/ansible ",
-                                "  -u ",
-                                    { "Ref": "SolaceDockerURL" },
-                                "  -p /tmp/solOSpasswd",
-                                " \n"
+                                "\n"
                             ]
                         ]
                     }

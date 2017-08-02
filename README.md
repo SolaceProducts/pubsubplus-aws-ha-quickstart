@@ -75,7 +75,7 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | LinuxOSAMI                 | Default is Amazon-Linux-HVM, recommended stay with this selection |
 | BootDiskSize               | Default is 24GB minimum is 20GB |
 | MessageRouterNodeInstance  | Default is t2.large which is the minimum |
-| MessageRouterNodeStorage   | Default is 0 which means ephemeral |
+| MessageRouterNodeStorage   | Default is 0 which means ephemeral, non-zero will cause new io1 disk creation for message-spool |
 | MonitorNodeInstance        | Default is t2.large which is the minimum | 
 | MonitorNodeStorage         | Default is 0 which means ephemeral |
 | **AWS QuickStart Config**  |  |

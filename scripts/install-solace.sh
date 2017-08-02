@@ -23,11 +23,13 @@ config_file=""
 solace_directory=""
 solace_url=""
 admin_password_file=""
+disk_size=""
+volume=""
 DEBUG="-vvvv"
 
 verbose=0
 
-while getopts "c:d:p:u:" opt; do
+while getopts "c:d:p:s:u:v:" opt; do
     case "$opt" in
     c)  config_file=$OPTARG
         ;;
@@ -35,7 +37,11 @@ while getopts "c:d:p:u:" opt; do
         ;;
     p)  admin_password_file=$OPTARG
         ;;
+    s)  disk_size=$OPTARG
+        ;;
     u)  solace_url=$OPTARG
+        ;;
+    v)  volume=$OPTARG
         ;;
     esac
 done
@@ -44,7 +50,8 @@ shift $((OPTIND-1))
 [ "$1" = "--" ] && shift
 
 verbose=1
-echo "config_file=$config_file ,solace_directory=$solace_directory ,admin_password_file=admin_password_file, solace_url=$solace_url ,Leftovers: $@"
+echo "config_file=$config_file ,solace_directory=$solace_directory ,admin_password_file=$admin_password_file, \
+      solace_url=$solace_url ,disk_size=$disk_size , volume=$volume ,Leftovers: $@"
 
 export admin_password=`cat ${admin_password_file}`
 rm ${admin_password_file}
@@ -73,9 +80,8 @@ cd ${solace_directory}
 host_name=`hostname`
 host_info=`grep ${host_name} ${config_file}`
 local_role=`echo $host_info | grep -o -E 'Monitor|MessageRouterPrimary|MessageRouterBackup'`
-sed -i "s/SOLACE_LOCAL_NAME/${host_name}/g" group_vars/LOCALHOST/localhost.yml
 
-#Set up the cluster part of the ansible variables file
+#Get the IP addressed for node
 for role in Monitor MessageRouterPrimary MessageRouterBackup
 do 
     role_info=`grep ${role} ${config_file}`
@@ -83,18 +89,12 @@ do
     role_ip=`echo ${role_name} | cut -c 4- | tr "-" .`
     case $role in  
         Monitor )
-            sed -i "s/SOLACE_MONITOR_NAME/${role_name}/g" group_vars/LOCALHOST/localhost.yml
-            sed -i "s/SOLACE_MONITOR_IP/${role_ip}/g" group_vars/LOCALHOST/localhost.yml
             MONITOR_IP=${role_ip}
             ;; 
         MessageRouterPrimary ) 
-            sed -i "s/SOLACE_PRIMARY_NAME/${role_name}/g" group_vars/LOCALHOST/localhost.yml
-            sed -i "s/SOLACE_PRIMARY_IP/${role_ip}/g" group_vars/LOCALHOST/localhost.yml
             PRIMARY_IP=${role_ip}
             ;; 
         MessageRouterBackup ) 
-            sed -i "s/SOLACE_BACKUP_NAME/${role_name}/g" group_vars/LOCALHOST/localhost.yml
-            sed -i "s/SOLACE_BACKUP_IP/${role_ip}/g" group_vars/LOCALHOST/localhost.yml
             BACKUP_IP=${role_ip}
             ;; 
     esac
@@ -118,8 +118,28 @@ case $local_role in
         ;; 
 esac
 
-# Set up the local host part of the ansible varialbes file
+if [ $disk_size == "0" ]; then
+   SPOOL_MOUNT="-v internalSpool:/usr/sw/internalSpool -v adbBackup:/usr/sw/adb -v softAdb:/usr/sw/internalSpool/softAdb"
+else
+    echo "`date` Create primary partition on new disk"
+    (
+    echo n # Add a new partition
+    echo p # Primary partition
+    echo 1  # Partition number
+    echo   # First sector (Accept default: 1)
+    echo   # Last sector (Accept default: varies)
+    echo w # Write changes
+    ) | sudo fdisk $volume
 
+    mkfs.xfs  ${volume}1 -m crc=0
+    UUID=`blkid -s UUID -o value ${volume}1`
+    echo "UUID=${UUID} /opt/vmr xfs defaults 0 0" >> /etc/fstab
+    mkdir /opt/vmr
+    mount -a
+    SPOOL_MOUNT="-v /opt/vmr:/usr/sw/internalSpool -v /opt/vmr:/usr/sw/adb -v /opt/vmr:/usr/sw/internalSpool/softAdb"
+fi
+
+# Start up the SolOS docer instance with HA config keys
 docker create \
    --uts=host \
    --shm-size 2g \
@@ -132,9 +152,7 @@ docker create \
    --restart=always \
    -v jail:/usr/sw/jail \
    -v var:/usr/sw/var \
-   -v internalSpool:/usr/sw/internalSpool \
-   -v adbBackup:/usr/sw/adb \
-   -v softAdb:/usr/sw/internalSpool/softAdb \
+   ${SPOOL_MOUNT} \
    --env "nodetype=${NODE_TYPE}" \
    --env "routername=${ROUTER_NAME}" \
    --env "username_admin_globalaccesslevel=admin" \
@@ -150,7 +168,6 @@ docker create \
    --env "redundancy_group_node_monitor_nodetype=monitoring" \
    --env "redundancy_group_node_monitor_connectvia=${MONITOR_IP}" \
    --name=solace ${VMR_VERSION}
-
 
 
 #Start the solace service and enable it at system start up.
