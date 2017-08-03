@@ -9,7 +9,7 @@
     },
     {
         "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "$[alfred_genaz_3]" 
+        "ParameterValue": "$[alfred_genaz_2]" 
     },
     {
         "ParameterKey": "NumberOfAZs",
@@ -24,20 +24,12 @@
         "ParameterValue": "t2.large"
     },
     {
-        "ParameterKey": "MessageRouterNodeSpotPrice",
-        "ParameterValue": "0.00"
-    },
-    {
         "ParameterKey": "MessageRouterNodeStorage",
         "ParameterValue": "0"
     },
     {
         "ParameterKey": "MonitorNodeInstanceType",
         "ParameterValue": "t2.large"
-    },
-    {
-        "ParameterKey": "MonitorNodeSpotPrice",
-        "ParameterValue": "0.00"
     },
     {
         "ParameterKey": "MonitorNodeStorage",
@@ -90,5 +82,13 @@
     {
         "ParameterKey": "VPCCIDR",
         "ParameterValue": "10.0.128.0/22"
+    },
+        {
+        "ParameterKey": "QSS3BucketName",
+        "ParameterValue": "solace-aws-ha-quickstart"
+    },
+    {
+        "ParameterKey": "QSS3KeyPrefix",
+        "ParameterValue": "latest"
     }
 ]

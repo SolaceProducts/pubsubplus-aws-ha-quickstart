@@ -393,7 +393,6 @@
         },
         "MessageRouterPrimaryStack": {
             "Type": "AWS::CloudFormation::Stack",
-            "DeletionPolicy": "Retain",
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
@@ -464,7 +463,6 @@
         },
         "MessageRouterBackupStack": {
             "Type": "AWS::CloudFormation::Stack",
-            "DeletionPolicy": "Retain",
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
@@ -535,7 +533,6 @@
         },
         "MonitorStack" :{
             "Type": "AWS::CloudFormation::Stack",
-            "DeletionPolicy": "Retain",
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
@@ -719,7 +716,7 @@
                 "Handle": {
                     "Ref": "ClusterInfoHandle"
                 },
-                "Timeout": "120",
+                "Timeout": "300",
                 "Count": "1"
             }
         },

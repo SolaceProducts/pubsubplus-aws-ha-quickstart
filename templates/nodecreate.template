@@ -113,7 +113,7 @@
                 "AMZNLINUXHVM": "ami-162c2575"
             },
             "ca-central-1": {
-                "AMZNLINUXHVM": "ami-b968bad6"
+                "AMZNLINUXHVM": "ami-a7aa15c3"
             },
             "eu-west-1": {
                 "AMZNLINUXHVM": "ami-01ccc867"
