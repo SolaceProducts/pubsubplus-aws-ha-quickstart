@@ -578,7 +578,7 @@
                                 { "Ref": "ParentStackName" },
                                 "\n",
                                 "## Tag the instance (now that we're sure of launch index)\n",
-                                "instance_id=$(curl -f http://instance-data/latest/meta-data/instance-id)\n",
+                                "instance_id=$(curl -f http://169.254.169.254/latest/meta-data/instance-id)\n",
                                 "instance_tag=",{ "Ref": "ParentStackName" },"-",{ "Ref": "NodeDesignation" },"\n",
                                 " \n",
                                 "aws ec2 create-tags",
