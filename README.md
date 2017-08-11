@@ -57,27 +57,15 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | **Network Parameters**     |  |
 | AvailabilityZones          | Pick 3 AZs from the drop down menue, alternativey pick 2 for PoC or limited Region |
 | NumberOfAZs                | Default is 3 unless only 2 AZs are selected above |
-| VPCCIDR                    | Unless specific requirement for internal addressing leave at default, must encapsulate all the above Subnets |
-| CreatePrivateSubnets       | Default is true, create a production enviroment or false to create simple POC env |                    
-| PublicSubnet1CIDR          | Unless specific requirement for internal addressing leave at default |
-| PublicSubnet2CIDR          | Unless specific requirement for internal addressing leave at default |
-| PublicSubnet3CIDR          | Unless specific requirement for internal addressing leave at default |
-| PrivateSubnet1ACIDR        | Unless specific requirement for internal addressing leave at default |
-| PrivateSubnet2ACIDR        | Unless specific requirement for internal addressing leave at default |
-| PrivateSubnet3ACIDR        | Unless specific requirement for internal addressing leave at default |
-| PrivateSubnet1BCIDR        | Unless specific requirement for internal addressing leave at default |
-| PrivateSubnet2BCIDR        | Unless specific requirement for internal addressing leave at default |
-| PrivateSubnet3BCIDR        | Unless specific requirement for internal addressing leave at default |
+| ProductionEnv              | True will create Private subnets and accompanying public ELBs if prod deployment |
 | RemoteAccessCIDR           | IP range that can send/recieve messages, use 0.0.0.0/0 if unsure |
 | SSHAccessCIDR              | IP range that can configure VMR, use 0.0.0.0/0 if unsure |
 | **EC2 Parameters**         |  |
 | KeyPairName                | Pick from your exisitng key pairs, create new AWSW key pair if required |
-| LinuxOSAMI                 | Default is Amazon-Linux-HVM, recommended stay with this selection |
 | BootDiskSize               | Default is 24GB minimum is 20GB |
 | MessageRouterNodeInstance  | Default is t2.large which is the minimum |
 | MessageRouterNodeStorage   | Default is 0 which means ephemeral, non-zero will cause new io1 disk creation for message-spool |
 | MonitorNodeInstance        | Default is t2.large which is the minimum | 
-| MonitorNodeStorage         | Default is 0 which means ephemeral |
 | **AWS QuickStart Config**  |  |
 | QSS3BucketName             | Leave at default |
 | QSS3KeyPrefix              | Leave at default |
