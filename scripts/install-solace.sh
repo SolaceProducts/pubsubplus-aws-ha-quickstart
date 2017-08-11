@@ -57,21 +57,48 @@ export admin_password=`cat ${admin_password_file}`
 rm ${admin_password_file}
 mkdir $solace_directory
 cd $solace_directory
-echo "`date` Configure VMRs Started"
+echo "`date` INFO: Configure VMRs Started"
+
+echo "`date` INFO: check to make sure we have a complete load"
+wget -O ${solace_directory}/solos.info -nv  https://products.solace.com/download/VMR_DOCKER_EVAL_MD5
+IFS=' ' read -ra SOLOS_INFO <<< `cat ${solace_directory}/solos.info`
+MD5_SUM=${SOLOS_INFO[0]}
+SolOS_LOAD=${SOLOS_INFO[1]}
+echo "`date` INFO: Reference md5sum is: ${MD5_SUM}"
 
 wget -q -O solace-redirect ${solace_url}
 REAL_LINK=`egrep -o "https://[a-zA-Z0-9\.\/\_\?\=]*" ${solace_directory}/solace-redirect`
-wget -q -O soltr-docker.tar.gz ${REAL_LINK}
+wget -q -O  ${solace_directory}/${SolOS_LOAD} ${REAL_LINK}
+cd ${solace_directory}
+LOCAL_OS_INFO=`md5sum ${SolOS_LOAD}`
+IFS=' ' read -ra SOLOS_INFO <<< ${LOCAL_OS_INFO}
+LOCAL_MD5_SUM=${SOLOS_INFO[0]}
+if [ ${LOCAL_MD5_SUM} != ${MD5_SUM} ]; then
+    echo "`date` WARN: Possible corrupt SolOS load, md5sum do not match"
+else
+    echo "`date` INFO: Successfully downloaded ${SolOS_LOAD}"
+fi
+
 
 # Make sure Docker is actually up
 docker_running=""
-while [[ ${docker_running} != "running" ]]; do 
-    echo "ERROR: Tried to launch Solace but Docker was not up"
+loop_guard=6
+loop_count=0
+while [ ${loop_count} != ${loop_guard} ]; do 
     sleep 10
     docker_running=`service docker status | grep -o running`
+    if [ ${docker_running} != "running" ]; then
+        ((loop_count++))
+        echo "`date` WARN: Tried to launch Solace but Docker in state ${docker_running}"
+    else
+        echo "`date` INFO: Docker in state ${docker_running}"
+        break
+    fi
 done
 
-docker load -i ${solace_directory}/soltr-docker.tar.gz
+
+
+docker load -i ${solace_directory}/${SolOS_LOAD}
 
 export VMR_VERSION=`docker images | grep solace | awk '{print $3}'`
 

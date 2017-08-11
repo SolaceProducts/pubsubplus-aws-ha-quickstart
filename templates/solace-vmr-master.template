@@ -20,17 +20,7 @@
                     "Parameters": [
                         "AvailabilityZones",
                         "NumberOfAZs",
-                        "VPCCIDR",
                         "CreatePrivateSubnets",
-                        "PublicSubnet1CIDR",
-                        "PrivateSubnet1ACIDR",
-                        "PrivateSubnet1BCIDR",
-                        "PublicSubnet2CIDR",
-                        "PrivateSubnet2ACIDR",
-                        "PrivateSubnet2BCIDR",
-                        "PublicSubnet3CIDR",
-                        "PrivateSubnet3ACIDR",
-                        "PrivateSubnet3BCIDR",
                         "SSHAccessCIDR",
                         "RemoteAccessCIDR"
                     ]
@@ -58,8 +48,7 @@
                         "default": "MonitorInstance Configuration"
                     },
                     "Parameters": [
-                        "MonitorNodeInstanceType",
-                        "MonitorNodeStorage"
+                        "MonitorNodeInstanceType"
                     ]
                 },
                 {
@@ -97,53 +86,11 @@
                 "MonitorNodeInstanceType": {
                     "default": "Instance Type"
                 },
-                "MonitorNodeNodeSpotPrice": {
-                    "default": "Spot Price (optional)"
-                },
-                "MonitorNodeNodeStorage": {
-                    "default": "Persistent Storage"
-                },
                 "KeyPairName": {
                     "default": "Key Pair Name"
                 },
                 "CreatePrivateSubnets": {
                     "default": "Create production ready enviroment"
-                },
-                "PublicSubnet1CIDR": {
-                    "default": "Public Subnet 1 CIDR"
-                },
-                "PrivateSubnet1ACIDR": {
-                    "default": "Private Subnet 1A CIDR"
-                },
-                "PrivateSubnet1BCIDR": {
-                    "default": "Private Subnet 1B CIDR"
-                },
-                "PublicSubnet2CIDR": {
-                    "default": "Public Subnet 2 CIDR"
-                },
-                "PrivateSubnet2ACIDR": {
-                    "default": "Private Subnet 2A CIDR"
-                },
-                "PrivateSubnet2BCIDR": {
-                    "default": "Private Subnet 2B CIDR"
-                },
-                "PublicSubnet3CIDR": {
-                    "default": "Public Subnet 3 CIDR"
-                },
-                "PrivateSubnet3ACIDR": {
-                    "default": "Private Subnet 3A CIDR"
-                },
-                "PrivateSubnet3BCIDR": {
-                    "default": "Private Subnet 3B CIDR"
-                },
-                "RemoteAccessCIDR": {
-                    "default": "Allowed External Access CIDR"
-                },
-                "SSHAccessCIDR": {
-                    "default": "Allowed External Mgmt Access CIDR"
-                },
-                "VPCCIDR": {
-                    "default": "VPC CIDR"
                 },
                 "QSS3BucketName": {
                     "default": "Quick Start S3 Bucket Name"
@@ -229,69 +176,6 @@
             "Description": "Whether to create and use Private Subnets with fronting ELBs",
             "Type": "String"
         },
-        "PublicSubnet1CIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.128.0/26",
-            "Description": "CIDR Block for the bootstrap subnet 1 located in Availability Zone 1",
-            "Type": "String"
-        },
-        "PrivateSubnet1ACIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.128.64/26",
-            "Description": "CIDR Block for the bootstrap subnet 1A located in Availability Zone 1",
-            "Type": "String"
-        },
-        "PrivateSubnet1BCIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.128.128/25",
-            "Description": "CIDR Block for the bootstrap subnet 1B located in Availability Zone 1",
-            "Type": "String"
-        },
-        "PublicSubnet2CIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.129.0/26",
-            "Description": "CIDR Block for the bootstrap subnet 2 located in Availability Zone 2",
-            "Type": "String"
-        },
-        "PrivateSubnet2ACIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.129.64/26",
-            "Description": "CIDR Block for the bootstrap subnet 2A located in Availability Zone 2",
-            "Type": "String"
-        },
-        "PrivateSubnet2BCIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.129.128/25",
-            "Description": "CIDR Block for the bootstrap subnet 2B located in Availability Zone 2",
-            "Type": "String"
-        },
-        "PublicSubnet3CIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.130.0/26",
-            "Description": "CIDR Block for the bootstrap subnet 3 located in Availability Zone 3",
-            "Type": "String"
-        },
-        "PrivateSubnet3ACIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.130.64/26",
-            "Description": "CIDR Block for the bootstrap subnet 3A located in Availability Zone 3",
-            "Type": "String"
-        },
-        "PrivateSubnet3BCIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.130.128/25",
-            "Description": "CIDR Block for the bootstrap subnet 3B located in Availability Zone 3",
-            "Type": "String"
-        },
         "RemoteAccessCIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
@@ -302,13 +186,6 @@
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
             "Description": "Allowed CIDR block for external access to cluster nodes for mgmt",
-            "Type": "String"
-        },
-        "VPCCIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.128.0/22",
-            "Description": "CIDR Block for the VPC",
             "Type": "String"
         },
         "MonitorNodeInstanceType": {
@@ -327,14 +204,6 @@
             "Description": "Instance Type for Solace Message Router",
             "Type": "String"
         },
-        "MonitorNodeStorage": {
-            "ConstraintDescription": "No more than 1024 GiB per device (4 TiB per node).",
-            "Default": "0",
-            "Description": "Allocated EBS storage for each block device (in GiB; 4 devs per node); 0 indicates ephemeral storage only",
-            "MaxValue": "1024",
-            "MinValue": "0",
-            "Type": "Number"
-        },
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
@@ -343,10 +212,10 @@
             "Type": "String"
         },
         "QSS3KeyPrefix": {
-            "AllowedPattern": "^[0-9a-zA-Z-]+(/[0-9a-zA-Z-]+)*$",
-            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
-            "Default": "latest",
-            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/). It cannot start or end with forward slash (/) because they are automatically appended.",
+            "AllowedPattern": "^[0-9a-zA-Z-/]*$",
+            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
+            "Default": "latest/",
+            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
             "Type": "String"
         }
     },
@@ -383,7 +252,7 @@
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
-                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/submodules/quickstart-aws-vpc/templates/aws-vpc.template",
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template",
                         {
                             "QSS3Region": {
                                 "Fn::If": [
@@ -412,36 +281,6 @@
                     },
                     "NumberOfAZs": {
                         "Ref": "NumberOfAZs"
-                    },
-                    "PublicSubnet1CIDR": {
-                        "Ref": "PublicSubnet1CIDR"
-                    },
-                    "PrivateSubnet1ACIDR": {
-                        "Ref": "PrivateSubnet1ACIDR"
-                    },
-                    "PrivateSubnet1BCIDR": {
-                        "Ref": "PrivateSubnet1BCIDR"
-                    },
-                    "PublicSubnet2CIDR": {
-                        "Ref": "PublicSubnet2CIDR"
-                    },
-                    "PrivateSubnet2ACIDR": {
-                        "Ref": "PrivateSubnet2ACIDR"
-                    },
-                    "PrivateSubnet2BCIDR": {
-                        "Ref": "PrivateSubnet2BCIDR"
-                    },
-                    "PublicSubnet3CIDR": {
-                        "Ref": "PublicSubnet3CIDR"
-                    },
-                    "PrivateSubnet3ACIDR": {
-                        "Ref": "PrivateSubnet3ACIDR"
-                    },
-                    "PrivateSubnet3BCIDR": {
-                        "Ref": "PrivateSubnet3BCIDR"
-                    },
-                    "VPCCIDR": {
-                        "Ref": "VPCCIDR"
                     }
                 }
             }
@@ -456,7 +295,7 @@
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
-                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/submodules/quickstart-linux-bastion/templates/linux-bastion.template",
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template",
                         {
                             "QSS3Region": {
                                 "Fn::If": [
@@ -474,7 +313,7 @@
                     "EnableBanner": "true",
                     "BastionBanner": {
                         "Fn::Sub": [
-                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/scripts/solace-banner.txt",
+                            "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/solace-banner.txt",
                             {
                                 "QSS3Region": {
                                     "Fn::If": [
@@ -520,7 +359,7 @@
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
-                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}/templates/solace-vmr.template",
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/solace-vmr.template",
                         {
                             "QSS3Region": {
                                 "Fn::If": [
@@ -554,9 +393,6 @@
                     "MonitorNodeInstanceType": {
                         "Ref": "MonitorNodeInstanceType"
                     },
-                    "MonitorNodeStorage": {
-                        "Ref": "MonitorNodeStorage"
-                    },
                     "KeyPairName": {
                         "Ref": "KeyPairName"
                     },
@@ -578,12 +414,6 @@
                             "Outputs.BastionSecurityGroupID"
                         ]
                     },                                        
-                    "VPCCIDR": {
-                        "Fn::GetAtt": [
-                            "VPCStack",
-                            "Outputs.VPCCIDR"
-                        ]
-                    },
                     "PrivateSubnetIDs" : {
                         "Fn::If": [
                             "UsePrivateSubnets",

@@ -24,7 +24,7 @@
 # If the ChildStack or the leaf Resource does not exist, this returns immediately.
 #
 
-murl_top=http://169.254.169.254/latest/meta-data
+murl_top=http://instance-data/latest/meta-data
 
 ThisInstance=$(curl -f $murl_top/instance-id 2> /dev/null)
 if [ -z "$ThisInstance" ] ; then
