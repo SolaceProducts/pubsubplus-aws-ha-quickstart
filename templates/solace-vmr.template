@@ -710,6 +710,14 @@
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "80",
+                        "ToPort": "80",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
                     }
                 ]
             }
@@ -757,7 +765,11 @@
                     "LoadBalancerPort" : "8080",
                     "InstancePort" : "8080",
                     "Protocol" : "HTTP"                    
-                    } 
+                    },{               
+                    "LoadBalancerPort" : "80",
+                    "InstancePort" : "80",
+                    "Protocol" : "HTTP"                    
+                    }
                 ]
             }
         },
@@ -788,6 +800,10 @@
                     },{               
                     "LoadBalancerPort" : "8080",
                     "InstancePort" : "8080",
+                    "Protocol" : "HTTP"                    
+                    },{               
+                    "LoadBalancerPort" : "80",
+                    "InstancePort" : "80",
                     "Protocol" : "HTTP"                    
                     } 
                 ]

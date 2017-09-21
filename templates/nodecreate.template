@@ -331,6 +331,11 @@
                             "group": "root"
                         }
                     },
+                    "commands" : {
+                        "01_add_ec2-user_to_docker_group" : {
+                            "command" : "usermod -a -G docker ec2-user"
+                        }
+                    },
                     "services" : {
                         "sysvinit" : {
                             "docker" : {
