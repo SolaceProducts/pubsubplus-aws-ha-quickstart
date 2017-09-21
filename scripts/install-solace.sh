@@ -96,7 +96,7 @@ while [ ${loop_count} != ${loop_guard} ]; do
     fi
 done
 
-
+usermod -a -G docker ec2-user
 
 docker load -i ${solace_directory}/${SolOS_LOAD}
 
