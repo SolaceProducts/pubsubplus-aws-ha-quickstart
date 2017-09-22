@@ -454,6 +454,25 @@
                                 "mode": "000755",
                                 "owner": "root",
                                 "group": "root"
+                            },
+                            "/tmp/semp_query.sh": {
+                                "source": {
+                                    "Fn::Sub": [
+                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/semp_query.sh",
+                                        {
+                                            "QSS3Region": {
+                                                "Fn::If": [
+                                                    "GovCloudCondition",
+                                                    "s3-us-gov-west-1",
+                                                    "s3"
+                                                ]
+                                            }
+                                         }
+                                    ]                         
+                                },
+                                "mode": "000755",
+                                "owner": "root",
+                                "group": "root"
                             }
                         }
                     }

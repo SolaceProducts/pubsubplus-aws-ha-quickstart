@@ -26,6 +26,7 @@ admin_password_file=""
 disk_size=""
 volume=""
 DEBUG="-vvvv"
+is_primary="false"
 
 verbose=0
 
@@ -135,6 +136,7 @@ case $local_role in
         NODE_TYPE="message_routing"
         ROUTER_NAME="primary"
         REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${BACKUP_IP} --env redundancy_activestandbyrole=primary --env configsync_enable=yes"
+        is_primary="true"
         ;; 
     MessageRouterBackup ) 
         NODE_TYPE="message_routing"
@@ -198,3 +200,35 @@ docker create \
 #Start the solace service and enable it at system start up.
 chkconfig --add solace-vmr
 service solace-vmr start
+
+loop_guard=30
+pause=10
+count=0
+if [ "${is_primary}" = "true" ]; then
+  while [ ${count} -lt ${loop_guard} ]; do 
+    online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
+         -q "<rpc semp-version='soltr/8_5VMR'><show><redundancy><group/></redundancy></show></rpc>" \
+         -c '/rpc-reply/rpc/show/redundancy/group-node/status[text()="Online"]'`
+
+    online_count=`echo ${online_results} | jq '.countSearchResult' -`
+
+    run_time=$((${count} * ${pause}))
+    if [ ${online_count} -eq 3 ]; then
+        echo "`date` INFO: Redundancy is up after ${run_time} seconds"
+        break
+    fi
+    ((count++))
+    echo "`date` INFO: Waited ${run_time} seconds, Redundancy not yet up"
+    sleep ${pause}
+  done
+
+  if [ ${count} -eq ${loop_guard} ]; then
+    echo "`date` ERROR: Solace redundancy group never came up" | tee /dev/stderr
+    exit 1 
+  fi
+
+ /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
+         -q "<rpc semp-version='soltr/8_5VMR'><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
+ /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
+         -q "<rpc semp-version='soltr/8_5VMR'><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
+fi
