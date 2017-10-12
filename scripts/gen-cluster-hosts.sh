@@ -98,5 +98,3 @@ if [ $? -eq 0 ] ; then
     grep -e "-MonitorStack-" ${SOLACE_HOSTS_FILE} \
     | awk '{print $1" MONITORNODE"NR-1" "$2" "$3" "$4}' > /tmp/monitors
 fi
-
-
