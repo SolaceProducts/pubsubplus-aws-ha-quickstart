@@ -2,13 +2,13 @@
 
 ![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-Prod-3AZ.png "Production enviroment for Solace VMR")
 
-This QuickStart template installs Solace Virtual Message Routers (VMRs) in high-availability (HA) redundancy groups for fault tolerance. HA redundancy provides 1:1 router sparing to increase overall service availability. If one of the routers fails or is taken out of service, the other router automatically takes over and provides service to the clients that were previously served by the now-out-of-service router.  To increase availability the meassage routers are deployed across 3 availability zones.
+This QuickStart template installs Solace Virtual Message Routers (VMRs) in high-availability (HA) redundancy groups for fault tolerance. HA redundancy provides 1:1 router sparing to increase overall service availability. If one of the routers fails or is taken out of service, the other router automatically takes over and provides service to the clients that were previously served by the now-out-of-service router.  To increase availability the message routers are deployed across 3 availability zones.
 
 To learn more about VMR redundancy see the [Redundancy Documentation](http://docs.solace.com/Features/VMR-Redundancy.htm).  If you are not familiar with Solace or the high-available configurations it is recommended that you review this document. 
 
 ![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/Solace-AWS-HA-PoC-2AZ.png "Proof of Concept enviroment for Solace VMR")
 
-Alternatively this quickstart can create Solace VMRs in an enviroment suitable for Proof Of Concept testing where loss of an AWS Availability Zone will not cause loss of access to mission critical data.
+Alternatively this quickstart can create Solace VMRs in an environment suitable for Proof Of Concept testing where loss of an AWS Availability Zone will not cause loss of access to mission critical data.
 
 To learn more about connectivity to the HA redundancy group see the AWS [VPC Gateway Documentation](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html).
 
@@ -21,7 +21,7 @@ This is a two step process:
     <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/register.png"/>
 </a>
 
-* Go to AWS Cloud Formation service and launch template.  The following links are for your convenience and take you directly to the templates for Solace Mesage Routers.
+* Go to AWS Cloud Formation service and launch template.  The following links are for your convenience and take you directly to the templates for Solace Message Routers.
 
 <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-aws-ha-quickstart/latest/templates/solace-vmr-master.template" target="_blank">
     <img src="https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/launch-button-new.png"/>
@@ -84,7 +84,7 @@ Quick Starts are automated reference deployments for key workloads on the AWS Cl
 
 # Testing data access to the ha cluster
 
-To test data traffic though the newly created VMR instances, visit the Solace developer portal and and select your prefered programming langauge to [send and receive messages](http://dev.solace.com/get-started/send-receive-messages/). Under each language there is a Publish/Subscribe tutorial that will help you get started.
+To test data traffic though the newly created VMR instances, visit the Solace developer portal and select your preferred programming language to [send and receive messages](http://dev.solace.com/get-started/send-receive-messages/). Under each language there is a Publish/Subscribe tutorial that will help you get started.
 
 ![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/solace_tutorial.png "getting started publish/subscribe")
 
