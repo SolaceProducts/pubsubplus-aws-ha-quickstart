@@ -647,6 +647,12 @@
                         "FromPort": "8300",
                         "ToPort": "8302", 
                         "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "55555",
+                        "ToPort": "55555",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
                     }
                 ]
             }
