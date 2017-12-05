@@ -27,6 +27,7 @@ disk_size=""
 volume=""
 DEBUG="-vvvv"
 is_primary="false"
+log_file="/tmp/install-solace.log"
 
 verbose=0
 
@@ -52,32 +53,31 @@ shift $((OPTIND-1))
 
 verbose=1
 echo "config_file=$config_file ,solace_directory=$solace_directory ,admin_password_file=$admin_password_file, \
-      solace_url=$solace_url ,disk_size=$disk_size , volume=$volume ,Leftovers: $@"
+      solace_url=$solace_url ,disk_size=$disk_size , volume=$volume ,Leftovers: $@" >> $log_file
 
 export admin_password=`cat ${admin_password_file}`
 rm ${admin_password_file}
 mkdir $solace_directory
 cd $solace_directory
-echo "`date` INFO: Configure VMRs Started"
-
-echo "`date` INFO: check to make sure we have a complete load"
-wget -O ${solace_directory}/solos.info -nv  https://products.solace.com/download/VMR_DOCKER_EVAL_MD5
+echo "`date` INFO: Configure VMRs Started" >> $log_file
+echo "`date` INFO: check to make sure we have a complete load" >> $log_file
+wget -O ${solace_directory}/solos.info -nv  ${solace_url}.md5
 IFS=' ' read -ra SOLOS_INFO <<< `cat ${solace_directory}/solos.info`
 MD5_SUM=${SOLOS_INFO[0]}
 SolOS_LOAD=${SOLOS_INFO[1]}
-echo "`date` INFO: Reference md5sum is: ${MD5_SUM}"
+echo "`date` INFO: Reference md5sum is: ${MD5_SUM}" >> $log_file
 
 wget -q -O solace-redirect ${solace_url}
-REAL_LINK=`egrep -o "https://[a-zA-Z0-9\.\/\_\?\=]*" ${solace_directory}/solace-redirect`
+REAL_LINK=${solace_url}
 wget -q -O  ${solace_directory}/${SolOS_LOAD} ${REAL_LINK}
 cd ${solace_directory}
 LOCAL_OS_INFO=`md5sum ${SolOS_LOAD}`
 IFS=' ' read -ra SOLOS_INFO <<< ${LOCAL_OS_INFO}
 LOCAL_MD5_SUM=${SOLOS_INFO[0]}
 if [ ${LOCAL_MD5_SUM} != ${MD5_SUM} ]; then
-    echo "`date` WARN: Possible corrupt SolOS load, md5sum do not match"
+    echo "`date` WARN: Possible corrupt SolOS load, md5sum do not match" >> $log_file
 else
-    echo "`date` INFO: Successfully downloaded ${SolOS_LOAD}"
+    echo "`date` INFO: Successfully downloaded ${SolOS_LOAD}" >> $log_file
 fi
 
 
@@ -85,14 +85,14 @@ fi
 docker_running=""
 loop_guard=6
 loop_count=0
-while [ ${loop_count} != ${loop_guard} ]; do 
+while [ ${loop_count} != ${loop_guard} ]; do
     sleep 10
     docker_running=`service docker status | grep -o running`
     if [ ${docker_running} != "running" ]; then
         ((loop_count++))
-        echo "`date` WARN: Tried to launch Solace but Docker in state ${docker_running}"
+        echo "`date` WARN: Tried to launch Solace but Docker in state ${docker_running}" >> $log_file
     else
-        echo "`date` INFO: Docker in state ${docker_running}"
+        echo "`date` INFO: Docker in state ${docker_running}" >> $log_file
         break
     fi
 done
@@ -109,40 +109,40 @@ local_role=`echo $host_info | grep -o -E 'Monitor|MessageRouterPrimary|MessageRo
 
 #Get the IP addressed for node
 for role in Monitor MessageRouterPrimary MessageRouterBackup
-do 
+do
     role_info=`grep ${role} ${config_file}`
     role_name=${role_info%% *}
     role_ip=`echo ${role_name} | cut -c 4- | tr "-" .`
-    case $role in  
+    case $role in
         Monitor )
             MONITOR_IP=${role_ip}
-            ;; 
-        MessageRouterPrimary ) 
+            ;;
+        MessageRouterPrimary )
             PRIMARY_IP=${role_ip}
-            ;; 
-        MessageRouterBackup ) 
+            ;;
+        MessageRouterBackup )
             BACKUP_IP=${role_ip}
-            ;; 
+            ;;
     esac
 done
 
-case $local_role in  
+case $local_role in
     Monitor )
         NODE_TYPE="monitoring"
         ROUTER_NAME="monitor"
         REDUNDANCY_CFG=""
-        ;; 
-    MessageRouterPrimary ) 
+        ;;
+    MessageRouterPrimary )
         NODE_TYPE="message_routing"
         ROUTER_NAME="primary"
         REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${BACKUP_IP} --env redundancy_activestandbyrole=primary --env configsync_enable=yes"
         is_primary="true"
-        ;; 
-    MessageRouterBackup ) 
+        ;;
+    MessageRouterBackup )
         NODE_TYPE="message_routing"
         ROUTER_NAME="backup"
         REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${PRIMARY_IP} --env redundancy_activestandbyrole=backup --env configsync_enable=yes"
-        ;; 
+        ;;
 esac
 
 if [ $disk_size == "0" ]; then
@@ -206,76 +206,78 @@ pause=10
 count=0
 
 
-loop_guard=30
+loop_guard=45
 pause=10
 count=0
 mate_active_check=""
-echo "`date` INFO: Wait for Primary to be 'Local Active' or 'Mate Active'"
+echo "`date` INFO: Wait for Primary to be 'Local Active' or 'Mate Active'" >> $log_file
 if [ "${is_primary}" = "true" ]; then
-  while [ ${count} -lt ${loop_guard} ]; do 
+  while [ ${count} -lt ${loop_guard} ]; do
     online_results=`./semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
          -q "<rpc semp-version='soltr/8_5VMR'><show><redundancy><detail/></redundancy></show></rpc>" \
          -v "/rpc-reply/rpc/show/redundancy/virtual-routers/primary/status/activity[text()]"`
 
     local_activity=`echo ${online_results} | jq '.valueSearchResult' -`
-    echo "`date` INFO: Local activity state is: ${local_activity}"
+    echo "`date` INFO: Local activity state is: ${local_activity}" >> $log_file
 
     run_time=$((${count} * ${pause}))
     case "${local_activity}" in
       "\"Local Active\"")
-        echo "`date` INFO: Redundancy is up locally, Primary Active, after ${run_time} seconds"
+        echo "`date` INFO: Redundancy is up locally, Primary Active, after ${run_time} seconds" >> $log_file
         mate_active_check="Standby"
         break
         ;;
       "\"Mate Active\"")
-        echo "`date` INFO: Redundancy is up locally, Backup Active, after ${run_time} seconds"
+        echo "`date` INFO: Redundancy is up locally, Backup Active, after ${run_time} seconds" >> $log_file
         mate_active_check="Active"
         break
         ;;
     esac
     ((count++))
-    echo "`date` INFO: Waited ${run_time} seconds, Redundancy not yet up"
+    echo "`date` INFO: Waited ${run_time} seconds, Redundancy not yet up" >> $log_file
     sleep ${pause}
   done
 
   if [ ${count} -eq ${loop_guard} ]; then
     echo "`date` ERROR: Solace redundancy group never came up" | tee /dev/stderr
-    exit 1 
+    echo "`date` ERROR: Solace redundancy group never came up" >> $log_file
+    exit 1
   fi
 
-  loop_guard=30
+  loop_guard=45
   pause=10
   count=0
-  echo "`date` INFO: Wait for Backup to be 'Active' or 'Standby'"
-  while [ ${count} -lt ${loop_guard} ]; do 
+  echo "`date` INFO: Wait for Backup to be 'Active' or 'Standby'" >> $log_file
+  while [ ${count} -lt ${loop_guard} ]; do
     online_results=`./semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
          -q "<rpc semp-version='soltr/8_5VMR'><show><redundancy><detail/></redundancy></show></rpc>" \
          -v "/rpc-reply/rpc/show/redundancy/virtual-routers/primary/status/detail/priority-reported-by-mate/summary[text()]"`
 
     mate_activity=`echo ${online_results} | jq '.valueSearchResult' -`
-    echo "`date` INFO: Mate activity state is: ${mate_activity}"
+    echo "`date` INFO: Mate activity state is: ${mate_activity}" >> $log_file
 
     run_time=$((${count} * ${pause}))
     case "${mate_activity}" in
       "\"Active\"")
-        echo "`date` INFO: Redundancy is up end-to-end, Backup Active, after ${run_time} seconds"
+        echo "`date` INFO: Redundancy is up end-to-end, Backup Active, after ${run_time} seconds" >> $log_file
         mate_active_check="Standby"
         break
         ;;
       "\"Standby\"")
-        echo "`date` INFO: Redundancy is up end-to-end, Primary Active, after ${run_time} seconds"
+        echo "`date` INFO: Redundancy is up end-to-end, Primary Active, after ${run_time} seconds" >> $log_file
         mate_active_check="Active"
         break
         ;;
     esac
     ((count++))
-    echo "`date` INFO: Waited ${run_time} seconds, Redundancy not yet up"
+    echo "`date` INFO: Waited ${run_time} seconds, Redundancy not yet up" >> $log_file
     sleep ${pause}
   done
 
   if [ ${count} -eq ${loop_guard} ]; then
     echo "`date` ERROR: Solace redundancy group never came up" | tee /dev/stderr
-    exit 1 
+    echo "`date` ERROR: Solace redundancy group never came up" >> $log_file
+    exit 1
   fi
 
  /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
