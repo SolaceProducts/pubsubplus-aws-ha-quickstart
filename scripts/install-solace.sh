@@ -68,7 +68,7 @@ SolOS_LOAD=${SOLOS_INFO[1]}
 echo "`date` INFO: Reference md5sum is: ${MD5_SUM}"
 
 wget -q -O solace-redirect ${solace_url}
-REAL_LINK=`egrep -o "https://[a-zA-Z0-9\.\/\_\?\=]*" ${solace_directory}/solace-redirect`
+REAL_LINK=`egrep -o "https://[a-zA-Z0-9\.\/\_\?\=%]*" ${solace_directory}/solace-redirect`
 wget -q -O  ${solace_directory}/${SolOS_LOAD} ${REAL_LINK}
 cd ${solace_directory}
 LOCAL_OS_INFO=`md5sum ${SolOS_LOAD}`
