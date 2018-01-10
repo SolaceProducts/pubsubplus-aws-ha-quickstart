@@ -3,11 +3,23 @@
     "Description": "CloudFormation sub-template for Single Node EC2 deployment within Solace HA Cluster",
     "Parameters": {
         "SolaceDockerURL": {
-            "Description": "Require URL to enterprise or Evaluation VMR, not Community",
+            "Description": "Required URL to enterprise or Evaluation VMR, not Community",
             "Type": "String"
         },
         "AdminPassword": {
-            "Description": "Require password to access SolOS admin console and SEMP",
+            "Description": "Required password to access SolOS admin console and SEMP",
+            "Type": "String"
+        },
+        "ContainerLoggingFormat": {
+            "AllowedValues": [
+                "graylog",
+                "legacy",
+                "raw",
+                "rfc5424"
+            ],
+            "ConstraintDescription": "Must be a valid container logging format.",
+            "Default": "graylog",
+            "Description": "Solace VMR logging format in CloudWatch",
             "Type": "String"
         },
         "BootDiskSize": {
@@ -281,6 +293,12 @@
                         "file = /var/log/cfn-wire.log\n",
                         "log_group_name = ", { "Ref": "CloudFormationLogs" }, "\n",
                         "log_stream_name = {instance_id}/cfn-wire.log\n",
+                        "datetime_format = \n",
+
+                        "[/var/log/solace-vmrs.log]\n",
+                        "file = /var/log/solace-vmrs.log\n",
+                        "log_group_name = ", { "Ref": "CloudFormationLogs" }, "\n",
+                        "log_stream_name = {instance_id}/solace-vmrs.log\n",
                         "datetime_format = \n"
                         ] ] },
                         "mode": "000444",
@@ -618,6 +636,11 @@
                                 "  -s ",
                                    { "Ref": "PersistentStorage" },
                                 "  -v /dev/xvdb",
+                                "  -f ",
+                                    { "Ref": "ContainerLoggingFormat" },
+                                "  -g ",
+                                    { "Ref": "CloudFormationLogs" },
+                                "  -r ${instance_id}/solace-vmrs.log",
                                 " \n",
                                 "## Signal back information for outputs (now that all nodes are up) \n",
                                 "/opt/aws/bin/cfn-signal -e 0 -r 'Solace HA deployment complete' '",

@@ -10,7 +10,8 @@
                     },
                     "Parameters": [
                         "SolaceDockerURL",
-                        "AdminPassword"
+                        "AdminPassword",
+                        "ContainerLoggingFormat"
                     ]
                 },
                 {
@@ -68,6 +69,9 @@
                 "AdminPassword": {
                     "default": "Password to access SolOS admin console and SEMP"
                 },
+                "ContainerLoggingFormat": {
+                    "default": "Container logging format"
+                },
                 "AvailabilityZones": {
                     "default": "Availability Zones"
                 },
@@ -108,6 +112,18 @@
         },
         "AdminPassword": {
             "Description": "Require password to access SolOS admin console and SEMP",
+            "Type": "String"
+        },
+        "ContainerLoggingFormat": {
+            "AllowedValues": [
+                "graylog",
+                "legacy",
+                "raw",
+                "rfc5424"
+            ],
+            "ConstraintDescription": "Must be a valid container logging format.",
+            "Default": "graylog",
+            "Description": "Solace VMR logging format in CloudWatch",
             "Type": "String"
         },
         "AvailabilityZones": {
@@ -377,6 +393,9 @@
                     },
                     "AdminPassword": {
                         "Ref": "AdminPassword"
+                    },
+                    "ContainerLoggingFormat": {
+                        "Ref": "ContainerLoggingFormat"
                     },
                     "NumberOfAZs": {
                         "Ref": "NumberOfAZs"

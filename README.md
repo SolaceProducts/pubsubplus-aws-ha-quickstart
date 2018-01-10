@@ -54,6 +54,7 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | **Solace Parameters**      |  |
 | SolaceDockerURL            | URL cut and paste from the registration email |
 | AdminPassword              | Password to allow SolOS access to configure the Solace Message Router instances |
+| ContainerLoggingFormat     | The format of the logs produced by the VMR into CloudWatch |
 | **Network Parameters**     |  |
 | AvailabilityZones          | Pick 3 AZs from the drop down menue, alternativey pick 2 for PoC or limited Region |
 | NumberOfAZs                | Default is 3 unless only 2 AZs are selected above |

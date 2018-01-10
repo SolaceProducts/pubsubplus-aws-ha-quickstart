@@ -27,11 +27,14 @@ disk_size=""
 volume=""
 DEBUG="-vvvv"
 is_primary="false"
+logging_format=""
+logging_group=""
+logging_stream=""
 log_file="/tmp/install-solace.log"
 
 verbose=0
 
-while getopts "c:d:p:s:u:v:" opt; do
+while getopts "c:d:p:s:u:v:f:g:r:" opt; do
     case "$opt" in
     c)  config_file=$OPTARG
         ;;
@@ -45,6 +48,12 @@ while getopts "c:d:p:s:u:v:" opt; do
         ;;
     v)  volume=$OPTARG
         ;;
+    f) logging_format=$OPTARG
+        ;;
+    g) logging_group=$OPTARG
+        ;;
+    r) logging_stream=$OPTARG
+        ;;
     esac
 done
 
@@ -52,8 +61,12 @@ shift $((OPTIND-1))
 [ "$1" = "--" ] && shift
 
 verbose=1
-echo "config_file=$config_file ,solace_directory=$solace_directory ,admin_password_file=$admin_password_file, \
-      solace_url=$solace_url ,disk_size=$disk_size , volume=$volume ,Leftovers: $@" >> $log_file
+echo "config_file=$config_file , solace_directory=$solace_directory , admin_password_file=$admin_password_file , \
+      solace_url=$solace_url , disk_size=$disk_size , volume=$volume , logging_format=$logging_format , \
+      logging_group=$logging_group , logging_stream=$logging_stream , Leftovers: $@" >> $log_file
+
+alias vmrcli='sudo docker exec -it solace /usr/sw/loads/currentload/bin/cli -A'
+alias vmrshell='sudo docker exec -it solace /bin/bash'
 
 export admin_password=`cat ${admin_password_file}`
 rm ${admin_password_file}
@@ -173,13 +186,24 @@ docker create \
    --ulimit core=-1 \
    --ulimit memlock=-1 \
    --ulimit nofile=2448:1048576 \
-   --cap-add=IPC_LOCK \
-   --cap-add=SYS_NICE \
    --net=host \
    --restart=always \
    -v jail:/usr/sw/jail \
    -v var:/usr/sw/var \
    ${SPOOL_MOUNT} \
+   --log-driver=awslogs \
+   --log-opt awslogs-group=${logging_group} \
+   --log-opt awslogs-stream=${logging_stream} \
+   --env "logging_debug_output=all" \
+   --env "logging_debug_format=${logging_format}" \
+   --env "logging_command_output=all" \
+   --env "logging_command_format=${logging_format}" \
+   --env "logging_system_output=all" \
+   --env "logging_system_format=${logging_format}" \
+   --env "logging_event_output=all" \
+   --env "logging_event_format=${logging_format}" \
+   --env "logging_kernel_output=all" \
+   --env "logging_kernel_format=${logging_format}" \
    --env "nodetype=${NODE_TYPE}" \
    --env "routername=${ROUTER_NAME}" \
    --env "username_admin_globalaccesslevel=admin" \
@@ -210,11 +234,11 @@ loop_guard=45
 pause=10
 count=0
 mate_active_check=""
-echo "`date` INFO: Wait for Primary to be 'Local Active' or 'Mate Active'" >> $log_file
 if [ "${is_primary}" = "true" ]; then
+  echo "`date` INFO: Wait for Primary to be 'Local Active' or 'Mate Active'" >> $log_file
   while [ ${count} -lt ${loop_guard} ]; do
-    online_results=`./semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc semp-version='soltr/8_5VMR'><show><redundancy><detail/></redundancy></show></rpc>" \
+    online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
+         -q "<rpc><show><redundancy><detail/></redundancy></show></rpc>" \
          -v "/rpc-reply/rpc/show/redundancy/virtual-routers/primary/status/activity[text()]"`
 
     local_activity=`echo ${online_results} | jq '.valueSearchResult' -`
@@ -249,8 +273,8 @@ if [ "${is_primary}" = "true" ]; then
   count=0
   echo "`date` INFO: Wait for Backup to be 'Active' or 'Standby'" >> $log_file
   while [ ${count} -lt ${loop_guard} ]; do
-    online_results=`./semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc semp-version='soltr/8_5VMR'><show><redundancy><detail/></redundancy></show></rpc>" \
+    online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
+         -q "<rpc><show><redundancy><detail/></redundancy></show></rpc>" \
          -v "/rpc-reply/rpc/show/redundancy/virtual-routers/primary/status/detail/priority-reported-by-mate/summary[text()]"`
 
     mate_activity=`echo ${online_results} | jq '.valueSearchResult' -`
@@ -281,7 +305,7 @@ if [ "${is_primary}" = "true" ]; then
   fi
 
  /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc semp-version='soltr/8_5VMR'><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
+         -q "<rpc><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
  /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc semp-version='soltr/8_5VMR'><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
+         -q "<rpc><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
 fi
