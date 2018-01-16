@@ -74,15 +74,26 @@ rm ${admin_password_file}
 mkdir $solace_directory
 cd $solace_directory
 echo "`date` INFO: Configure VMRs Started" >> $log_file
+
 echo "`date` INFO: check to make sure we have a complete load" >> $log_file
-wget -O ${solace_directory}/solos.info -nv  ${solace_url}.md5
+if [[ ${solace_url} == *"solace.com"* ]]; then
+    # a redirect link provided by solace
+    wget -O ${solace_directory}/solos.info -nv  https://products.solace.com/download/VMR_DOCKER_EVAL_MD5
+else
+    # an already-existing load (plus its md5 file) hosted somewhere else (e.g. in an s3 bucket)
+    wget -O ${solace_directory}/solos.info -nv  ${solace_url}.md5
+fi
 IFS=' ' read -ra SOLOS_INFO <<< `cat ${solace_directory}/solos.info`
 MD5_SUM=${SOLOS_INFO[0]}
 SolOS_LOAD=${SOLOS_INFO[1]}
 echo "`date` INFO: Reference md5sum is: ${MD5_SUM}" >> $log_file
 
 wget -q -O solace-redirect ${solace_url}
-REAL_LINK=${solace_url}
+if [[ ${solace_url} == *"solace.com"* ]]; then
+    REAL_LINK=`egrep -o "https://[a-zA-Z0-9\.\/\_\?\=%]*" ${solace_directory}/solace-redirect`
+else
+    REAL_LINK=${solace_url}
+fi
 wget -q -O  ${solace_directory}/${SolOS_LOAD} ${REAL_LINK}
 cd ${solace_directory}
 LOCAL_OS_INFO=`md5sum ${SolOS_LOAD}`
