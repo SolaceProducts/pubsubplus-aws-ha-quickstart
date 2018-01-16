@@ -142,7 +142,8 @@
                 "m3.xlarge",
                 "m4.large",
                 "m4.xlarge",
-                "c4.xlarge"
+                "c4.xlarge",
+                "m4.4xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
@@ -173,7 +174,8 @@
                 "m3.xlarge",
                 "m4.large",
                 "m4.xlarge",
-                "c4.xlarge"
+                "c4.xlarge",
+                "m4.4xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
@@ -756,6 +758,14 @@
                     },
                     {
                         "IpProtocol": "tcp",
+                        "FromPort": "5550",
+                        "ToPort": "5550",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
                         "FromPort": "8080",
                         "ToPort": "8080",
                         "CidrIp": {
@@ -788,22 +798,28 @@
                 "Count": "1"
             }
         },
-        "PrimaryELB": {
+        "ELB": {
             "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
             "DependsOn": ["MessageRouterPrimaryStack"],
             "Condition": "UsePrivateSubnetsCondition",
             "Properties":{
                 "SecurityGroups": [{ "Ref" : "MessageRouterSecurityGroup"}],
-                "Subnets" : [
-                    {"Fn::Select":
-                        [
-                            0,
-                            { "Ref": "PublicSubnetIDs" }
-                        ]
-                    }
+                "Subnets" : { "Ref": "PublicSubnetIDs" },
+                "Instances" : [
+                    {"Fn::GetAtt": ["MessageRouterPrimaryStack","Outputs.EC2ID"]},
+                    {"Fn::GetAtt": ["MessageRouterBackupStack","Outputs.EC2ID"]},
+                    {"Fn::GetAtt": ["MonitorStack","Outputs.EC2ID"]}
                 ],
-                "Instances" : [{"Fn::GetAtt": ["MessageRouterPrimaryStack","Outputs.EC2ID"]}],          
-                "Listeners" : [ 
+                "HealthCheck" : {
+                    "Target" : {
+                        "Fn::Join" : [ "", [ "HTTP:", 5550, "/health-check/guaranteed-active" ] ]
+                    },
+                    "HealthyThreshold" : "2",
+                    "UnhealthyThreshold" : "2",
+                    "Timeout" : "6",
+                    "Interval" : "10",
+                },
+                "Listeners" : [
                     {
                     "LoadBalancerPort" : "55555",
                     "InstancePort" : "55555",
@@ -823,42 +839,6 @@
                     }
                 ]
             }
-        },
-         "BackupELB": {
-            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
-            "DependsOn": ["MessageRouterBackupStack"],
-            "Condition": "UsePrivateSubnetsCondition",
-            "Properties":{
-                "SecurityGroups": [{ "Ref" : "MessageRouterSecurityGroup"}],
-                "Subnets" : [
-                    {"Fn::Select":
-                        [
-                            1,
-                            { "Ref": "PublicSubnetIDs" }
-                        ]
-                    }
-                ],
-                "Instances" : [{"Fn::GetAtt": ["MessageRouterBackupStack","Outputs.EC2ID"]}],
-                "Listeners" : [ 
-                    {
-                    "LoadBalancerPort" : "55555",
-                    "InstancePort" : "55555",
-                    "Protocol" : "TCP"
-                    },{
-                    "LoadBalancerPort" : "1883",
-                    "InstancePort" : "1883",
-                    "Protocol" : "TCP"                    
-                    },{               
-                    "LoadBalancerPort" : "8080",
-                    "InstancePort" : "8080",
-                    "Protocol" : "HTTP"                    
-                    },{               
-                    "LoadBalancerPort" : "80",
-                    "InstancePort" : "80",
-                    "Protocol" : "HTTP"                    
-                    } 
-                ]
-            }
-        }       
+        }
     }
 }

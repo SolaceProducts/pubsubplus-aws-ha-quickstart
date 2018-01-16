@@ -65,8 +65,9 @@ echo "config_file=$config_file , solace_directory=$solace_directory , admin_pass
       solace_url=$solace_url , disk_size=$disk_size , volume=$volume , logging_format=$logging_format , \
       logging_group=$logging_group , logging_stream=$logging_stream , Leftovers: $@" >> $log_file
 
-alias vmrcli='sudo docker exec -it solace /usr/sw/loads/currentload/bin/cli -A'
-alias vmrshell='sudo docker exec -it solace /bin/bash'
+# add aliases to access the Solace VMR container shell and CLI
+echo "alias vmr-cli='sudo docker exec -it solace /usr/sw/loads/currentload/bin/cli -A'" >> /home/ec2-user/.bashrc
+echo "alias vmr-shell='sudo docker exec -it solace /bin/bash --login'" >> /home/ec2-user/.bashrc
 
 export admin_password=`cat ${admin_password_file}`
 rm ${admin_password_file}
@@ -238,7 +239,7 @@ if [ "${is_primary}" = "true" ]; then
   echo "`date` INFO: Wait for Primary to be 'Local Active' or 'Mate Active'" >> $log_file
   while [ ${count} -lt ${loop_guard} ]; do
     online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc><show><redundancy><detail/></redundancy></show></rpc>" \
+         -q "<rpc semp-version='soltr/8_7VMR'><show><redundancy><detail/></redundancy></show></rpc>" \
          -v "/rpc-reply/rpc/show/redundancy/virtual-routers/primary/status/activity[text()]"`
 
     local_activity=`echo ${online_results} | jq '.valueSearchResult' -`
@@ -274,7 +275,7 @@ if [ "${is_primary}" = "true" ]; then
   echo "`date` INFO: Wait for Backup to be 'Active' or 'Standby'" >> $log_file
   while [ ${count} -lt ${loop_guard} ]; do
     online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc><show><redundancy><detail/></redundancy></show></rpc>" \
+         -q "<rpc semp-version='soltr/8_7VMR'><show><redundancy><detail/></redundancy></show></rpc>" \
          -v "/rpc-reply/rpc/show/redundancy/virtual-routers/primary/status/detail/priority-reported-by-mate/summary[text()]"`
 
     mate_activity=`echo ${online_results} | jq '.valueSearchResult' -`
@@ -305,7 +306,7 @@ if [ "${is_primary}" = "true" ]; then
   fi
 
  /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
+         -q "<rpc semp-version='soltr/8_7VMR'><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
  /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
+         -q "<rpc semp-version='soltr/8_7VMR'><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
 fi

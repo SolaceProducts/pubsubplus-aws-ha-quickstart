@@ -55,7 +55,8 @@
                 "m3.xlarge",
                 "m4.large",
                 "m4.xlarge",
-                "c4.xlarge"
+                "c4.xlarge",
+                "m4.4xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
