@@ -150,15 +150,18 @@
         },
         "MessageRouterNodeInstanceType": {
             "AllowedValues": [
-                "t2.medium",
                 "t2.large",
                 "t2.xlarge",
                 "m3.large",
                 "m3.xlarge",
                 "m4.large",
                 "m4.xlarge",
-                "c4.xlarge",
-                "m4.4xlarge"
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m5.xlarge",
+                "m5.2xlarge",
+                "m5.4xlarge",
+                "c4.xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
@@ -214,8 +217,12 @@
                 "m3.xlarge",
                 "m4.large",
                 "m4.xlarge",
-                "c4.xlarge",
-                "m4.4xlarge"
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m5.xlarge",
+                "m5.2xlarge",
+                "m5.4xlarge",
+                "c4.xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",

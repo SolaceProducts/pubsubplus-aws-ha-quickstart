@@ -142,8 +142,12 @@
                 "m3.xlarge",
                 "m4.large",
                 "m4.xlarge",
-                "c4.xlarge",
-                "m4.4xlarge"
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m5.xlarge",
+                "m5.2xlarge",
+                "m5.4xlarge",
+                "c4.xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
@@ -174,8 +178,12 @@
                 "m3.xlarge",
                 "m4.large",
                 "m4.xlarge",
-                "c4.xlarge",
-                "m4.4xlarge"
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m5.xlarge",
+                "m5.2xlarge",
+                "m5.4xlarge",
+                "c4.xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
@@ -814,10 +822,10 @@
                     "Target" : {
                         "Fn::Join" : [ "", [ "HTTP:", 5550, "/health-check/guaranteed-active" ] ]
                     },
-                    "HealthyThreshold" : "2",
+                    "Timeout" : "3",
+                    "Interval" : "5",
                     "UnhealthyThreshold" : "2",
-                    "Timeout" : "6",
-                    "Interval" : "10",
+                    "HealthyThreshold" : "2",
                 },
                 "Listeners" : [
                     {
@@ -825,17 +833,53 @@
                     "InstancePort" : "55555",
                     "Protocol" : "TCP"
                     },{
+                    "LoadBalancerPort" : "55003",
+                    "InstancePort" : "55003",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "55443",
+                    "InstancePort" : "55443",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "443",
+                    "InstancePort" : "443",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "8883",
+                    "InstancePort" : "8883",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "8000",
+                    "InstancePort" : "8000",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "8443",
+                    "InstancePort" : "8443",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "5672",
+                    "InstancePort" : "5672",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "5671",
+                    "InstancePort" : "5671",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "9000",
+                    "InstancePort" : "9000",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "9443",
+                    "InstancePort" : "9443",
+                    "Protocol" : "TCP"
+                    },{
                     "LoadBalancerPort" : "1883",
                     "InstancePort" : "1883",
-                    "Protocol" : "TCP"                    
-                    },{               
-                    "LoadBalancerPort" : "8080",
-                    "InstancePort" : "8080",
-                    "Protocol" : "HTTP"                    
-                    },{               
+                    "Protocol" : "TCP"
+                    },{
                     "LoadBalancerPort" : "80",
                     "InstancePort" : "80",
-                    "Protocol" : "HTTP"                    
+                    "Protocol" : "HTTP"
                     }
                 ]
             }

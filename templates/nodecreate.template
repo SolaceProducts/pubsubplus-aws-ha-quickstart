@@ -48,16 +48,6 @@
             "Type": "String"
         },
         "NodeInstanceType": {
-            "AllowedValues": [
-                "t2.large",
-                "t2.xlarge",
-                "m3.large",
-                "m3.xlarge",
-                "m4.large",
-                "m4.xlarge",
-                "c4.xlarge",
-                "m4.4xlarge"
-            ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
             "Description": "Instance Type for Kafka brokers; select m3/m4 or i2 instance types for us-west-1 and sa-east-1",
@@ -374,9 +364,15 @@
                         }
                     }
                 },
+
                 "install_solace" : {
+                        "commands" : {
+                        "01_create_secrets_directory" : {
+                            "command" : "mkdir -p /mnt/vmr/secrets"
+                        }
+                        },
                         "files": {
-                            "/tmp/solOSpasswd": {
+                            "/mnt/vmr/secrets/solOSpasswd": {
                                 "content" : { "Ref": "AdminPassword" }
                             },
                             "/tmp/gen-cluster-hosts.sh": {
@@ -633,7 +629,7 @@
                                 "$AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/solace",
                                 "  -u ",
                                     { "Ref": "SolaceDockerURL" },
-                                "  -p /tmp/solOSpasswd",
+                                "  -p /mnt/vmr/secrets/solOSpasswd",
                                 "  -s ",
                                    { "Ref": "PersistentStorage" },
                                 "  -v /dev/xvdb",

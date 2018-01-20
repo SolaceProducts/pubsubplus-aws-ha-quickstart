@@ -70,7 +70,6 @@ echo "alias vmr-cli='sudo docker exec -it solace /usr/sw/loads/currentload/bin/c
 echo "alias vmr-shell='sudo docker exec -it solace /bin/bash --login'" >> /home/ec2-user/.bashrc
 
 export admin_password=`cat ${admin_password_file}`
-rm ${admin_password_file}
 mkdir $solace_directory
 cd $solace_directory
 echo "`date` INFO: Configure VMRs Started" >> $log_file
@@ -105,7 +104,6 @@ else
     echo "`date` INFO: Successfully downloaded ${SolOS_LOAD}" >> $log_file
 fi
 
-
 # Make sure Docker is actually up
 docker_running=""
 loop_guard=6
@@ -122,6 +120,7 @@ while [ ${loop_count} != ${loop_guard} ]; do
     fi
 done
 
+echo "`date` INFO: Executing 'docker load'" >> $log_file
 docker load -i ${solace_directory}/${SolOS_LOAD}
 
 export VMR_VERSION=`docker images | grep solace | awk '{print $3}'`
@@ -192,6 +191,7 @@ else
 fi
 
 # Start up the SolOS docer instance with HA config keys
+echo "`date` INFO: Executing 'docker create'" >> $log_file
 docker create \
    --uts=host \
    --shm-size 2g \
@@ -202,6 +202,7 @@ docker create \
    --restart=always \
    -v jail:/usr/sw/jail \
    -v var:/usr/sw/var \
+   -v /mnt/vmr/secrets:/run/secrets \
    ${SPOOL_MOUNT} \
    --log-driver=awslogs \
    --log-opt awslogs-group=${logging_group} \
@@ -219,10 +220,10 @@ docker create \
    --env "nodetype=${NODE_TYPE}" \
    --env "routername=${ROUTER_NAME}" \
    --env "username_admin_globalaccesslevel=admin" \
-   --env "username_admin_password=${admin_password}" \
+   --env "username_admin_passwordfilepath=$(basename ${admin_password_file})" \
    --env "service_ssh_port=2222" \
    ${REDUNDANCY_CFG} \
-   --env "redundancy_group_password=${admin_password}" \
+   --env "redundancy_group_passwordfilepath=$(basename ${admin_password_file})" \
    --env "redundancy_enable=yes" \
    --env "redundancy_group_node_primary_nodetype=message_routing" \
    --env "redundancy_group_node_primary_connectvia=${PRIMARY_IP}" \
@@ -232,17 +233,44 @@ docker create \
    --env "redundancy_group_node_monitor_connectvia=${MONITOR_IP}" \
    --name=solace ${VMR_VERSION}
 
-
 #Start the solace service and enable it at system start up.
 chkconfig --add solace-vmr
+echo "`date` INFO: Starting Solace service" >> $log_file
 service solace-vmr start
 
+# Poll the VMR SEMP port until it is Up
 loop_guard=30
 pause=10
 count=0
+echo "`date` INFO: Wait for the VMR SEMP service to be enabled" >> $log_file
+while [ ${count} -lt ${loop_guard} ]; do
+  online_results=`/tmp/semp_query.sh -n admin -p admin -u http://localhost:8080/SEMP \
+    -q "<rpc semp-version='soltr/8_7VMR'><show><service/></show></rpc>" \
+    -v "/rpc-reply/rpc/show/service/services/service[name='SEMP']/enabled[text()]"`
+  is_vmr_up=`echo ${online_results} | jq '.valueSearchResult' -`
+  echo "`date` INFO: SEMP service 'enabled' status is: ${is_vmr_up}" >> $log_file
+  run_time=$((${count} * ${pause}))
+  if [ "${is_vmr_up}" = "\"true\"" ]; then
+      echo "`date` INFO: VMR SEMP service is up, after ${run_time} seconds" >> $log_file
+      break
+  fi
+  ((count++))
+  echo "`date` INFO: Waited ${run_time} seconds, VMR SEMP service not yet up" >> $log_file
+  sleep ${pause}
+done
 
+# Remove all VMR Secrets from the host; at this point, the VMR should have come up
+# and it won't be needing those files anymore
+rm ${admin_password_file}
 
-loop_guard=45
+if [ ${count} -eq ${loop_guard} ]; then
+  echo "`date` ERROR: Solace VMR SEMP service never came up" | tee /dev/stderr
+  echo "`date` ERROR: Solace VMR SEMP service never came up" >> $log_file
+  exit 1
+fi
+
+# Poll the redundancy status on the Primary VMR
+loop_guard=30
 pause=10
 count=0
 mate_active_check=""
@@ -316,8 +344,8 @@ if [ "${is_primary}" = "true" ]; then
     exit 1
   fi
 
- /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc semp-version='soltr/8_7VMR'><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
- /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc semp-version='soltr/8_7VMR'><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
+  /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
+    -q "<rpc semp-version='soltr/8_7VMR'><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
+  /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
+    -q "<rpc semp-version='soltr/8_7VMR'><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
 fi
