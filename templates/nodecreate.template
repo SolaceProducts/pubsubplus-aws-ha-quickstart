@@ -181,10 +181,6 @@
                 "IOPs": "20000"
             }
         }
-
-
-
-
     },
     "Conditions": {
         "EphemeralStorage": {

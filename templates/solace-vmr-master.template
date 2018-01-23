@@ -193,7 +193,7 @@
                 "false"
             ],
             "Default": "true",
-            "Description": "Whether to create and use Private Subnets with fronting ELBs",
+            "Description": "Whether to create and use Private Subnets with a fronting ELB",
             "Type": "String"
         },
         "RemoteAccessCIDR": {

@@ -52,13 +52,13 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 |----------------------------|--------------------------------------------------------------------------------|
 | Stack name                 | Default is Solace-HA, any unique name will suffice |
 | **Solace Parameters**      |  |
-| SolaceDockerURL            | URL cut and paste from the registration email |
+| SolaceDockerURL            | URL cut and paste from the registration email. Also accepts SolOS versions hosted elsewhere |
 | AdminPassword              | Password to allow SolOS access to configure the Solace Message Router instances |
 | ContainerLoggingFormat     | The format of the logs produced by the VMR into CloudWatch |
 | **Network Parameters**     |  |
 | AvailabilityZones          | Pick 3 AZs from the drop down menue, alternativey pick 2 for PoC or limited Region |
 | NumberOfAZs                | Default is 3 unless only 2 AZs are selected above |
-| ProductionEnv              | True will create Private subnets and accompanying public ELBs if prod deployment |
+| ProductionEnv              | True will create Private subnets and accompanying public ELB with health-check if prod deployment |
 | RemoteAccessCIDR           | IP range that can send/recieve messages, use 0.0.0.0/0 if unsure |
 | SSHAccessCIDR              | IP range that can configure VMR, use 0.0.0.0/0 if unsure |
 | **EC2 Parameters**         |  |

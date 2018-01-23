@@ -11,15 +11,15 @@
                         "AdminPassword",
                         "ContainerLoggingFormat"
                     ]
-                },                
+                },
                 {
                     "Label": { "default": "Network Configuration" },
                     "Parameters": [
                         "VPCID",
                         "NumberOfAZs",
-                        "UsePrivateSubnets",                    
+                        "UsePrivateSubnets",
                         "PublicSubnetIDs",
-                        "PrivateSubnetIDs",                       
+                        "PrivateSubnetIDs",
                         "RemoteAccessCIDR",
                         "SSHSecurityGroupID"
                     ]
@@ -224,7 +224,7 @@
             "Type": "String"
         },
         "PrivateSubnetIDs": {
-            "Description": "Comma separated list of VPC private subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access",
+            "Description": "Comma separated list of VPC private subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access. Note: This will be skipped if 'Use private subnets' is set to 'false'",
             "Type": "List<AWS::EC2::Subnet::Id>"
         },
          "PublicSubnetIDs": {
