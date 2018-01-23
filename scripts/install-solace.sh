@@ -254,7 +254,7 @@ pause=10
 count=0
 echo "`date` INFO: Wait for the VMR SEMP service to be enabled"
 while [ ${count} -lt ${loop_guard} ]; do
-  online_results=`/tmp/semp_query.sh -n admin -p admin -u http://localhost:8080/SEMP \
+  online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
     -q "<rpc semp-version='soltr/8_7VMR'><show><service/></show></rpc>" \
     -v "/rpc-reply/rpc/show/service/services/service[name='SEMP']/enabled[text()]"`
   is_vmr_up=`echo ${online_results} | jq '.valueSearchResult' -`

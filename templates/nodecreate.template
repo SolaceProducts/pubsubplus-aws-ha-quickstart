@@ -369,7 +369,9 @@
                         },
                         "files": {
                             "/mnt/vmr/secrets/solOSpasswd": {
-                                "content" : { "Ref": "AdminPassword" }
+                                "content": { "Fn::Join": [ "", [
+                                     { "Ref" : "AdminPassword" }, "\n"
+                                ] ] },
                             },
                             "/tmp/gen-cluster-hosts.sh": {
                                 "source": {
