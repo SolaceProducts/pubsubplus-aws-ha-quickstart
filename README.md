@@ -79,11 +79,21 @@ Acknoledge that resources will be created and select [Create] in bottom right co
 
 ![alt text](https://raw.githubusercontent.com/SolaceLabs/solace-aws-ha-quickstart/master/images/capabilities.png "Create Stack")
 
+# Gaining admin access to the VMR
+
+For persons used to working with Solace message router console access, this is still available with the AWS EC2 instance:
+
+* Log in to the Linux Bastion Host by issuing `ssh -i <key-pair-file-path> ec2-user@<bastion-elastic-ip>` from a terminal window
+* Save a copy of the Key Pair file used during deployment onto the Linux Bastion Host. The key must not be publicaly viewable, so issue `chmod 400 <key-pair-file-path>`
+* Under the EC2 Dashboard, go to the EC2 instance you would like to log in to and click on the "Connect" button. Copy the SSH command from the "Example" snippet that pops up.
+* On the Linux Bastion Host, issue the SSH command to log in to the host. Make sure the path to the Key Pair file is correct.
+* From the host you can log in to the SolOS CLI session by issuing `sudo docker exec -it solace /usr/sw/loads/currentload/bin/cli -A`
+
 # About Quick Starts
 
 Quick Starts are automated reference deployments for key workloads on the AWS Cloud. Each Quick Start launches, configures, and runs the AWS compute, network, storage, and other services required to deploy a specific workload on AWS, using AWS best practices for security and availability.
 
-# Testing data access to the ha cluster
+# Testing data access to the HA cluster
 
 To test data traffic though the newly created VMR instances, visit the Solace developer portal and select your preferred programming language to [send and receive messages](http://dev.solace.com/get-started/send-receive-messages/). Under each language there is a Publish/Subscribe tutorial that will help you get started.
 
