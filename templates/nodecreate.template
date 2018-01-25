@@ -282,10 +282,10 @@
                         "log_stream_name = {instance_id}/cfn-wire.log\n",
                         "datetime_format = \n",
 
-                        "[/var/log/solace-vmrs.log]\n",
-                        "file = /var/log/solace-vmrs.log\n",
+                        "[/var/log/solace-vmr.log]\n",
+                        "file = /var/log/solace-vmr.log\n",
                         "log_group_name = ", { "Ref": "CloudFormationLogs" }, "\n",
-                        "log_stream_name = {instance_id}/solace-vmrs.log\n",
+                        "log_stream_name = {instance_id}/solace-vmr.log\n",
                         "datetime_format = \n"
                         ] ] },
                         "mode": "000444",
@@ -635,7 +635,7 @@
                                     { "Ref": "ContainerLoggingFormat" },
                                 "  -g ",
                                     { "Ref": "CloudFormationLogs" },
-                                "  -r ${instance_id}/solace-vmrs.log",
+                                "  -r ${instance_id}/solace-vmr.log",
                                 " \n",
                                 "## Signal back information for outputs (now that all nodes are up) \n",
                                 "/opt/aws/bin/cfn-signal -e 0 -r 'Solace HA deployment complete' '",

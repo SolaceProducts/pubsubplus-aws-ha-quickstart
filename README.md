@@ -12,6 +12,22 @@ Alternatively this quickstart can create Solace VMRs in an environment suitable 
 
 To learn more about connectivity to the HA redundancy group see the AWS [VPC Gateway Documentation](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html).
 
+# Minimum Resource Requirements
+Below is the list of AWS resources that will be deployed by the Quick Start. Please consult the [Amazon VPC Limits](https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Appendix_Limits.html) page and ensure that your AWS region is within the limit range per resource before launching:
+
+| Resource                   | Deploy |
+|----------------------------|--------|
+| VPCs                       |   1    |
+| subnets                    |   6    |
+| Elastic IPs                |   5    |
+| Internet Gateways          |   1    |
+| NAT Gateways               |   3    |
+| Running Instances          |   5    |
+| Route Tables               |   5    |
+| Network ACLs               |   1    |
+| Endpoints                  |   1    |
+| Security Groups            |   6    |
+
 # How to Deploy a VMR HA 
 This is a two step process:
 
@@ -52,7 +68,7 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 |----------------------------|--------------------------------------------------------------------------------|
 | Stack name                 | Default is Solace-HA, any unique name will suffice |
 | **Solace Parameters**      |  |
-| SolaceDockerURL            | URL cut and paste from the registration email. Also accepts SolOS versions hosted elsewhere |
+| SolaceDockerURL            | URL from the registration email. Can also use SolOS versions hosted remotely (if so, a .md5 file needs to be created in the same remote directory) |
 | AdminPassword              | Password to allow SolOS access to configure the Solace Message Router instances |
 | ContainerLoggingFormat     | The format of the logs produced by the VMR into CloudWatch |
 | **Network Parameters**     |  |
@@ -65,7 +81,7 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | KeyPairName                | Pick from your exisitng key pairs, create new AWSW key pair if required |
 | BootDiskSize               | Default is 24GB minimum is 20GB |
 | MessageRouterNodeInstance  | Default is t2.large which is the minimum |
-| MessageRouterNodeStorage   | Default is 0 which means ephemeral, non-zero will cause new io1 disk creation for message-spool |
+| MessageRouterNodeStorage   | Default is 0 which means ephemeral, non-zero will cause new io1 disk creation for message-spool which will not delete on stack termination |
 | MonitorNodeInstance        | Default is t2.large which is the minimum | 
 | **AWS QuickStart Config**  |  |
 | QSS3BucketName             | Leave at default |
@@ -83,11 +99,29 @@ Acknoledge that resources will be created and select [Create] in bottom right co
 
 For persons used to working with Solace message router console access, this is still available with the AWS EC2 instance:
 
-* Log in to the Linux Bastion Host by issuing `ssh -i <key-pair-file-path> ec2-user@<bastion-elastic-ip>` from a terminal window
-* Save a copy of the Key Pair file used during deployment onto the Linux Bastion Host. The key must not be publicaly viewable, so issue `chmod 400 <key-pair-file-path>`
-* Under the EC2 Dashboard, go to the EC2 instance you would like to log in to and click on the "Connect" button. Copy the SSH command from the "Example" snippet that pops up.
-* On the Linux Bastion Host, issue the SSH command to log in to the host. Make sure the path to the Key Pair file is correct.
-* From the host you can log in to the SolOS CLI session by issuing `sudo docker exec -it solace /usr/sw/loads/currentload/bin/cli -A`
+* Copy the Key Pair file used during deployment (KeyPairName) to the Linux Bastion Host. The key must not be publicaly viewable.
+```sh
+chmod 400 <key.pem>
+scp -i <key.pem> <key.pem> ec2-user@<bastion-elastic-ip>:/home/ec2-user
+```
+* Log in to the Linux Bastion Host
+```sh
+ssh -i <key.pem> ec2-user@<bastion-elastic-ip>
+```
+* From the Linux Bastion Host, SSH to your desired EC2 host that is running the Solace VMR.
+```sh
+ssh -i <key.pem> ec2-user@<ec2-host>
+```
+* From the host, log in to the SolOS CLI
+```sh
+sudo docker exec -it solace /usr/sw/loads/currentload/bin/cli -A
+```
+
+# Solace VMR Logs
+
+Both host and container logs get logged to [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/) on the region where the deployment occurred. The Solace VMR logs can be found under the `*/solace-vmr.log` log stream. The `ContainerLoggingFormat` field can be used to control the log output format.
+
+![alt text](/images/CloudWatch_logging.png "CloudWatch Logging")
 
 # About Quick Starts
 
