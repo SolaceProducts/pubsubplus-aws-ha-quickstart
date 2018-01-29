@@ -58,7 +58,7 @@ This is a two step process:
 </a>
 
 # Filling the templates
-Select the Launch Quick Start (for new VPC) above will take you to the AWS "Select Template" tab with the Solace template references, hit the next button in the bottom right corner.
+Selecting the Launch Quick Start (for new VPC) above will take you to the AWS "Select Template" tab with the Solace template referenced in region `us-east-1`. You can change the deployment region using the drop down menu in the top right corner. Hit the next button in the bottom right corner once you are done.
 
 ![alt text](/images/Select-Template.png "Select Template")
 
@@ -100,20 +100,20 @@ Acknoledge that resources will be created and select [Create] in bottom right co
 For persons used to working with Solace message router console access, this is still available with the AWS EC2 instance:
 
 * Copy the Key Pair file used during deployment (KeyPairName) to the Linux Bastion Host. The key must not be publicaly viewable.
-```sh
+```
 chmod 400 <key.pem>
 scp -i <key.pem> <key.pem> ec2-user@<bastion-elastic-ip>:/home/ec2-user
 ```
 * Log in to the Linux Bastion Host
-```sh
+```
 ssh -i <key.pem> ec2-user@<bastion-elastic-ip>
 ```
 * From the Linux Bastion Host, SSH to your desired EC2 host that is running the Solace VMR.
-```sh
+```
 ssh -i <key.pem> ec2-user@<ec2-host>
 ```
 * From the host, log in to the SolOS CLI
-```sh
+```
 sudo docker exec -it solace /usr/sw/loads/currentload/bin/cli -A
 ```
 

@@ -19,8 +19,8 @@
                         "default": "Network Configuration"
                     },
                     "Parameters": [
-                        "AvailabilityZones",
                         "NumberOfAZs",
+                        "AvailabilityZones",
                         "CreatePrivateSubnets",
                         "SSHAccessCIDR",
                         "RemoteAccessCIDR"
@@ -127,7 +127,7 @@
             "Type": "String"
         },
         "AvailabilityZones": {
-            "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved exctly 3 AZs are used for this deployment.",
+            "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved. The number of zones to choose should be equal to 'Number of Availability Zones' previously specified",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"
         },
         "NumberOfAZs": {
@@ -139,7 +139,7 @@
                 "3"
             ],
             "Type": "Number"
-            },
+        },
         "BootDiskSize": {
             "ConstraintDescription": "Deployment supports 8 to 128 GB for boot volumes",
             "Default": "24",
