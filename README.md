@@ -84,8 +84,8 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | MessageRouterNodeStorage   | Default is 0 which means ephemeral, non-zero will cause new io1 disk creation for message-spool which will not delete on stack termination |
 | MonitorNodeInstance        | Default is t2.large which is the minimum | 
 | **AWS QuickStart Config**  |  |
-| QSS3BucketName             | Leave at default |
-| QSS3KeyPrefix              | Leave at default |
+| QSS3BucketName             | Leave at default. References the S3 bucket where the templates are hosted |
+| QSS3KeyPrefix              | Leave at default. References the path to the Quick Start resources within the S3 bucket |
 
 ![alt text](/images/specify-details.png "Specify Details")
 
