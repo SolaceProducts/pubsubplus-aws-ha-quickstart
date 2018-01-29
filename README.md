@@ -70,7 +70,7 @@ The next screen will allow you to fill in the details of the root AWS stack for 
 | **Solace Parameters**      |  |
 | SolaceDockerURL            | URL from the registration email. Can also use SolOS versions hosted remotely (if so, a .md5 file needs to be created in the same remote directory) |
 | AdminPassword              | Password to allow SolOS access to configure the Solace Message Router instances |
-| ContainerLoggingFormat     | The format of the logs produced by the VMR into CloudWatch |
+| ContainerLoggingFormat     | The format of the logs sent by the VMR to the CloudWatch service (see [documentation](https://docs.solace.com/Solace-VMR-Set-Up/Docker-Containers/Configuring-VMR-Container-Logging.htm#configuring-the-vmr-container-log-output-format) for details) |
 | **Network Parameters**     |  |
 | NumberOfAZs                | Default is 3. Depends on number of `AvailibilityZones` selected |
 | AvailabilityZones          | Pick 3 AZs from the drop down menu, alternativey pick 2 for PoC or limited Region. Must equal `NumberOfAZs` |
