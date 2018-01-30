@@ -37,7 +37,8 @@ This is a two step process:
     <img src="/images/register.png"/>
 </a>
 
-* Go to AWS Cloud Formation service and launch template.  The following links are for your convenience and take you directly to the templates for Solace Message Routers.
+* Go to AWS Cloud Formation service and launch template.  The following links are for your convenience and take you directly to the templates for Solace Message Routers. 
+**Note:** Using `Launch Quick Start (for new VPC)` launches the AWS infrastructure stacks needed, with the Solace VMR stack on top (recommended). If however you have previously launched this Quick Start within your target region, and, would like to re-deploy just the Solace VMR stack on top of the already-existing AWS infrastructure stacks; then you can use `Launch Quick Start (for existing VPC)` instead.
 
 <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-products/solace-aws-ha-quickstart/latest/templates/solace-vmr-master.template" target="_blank">
     <img src="/images/launch-button-new.png"/>
@@ -139,7 +140,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Authors
 
-See the list of [contributors](https://github.com/SolaceProducts/solace-aws-ha-quickstart/graphs/contributors) who participated in this project.
+See the list of [contributors](../../graphs/contributors) who participated in this project.
 
 ## License
 
