@@ -165,7 +165,7 @@
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Solace Message Router",
+            "Description": "Instance Type for Solace Message Router. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
         "MessageRouterNodeStorage": {
@@ -199,14 +199,12 @@
         "RemoteAccessCIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-            "Default": "0.0.0.0/0",
             "Description": "Allowed CIDR block for external access to cluster nodes",
             "Type": "String"
         },
         "SSHAccessCIDR": {
             "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
             "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-            "Default": "0.0.0.0/0",
             "Description": "Allowed CIDR block for external access to cluster nodes for mgmt",
             "Type": "String"
         },
@@ -223,7 +221,7 @@
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Solace Message Router",
+            "Description": "Instance Type for Solace Message Router. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
         "QSS3BucketName": {

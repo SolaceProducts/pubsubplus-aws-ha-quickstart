@@ -70,7 +70,7 @@ cd $solace_directory
 echo "`date` INFO: Configure VMRs Started"
 
 echo "`date` INFO: check to make sure we have a complete load"
-if [[ ${solace_url} == *"solace.com"* ]]; then
+if [[ ${solace_url} == *"em.solace.com"* ]]; then
     # a redirect link provided by solace
     wget -O ${solace_directory}/solos.info -nv  https://products.solace.com/download/VMR_DOCKER_EVAL_MD5
 else
@@ -83,7 +83,7 @@ SolOS_LOAD=${SOLOS_INFO[1]}
 echo "`date` INFO: Reference md5sum is: ${MD5_SUM}"
 
 wget -q -O solace-redirect ${solace_url}
-if [[ ${solace_url} == *"solace.com"* ]]; then
+if [[ ${solace_url} == *"em.solace.com"* ]]; then
     REAL_LINK=`egrep -o "https://[a-zA-Z0-9\.\/\_\?\=%]*" ${solace_directory}/solace-redirect`
 else
     REAL_LINK=${solace_url}
