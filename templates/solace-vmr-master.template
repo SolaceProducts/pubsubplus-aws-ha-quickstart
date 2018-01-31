@@ -10,7 +10,8 @@
                     },
                     "Parameters": [
                         "SolaceDockerURL",
-                        "AdminPassword"
+                        "AdminPassword",
+                        "ContainerLoggingFormat"
                     ]
                 },
                 {
@@ -18,8 +19,8 @@
                         "default": "Network Configuration"
                     },
                     "Parameters": [
-                        "AvailabilityZones",
                         "NumberOfAZs",
+                        "AvailabilityZones",
                         "CreatePrivateSubnets",
                         "SSHAccessCIDR",
                         "RemoteAccessCIDR"
@@ -68,6 +69,9 @@
                 "AdminPassword": {
                     "default": "Password to access SolOS admin console and SEMP"
                 },
+                "ContainerLoggingFormat": {
+                    "default": "Container logging format"
+                },
                 "AvailabilityZones": {
                     "default": "Availability Zones"
                 },
@@ -110,8 +114,20 @@
             "Description": "Require password to access SolOS admin console and SEMP",
             "Type": "String"
         },
+        "ContainerLoggingFormat": {
+            "AllowedValues": [
+                "graylog",
+                "legacy",
+                "raw",
+                "rfc5424"
+            ],
+            "ConstraintDescription": "Must be a valid container logging format.",
+            "Default": "graylog",
+            "Description": "Solace VMR logging format in CloudWatch",
+            "Type": "String"
+        },
         "AvailabilityZones": {
-            "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved exctly 3 AZs are used for this deployment.",
+            "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved. The number of zones to choose should be equal to 'Number of Availability Zones' previously specified",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"
         },
         "NumberOfAZs": {
@@ -123,7 +139,7 @@
                 "3"
             ],
             "Type": "Number"
-            },
+        },
         "BootDiskSize": {
             "ConstraintDescription": "Deployment supports 8 to 128 GB for boot volumes",
             "Default": "24",
@@ -134,18 +150,19 @@
         },
         "MessageRouterNodeInstanceType": {
             "AllowedValues": [
-                "t2.medium",
                 "t2.large",
                 "t2.xlarge",
                 "m3.large",
                 "m3.xlarge",
                 "m4.large",
                 "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
                 "c4.xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Solace Message Router",
+            "Description": "Instance Type for Solace Message Router. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
         "MessageRouterNodeStorage": {
@@ -173,7 +190,7 @@
                 "false"
             ],
             "Default": "true",
-            "Description": "Whether to create and use Private Subnets with fronting ELBs",
+            "Description": "Whether to create and use Private Subnets with a fronting ELB",
             "Type": "String"
         },
         "RemoteAccessCIDR": {
@@ -201,20 +218,20 @@
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Solace Message Router",
+            "Description": "Instance Type for Solace Message Router. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-            "Default": "solace-aws-ha-quickstart",
+            "Default": "solace-products",
             "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-/]*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
-            "Default": "latest/",
+            "Default": "solace-aws-ha-quickstart/latest/",
             "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
             "Type": "String"
         }
@@ -377,6 +394,9 @@
                     },
                     "AdminPassword": {
                         "Ref": "AdminPassword"
+                    },
+                    "ContainerLoggingFormat": {
+                        "Ref": "ContainerLoggingFormat"
                     },
                     "NumberOfAZs": {
                         "Ref": "NumberOfAZs"
