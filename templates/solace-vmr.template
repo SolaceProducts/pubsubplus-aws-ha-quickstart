@@ -8,17 +8,18 @@
                     "Label": { "default": "Solace Parameters" },
                     "Parameters": [
                         "SolaceDockerURL",
-                        "AdminPassword"
+                        "AdminPassword",
+                        "ContainerLoggingFormat"
                     ]
-                },                
+                },
                 {
                     "Label": { "default": "Network Configuration" },
                     "Parameters": [
                         "VPCID",
                         "NumberOfAZs",
-                        "UsePrivateSubnets",                    
+                        "UsePrivateSubnets",
                         "PublicSubnetIDs",
-                        "PrivateSubnetIDs",                       
+                        "PrivateSubnetIDs",
                         "RemoteAccessCIDR",
                         "SSHSecurityGroupID"
                     ]
@@ -55,7 +56,10 @@
                 },
                 "AdminPassword": {
                     "default": "Password to access SolOS admin console and SEMP"
-                },                
+                },
+                "ContainerLoggingFormat": {
+                    "default": "Container logging format"
+                },
                 "BootDiskSize": {
                     "default": "Boot Disk Capacity (GiB)"
                 },
@@ -103,11 +107,23 @@
     },
     "Parameters": {
         "SolaceDockerURL": {
-            "Description": "Require URL to enterprise or Evaluation VMR, not Community",
+            "Description": "Required URL to enterprise or Evaluation VMR, not Community",
             "Type": "String"
         },
         "AdminPassword": {
-            "Description": "Require password to access SolOS admin console and SEMP",
+            "Description": "Required password to access SolOS admin console and SEMP",
+            "Type": "String"
+        },
+        "ContainerLoggingFormat": {
+            "AllowedValues": [
+                "graylog",
+                "legacy",
+                "raw",
+                "rfc5424"
+            ],
+            "ConstraintDescription": "Must be a valid container logging format.",
+            "Default": "graylog",
+            "Description": "Solace VMR logging format in CloudWatch",
             "Type": "String"
         },
         "BootDiskSize": {
@@ -126,11 +142,13 @@
                 "m3.xlarge",
                 "m4.large",
                 "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
                 "c4.xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Solace Message Router",
+            "Description": "Instance Type for Solace Message Router. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
         "MessageRouterNodeStorage": {
@@ -161,7 +179,7 @@
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Solace Message Router",
+            "Description": "Instance Type for Solace Message Router. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
         "KeyPairName": {
@@ -198,7 +216,7 @@
             "Type": "String"
         },
         "PrivateSubnetIDs": {
-            "Description": "Comma separated list of VPC private subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access",
+            "Description": "Comma separated list of VPC private subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access. Note: This will be skipped if 'Use private subnets' is set to 'false'",
             "Type": "List<AWS::EC2::Subnet::Id>"
         },
          "PublicSubnetIDs": {
@@ -212,14 +230,14 @@
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-            "Default": "solace-aws-ha-quickstart",
+            "Default": "solace-products",
             "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-/]*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
-            "Default": "latest/",
+            "Default": "solace-aws-ha-quickstart/latest/",
             "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
             "Type": "String"
         }
@@ -359,6 +377,26 @@
                             ]
                         },
                         "PolicyName": "ec2-policy"
+                    },
+                    {
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents",
+                                        "logs:DescribeLogStreams"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:logs:*:*:*"
+                                    ],
+                                    "Effect": "Allow"
+                                }
+                            ]
+                        },
+                        "PolicyName": "cloudwatch-policy"
                     }
                 ],
                 "Path": "/",
@@ -404,6 +442,9 @@
                     },
                     "AdminPassword": {
                         "Ref": "AdminPassword"
+                    },
+                    "ContainerLoggingFormat": {
+                        "Ref": "ContainerLoggingFormat"
                     },
                     "BootDiskSize": {
                         "Ref": "BootDiskSize"
@@ -483,6 +524,9 @@
                     "AdminPassword": {
                         "Ref": "AdminPassword"
                     },
+                    "ContainerLoggingFormat": {
+                        "Ref": "ContainerLoggingFormat"
+                    },
                     "BootDiskSize": {
                         "Ref": "BootDiskSize"
                     },
@@ -560,6 +604,9 @@
                     },
                     "AdminPassword": {
                         "Ref": "AdminPassword"
+                    },
+                    "ContainerLoggingFormat": {
+                        "Ref": "ContainerLoggingFormat"
                     },
                     "BootDiskSize": {
                         "Ref": "BootDiskSize"
@@ -653,6 +700,54 @@
                         "FromPort": "55555",
                         "ToPort": "55555",
                         "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "55003",
+                        "ToPort": "55003",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "8000",
+                        "ToPort": "8000",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "5672",
+                        "ToPort": "5672",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "9000",
+                        "ToPort": "9000",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "1883",
+                        "ToPort": "1883",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "80",
+                        "ToPort": "80",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "8080",
+                        "ToPort": "8080",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "5550",
+                        "ToPort": "5550",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
                     }
                 ]
             }
@@ -703,6 +798,38 @@
                     },
                     {
                         "IpProtocol": "tcp",
+                        "FromPort": "55003",
+                        "ToPort": "55003",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "8000",
+                        "ToPort": "8000",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "5672",
+                        "ToPort": "5672",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "9000",
+                        "ToPort": "9000",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
                         "FromPort": "1883",
                         "ToPort": "1883",
                         "CidrIp": {
@@ -743,77 +870,66 @@
                 "Count": "1"
             }
         },
-        "PrimaryELB": {
+        "ELB": {
             "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
             "DependsOn": ["MessageRouterPrimaryStack"],
             "Condition": "UsePrivateSubnetsCondition",
             "Properties":{
-                "SecurityGroups": [{ "Ref" : "MessageRouterSecurityGroup"}],
-                "Subnets" : [
-                    {"Fn::Select":
-                        [
-                            0,
-                            { "Ref": "PublicSubnetIDs" }
-                        ]
-                    }
+                "SecurityGroups": [
+                    { "Ref" : "MessageRouterSecurityGroup" },
+                    { "Ref" : "SolaceInternalSecurityGroupMember" }
                 ],
-                "Instances" : [{"Fn::GetAtt": ["MessageRouterPrimaryStack","Outputs.EC2ID"]}],          
-                "Listeners" : [ 
+                "Subnets" : { "Ref": "PublicSubnetIDs" },
+                "Instances" : [
+                    {"Fn::GetAtt": ["MessageRouterPrimaryStack","Outputs.EC2ID"]},
+                    {"Fn::GetAtt": ["MessageRouterBackupStack","Outputs.EC2ID"]},
+                    {"Fn::GetAtt": ["MonitorStack","Outputs.EC2ID"]}
+                ],
+                "HealthCheck" : {
+                    "Target" : {
+                        "Fn::Join" : [ "", [ "HTTP:", 5550, "/health-check/guaranteed-active" ] ]
+                    },
+                    "Timeout" : "3",
+                    "Interval" : "5",
+                    "UnhealthyThreshold" : "2",
+                    "HealthyThreshold" : "2",
+                },
+                "Listeners" : [
                     {
                     "LoadBalancerPort" : "55555",
                     "InstancePort" : "55555",
                     "Protocol" : "TCP"
                     },{
-                    "LoadBalancerPort" : "1883",
-                    "InstancePort" : "1883",
-                    "Protocol" : "TCP"                    
-                    },{               
-                    "LoadBalancerPort" : "8080",
-                    "InstancePort" : "8080",
-                    "Protocol" : "HTTP"                    
-                    },{               
-                    "LoadBalancerPort" : "80",
-                    "InstancePort" : "80",
-                    "Protocol" : "HTTP"                    
-                    }
-                ]
-            }
-        },
-         "BackupELB": {
-            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
-            "DependsOn": ["MessageRouterBackupStack"],
-            "Condition": "UsePrivateSubnetsCondition",
-            "Properties":{
-                "SecurityGroups": [{ "Ref" : "MessageRouterSecurityGroup"}],
-                "Subnets" : [
-                    {"Fn::Select":
-                        [
-                            1,
-                            { "Ref": "PublicSubnetIDs" }
-                        ]
-                    }
-                ],
-                "Instances" : [{"Fn::GetAtt": ["MessageRouterBackupStack","Outputs.EC2ID"]}],
-                "Listeners" : [ 
-                    {
-                    "LoadBalancerPort" : "55555",
-                    "InstancePort" : "55555",
+                    "LoadBalancerPort" : "55003",
+                    "InstancePort" : "55003",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "8000",
+                    "InstancePort" : "8000",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "5672",
+                    "InstancePort" : "5672",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "9000",
+                    "InstancePort" : "9000",
                     "Protocol" : "TCP"
                     },{
                     "LoadBalancerPort" : "1883",
                     "InstancePort" : "1883",
-                    "Protocol" : "TCP"                    
-                    },{               
-                    "LoadBalancerPort" : "8080",
-                    "InstancePort" : "8080",
-                    "Protocol" : "HTTP"                    
-                    },{               
+                    "Protocol" : "TCP"
+                    },{
                     "LoadBalancerPort" : "80",
                     "InstancePort" : "80",
-                    "Protocol" : "HTTP"                    
-                    } 
+                    "Protocol" : "HTTP"
+                    },{
+                    "LoadBalancerPort" : "8080",
+                    "InstancePort" : "8080",
+                    "Protocol" : "HTTP"
+                    }
                 ]
             }
-        }       
+        }
     }
 }
