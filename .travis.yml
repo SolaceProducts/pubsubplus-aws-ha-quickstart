@@ -1,0 +1,48 @@
+language: ruby
+
+git:
+  submodules: false
+
+env:
+  global:
+  - AWS_DEFAULT_REGION=us-west-2
+  
+before_install:
+  - echo "Installing AWS CLI"
+  - pip install --upgrade --user awscli
+  - echo "Installing test gems"
+  - gem install yaml-lint
+  
+install: true
+
+script:
+  - aws cloudformation validate-template --template-body file://templates/solace-vmr-master.template
+  - aws cloudformation validate-template --template-body file://templates/solace-vmr.template
+  - aws cloudformation validate-template --template-body file://templates/nodecreate.template
+  - yaml-lint -n templates/
+  - sed -i "s@SolaceDockerURLParameterValue@$SOLACE_DOCKER_URL_PARAMETER_VALUE@g" ci/solace-aws-ha-3az-prod-travistest.json
+  - aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"
+  - aws s3 sync . s3://solace-cf-quickstart-travistest/solace/vmr/latest --acl public-read
+  - aws cloudformation create-stack --stack-name vmr-ha-travistest --template-body file://templates/solace-vmr-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure DELETE --capabilities CAPABILITY_IAM
+  - echo "Waiting for stack create complete"
+  - "travis_wait 30 sleep 1800 &"
+  - until aws cloudformation describe-stacks --stack-name vmr-ha-travistest | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
+  - url="$(aws elb describe-load-balancers | grep DNSName | grep vmr-ha-travis | awk -F '"' '{print $4}')"; echo $url
+  - curl -O https://sftp.solace.com/download/SDKPERF_C_LINUX64
+  - tar -xvf SDKPERF_C_LINUX64
+  - pubSubTools/sdkperf_c -cip=$url -mn=100000 -mr=0 -ptl=t1 -stl=t1 | grep "Total Messages"
+
+after_success:
+  - echo "Test Success - Branch($TRAVIS_BRANCH) Pull Request($TRAVIS_PULL_REQUEST) Tag($TRAVIS_TAG)"
+  - echo "Cloudformation template validated"
+  - echo "YAML linted"
+  - echo "Cloudformation tested"
+  - echo "Messaging tested"
+
+after_script:
+  - aws s3 rb s3://solace-cf-quickstart-travistest --force
+  - aws cloudformation delete-stack --stack-name vmr-ha-travistest
+  - echo "Waiting for stack delete complete"
+  - stackid="$(aws cloudformation describe-stacks --stack-name vmr-ha-travistest | grep StackId | awk -F '"' '{print $4}')"
+  - if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
+# aws ec2 describe-volumes --filters Name="status",Values="available" | grep VolumeId | awk -F '"' '{print $4}' | while read -r line ; do aws ec2 delete-volume --volume-id $line; done

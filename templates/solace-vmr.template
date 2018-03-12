@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "CloudFormation template to deploy Solace HA Message Routers on AWS",
+    "Description": "CloudFormation template to deploy Solace HA Message Routers on AWS. (qs-1nju7g5r0)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -112,7 +112,8 @@
         },
         "AdminPassword": {
             "Description": "Required password to access SolOS admin console and SEMP",
-            "Type": "String"
+            "Type": "String",
+            "NoEcho": "True"
         },
         "ContainerLoggingFormat": {
             "AllowedValues": [
@@ -154,7 +155,7 @@
         "MessageRouterNodeStorage": {
             "ConstraintDescription": "No more than 640 GiB per device.",
             "Default": "0",
-            "Description": "Allocated EBS storage for each block device (in GiB); 0 indicates ephemeral storage only",
+            "Description": "Allocated EBS storage for each block device (in GiB); 0 indicates ephemeral storage only. Non-zero will cause a new io1 disk creation for message-spool which will NOT be deleted on stack termination",
             "AllowedValues": [
                 "0",
                 "20",
@@ -203,8 +204,8 @@
             "Type": "String"
         },
         "SSHSecurityGroupID": {
-            "Description": "ID of the SSH Security Group (e.g., sg-7f16e910)",
-            "Type": "AWS::EC2::SecurityGroup::Id"
+            "Description": "ID of the SSH Security Group (e.g., sg-7f16e910).  Note: This will be ignored if 'Use private subnets' is set to 'false'",
+            "Type": "String"
         },
         "UsePrivateSubnets": {
             "AllowedValues": [
@@ -216,7 +217,7 @@
             "Type": "String"
         },
         "PrivateSubnetIDs": {
-            "Description": "Comma separated list of VPC private subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access. Note: This will be skipped if 'Use private subnets' is set to 'false'",
+            "Description": "Comma separated list of VPC private subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solace cluster access. Note: This will be ignored if 'Use private subnets' is set to 'false'",
             "Type": "List<AWS::EC2::Subnet::Id>"
         },
          "PublicSubnetIDs": {
