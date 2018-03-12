@@ -90,7 +90,7 @@
             "Default": "solace-aws-ha-quickstart/latest/",
             "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
             "Type": "String"
-        }
+        },
         "SubnetID": {
             "Description": "Comma separated list of VPC subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration for Solacet cluster access (internal and external)and the subnets must be in the same VPC as the security groups",
             "Type": "AWS::EC2::Subnet::Id"
