@@ -25,7 +25,7 @@
         },
         "BootDiskSize": {
             "ConstraintDescription": "Deployment supports 8 to 128 GB for boot volumes",
-        "Default": "24",
+            "Default": "24",
             "Description": "Allocated EBS storage for boot disk",
             "MaxValue": "128",
             "MinValue": "8",
