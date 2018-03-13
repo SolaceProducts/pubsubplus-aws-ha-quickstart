@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "This template creates a new VPC infrastructure for Solace high availability architecture. **WARNING** This template creates Amazon EC2 instance and related resources. You will be billed for the AWS resources used if you create a stack from this template.",
+    "Description": "This template creates a new VPC infrastructure for Solace high availability architecture. **WARNING** This template creates Amazon EC2 instance and related resources. You will be billed for the AWS resources used if you create a stack from this template. (qs-1nju7g5qq)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -112,7 +112,8 @@
         },
         "AdminPassword": {
             "Description": "Require password to access SolOS admin console and SEMP",
-            "Type": "String"
+            "Type": "String",
+            "NoEcho": "True"
         },
         "ContainerLoggingFormat": {
             "AllowedValues": [
@@ -168,7 +169,7 @@
         "MessageRouterNodeStorage": {
             "ConstraintDescription": "No more than 640 GiB per device.",
             "Default": "0",
-            "Description": "Allocated EBS storage for each block device (in GiB); 0 indicates ephemeral storage only",
+            "Description": "Allocated EBS storage for each block device (in GiB); 0 indicates ephemeral storage only. Non-zero will cause a new io1 disk creation for message-spool which will NOT be deleted on stack termination",
             "AllowedValues": [
                 "0",
                 "20",
@@ -371,7 +372,6 @@
             }
         },
         "SolaceStack": {
-            "DependsOn": [ "BastionStack" ],
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
@@ -429,11 +429,17 @@
                         "Ref": "CreatePrivateSubnets"  
                     },
                     "SSHSecurityGroupID": {
-                        "Fn::GetAtt": [
-                            "BastionStack",
-                            "Outputs.BastionSecurityGroupID"
+                        "Fn::If": [
+                            "UsePrivateSubnets",
+                            {
+                                "Fn::GetAtt": [
+                                    "BastionStack",
+                                    "Outputs.BastionSecurityGroupID"
+                                ]
+                            },
+                            "default"
                         ]
-                    },                                        
+                    },
                     "PrivateSubnetIDs" : {
                         "Fn::If": [
                             "UsePrivateSubnets",
@@ -486,7 +492,12 @@
                                     }
                                 ]
                             },
-                            {}
+                            {
+                                "Fn::GetAtt": [
+                                    "VPCStack",
+                                    "Outputs.PublicSubnet1ID"
+                                ]
+                            }
                         ]
                     },
                     "PublicSubnetIDs" : {
