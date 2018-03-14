@@ -12,6 +12,11 @@ before_install:
   - pip install --upgrade --user awscli
   - echo "Installing test gems"
   - gem install yaml-lint
+  - echo "Fixing to handle submodules then clone them"
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules; cat .gitmodules
+  - git submodule sync
+  - git submodule init
+  - git submodule update
   
 install: true
 
@@ -27,6 +32,8 @@ script:
   - echo "Waiting for stack create complete"
   - "travis_wait 30 sleep 1800 &"
   - until aws cloudformation describe-stacks --stack-name vmr-ha-travistest | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
+  - aws cloudformation describe-stacks --stack-name vmr-ha-travistest | cat
+  - echo "Pausing to get the ELB ready"; sleep 10
   - url="$(aws elb describe-load-balancers | grep DNSName | grep vmr-ha-travis | awk -F '"' '{print $4}')"; echo $url
   - curl -O https://sftp.solace.com/download/SDKPERF_C_LINUX64
   - tar -xvf SDKPERF_C_LINUX64
@@ -45,4 +52,3 @@ after_script:
   - echo "Waiting for stack delete complete"
   - stackid="$(aws cloudformation describe-stacks --stack-name vmr-ha-travistest | grep StackId | awk -F '"' '{print $4}')"
   - if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
-# aws ec2 describe-volumes --filters Name="status",Values="available" | grep VolumeId | awk -F '"' '{print $4}' | while read -r line ; do aws ec2 delete-volume --volume-id $line; done
