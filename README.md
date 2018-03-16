@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/SolaceDev/solace-aws-ha-quickstart.svg?branch=master)](https://travis-ci.org/SolaceDev/solace-aws-ha-quickstart)
+[![Build Status](https://travis-ci.org/SolaceProducts/solace-aws-ha-quickstart.svg?branch=master)](https://travis-ci.org/SolaceProducts/solace-aws-ha-quickstart)
 
 # Install and configure Solace message routers in an HA tuple using AWS Cloud Formation
 
