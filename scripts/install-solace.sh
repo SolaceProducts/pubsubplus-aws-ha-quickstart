@@ -169,18 +169,18 @@ case $local_role in
         NODE_TYPE="monitoring"
         ROUTER_NAME="monitor${monitor_stack}"
         REDUNDANCY_CFG=""
-        ;;
+    ;;
     MessageRouterPrimary )
         NODE_TYPE="message_routing"
         ROUTER_NAME="primary${primary_stack}"
         REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${BACKUP_IP} --env redundancy_activestandbyrole=primary --env configsync_enable=yes"
         is_primary="true"
-        ;;
+    ;;
     MessageRouterBackup )
         NODE_TYPE="message_routing"
         ROUTER_NAME="backup${backup_stack}"
         REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${PRIMARY_IP} --env redundancy_activestandbyrole=backup --env configsync_enable=yes"
-        ;;
+    ;;
 esac
 
 if [ $disk_size == "0" ]; then
@@ -239,12 +239,12 @@ docker create \
    ${REDUNDANCY_CFG} \
    --env "redundancy_group_passwordfilepath=$(basename ${admin_password_file})" \
    --env "redundancy_enable=yes" \
-   --env "redundancy_group_node_primary${primary_stack}_nodetype=message_routing" \
-   --env "redundancy_group_node_primary${primary_stack}_connectvia=${PRIMARY_IP}" \
-   --env "redundancy_group_node_backup${backup_stack}_nodetype=message_routing" \
-   --env "redundancy_group_node_backup${backup_stack}_connectvia=${BACKUP_IP}" \
-   --env "redundancy_group_node_monitor${monitor_stack}_nodetype=monitoring" \
-   --env "redundancy_group_node_monitor${monitor_stack}_connectvia=${MONITOR_IP}" \
+    --env "redundancy_group_node_primary${primary_stack}_nodetype=message_routing" \
+    --env "redundancy_group_node_primary${primary_stack}_connectvia=${PRIMARY_IP}" \
+    --env "redundancy_group_node_backup${backup_stack}_nodetype=message_routing" \
+    --env "redundancy_group_node_backup${backup_stack}_connectvia=${BACKUP_IP}" \
+    --env "redundancy_group_node_monitor${monitor_stack}_nodetype=monitoring" \
+    --env "redundancy_group_node_monitor${monitor_stack}_connectvia=${MONITOR_IP}" \
    --name=solace ${VMR_VERSION}
 
 
