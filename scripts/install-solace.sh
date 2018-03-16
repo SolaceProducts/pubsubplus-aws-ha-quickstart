@@ -247,6 +247,7 @@ docker create \
    --env "redundancy_group_node_monitor${monitor_stack}_connectvia=${MONITOR_IP}" \
    --name=solace ${VMR_VERSION}
 
+
 # Start the solace service and enable it at system start up.
 chkconfig --add solace-vmr
 echo "`date` INFO: Starting Solace service"
