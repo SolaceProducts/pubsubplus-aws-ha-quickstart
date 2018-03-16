@@ -141,6 +141,10 @@ host_name=`hostname`
 host_info=`grep ${host_name} ${config_file}`
 local_role=`echo $host_info | grep -o -E 'Monitor|MessageRouterPrimary|MessageRouterBackup'`
 
+primary_stack=`cat ${config_file} | grep MessageRouterPrimary | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
+backup_stack=`cat ${config_file} | grep MessageRouterBackup | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
+monitor_stack=`cat ${config_file} | grep Monitor | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
+
 # Get the IP addressed for node
 for role in Monitor MessageRouterPrimary MessageRouterBackup
 do
@@ -163,18 +167,18 @@ done
 case $local_role in
     Monitor )
         NODE_TYPE="monitoring"
-        ROUTER_NAME="monitor"
+        ROUTER_NAME="monitor${monitor_stack}"
         REDUNDANCY_CFG=""
         ;;
     MessageRouterPrimary )
         NODE_TYPE="message_routing"
-        ROUTER_NAME="primary"
+        ROUTER_NAME="primary${primary_stack}"
         REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${BACKUP_IP} --env redundancy_activestandbyrole=primary --env configsync_enable=yes"
         is_primary="true"
         ;;
     MessageRouterBackup )
         NODE_TYPE="message_routing"
-        ROUTER_NAME="backup"
+        ROUTER_NAME="backup${backup_stack}"
         REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${PRIMARY_IP} --env redundancy_activestandbyrole=backup --env configsync_enable=yes"
         ;;
 esac
@@ -235,12 +239,12 @@ docker create \
    ${REDUNDANCY_CFG} \
    --env "redundancy_group_passwordfilepath=$(basename ${admin_password_file})" \
    --env "redundancy_enable=yes" \
-   --env "redundancy_group_node_primary_nodetype=message_routing" \
-   --env "redundancy_group_node_primary_connectvia=${PRIMARY_IP}" \
-   --env "redundancy_group_node_backup_nodetype=message_routing" \
-   --env "redundancy_group_node_backup_connectvia=${BACKUP_IP}" \
-   --env "redundancy_group_node_monitor_nodetype=monitoring" \
-   --env "redundancy_group_node_monitor_connectvia=${MONITOR_IP}" \
+   --env "redundancy_group_node_primary${primary_stack}_nodetype=message_routing" \
+   --env "redundancy_group_node_primary${primary_stack}_connectvia=${PRIMARY_IP}" \
+   --env "redundancy_group_node_backup${backup_stack}_nodetype=message_routing" \
+   --env "redundancy_group_node_backup${backup_stack}_connectvia=${BACKUP_IP}" \
+   --env "redundancy_group_node_monitor${monitor_stack}_nodetype=monitoring" \
+   --env "redundancy_group_node_monitor${monitor_stack}_connectvia=${MONITOR_IP}" \
    --name=solace ${VMR_VERSION}
 
 # Start the solace service and enable it at system start up.
