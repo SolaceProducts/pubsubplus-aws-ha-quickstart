@@ -1,0 +1,62 @@
+[
+    {   
+        "ParameterKey": "SolaceDockerURL",
+        "ParameterValue": "SolaceDockerURLParameterValue"
+    },
+    {
+        "ParameterKey": "AdminPassword",
+        "ParameterValue": "admin"
+    },
+    {
+        "ParameterKey": "ContainerLoggingFormat",
+        "ParameterValue": "graylog"
+    },
+    {
+        "ParameterKey": "NumberOfAZs",
+        "ParameterValue": "3"
+    },
+    {
+        "ParameterKey": "AvailabilityZones",
+        "ParameterValue": "us-west-2a,us-west-2b,us-west-2c" 
+    },
+    {
+        "ParameterKey": "CreatePrivateSubnets",
+        "ParameterValue": "true" 
+    },
+    {
+        "ParameterKey": "BootDiskSize",
+        "ParameterValue": "24"
+    },
+    {
+        "ParameterKey": "MessageRouterNodeInstanceType",
+        "ParameterValue": "t2.large"
+    },
+    {
+        "ParameterKey": "MessageRouterNodeStorage",
+        "ParameterValue": "0"
+    },
+    {
+        "ParameterKey": "MonitorNodeInstanceType",
+        "ParameterValue": "t2.large"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "cikey"
+    },
+    {
+        "ParameterKey": "RemoteAccessCIDR",
+        "ParameterValue": "0.0.0.0/0"
+    },
+    {
+        "ParameterKey": "SSHAccessCIDR",
+        "ParameterValue": "0.0.0.0/0"
+    },
+    {
+        "ParameterKey": "QSS3BucketName",
+        "ParameterValue": "solace-cf-quickstart-travistest"
+    },
+    {
+        "ParameterKey": "QSS3KeyPrefix",
+        "ParameterValue": "solace/vmr/latest/"
+    }
+]
