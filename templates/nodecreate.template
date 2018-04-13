@@ -587,6 +587,36 @@
                 "IamInstanceProfile": {
                     "Ref": "InstanceProfile"
                 },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "ParentStackName"
+                                    },
+                                    {
+                                        "Ref": "NodeDesignation"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "ParentStack",
+                        "Value": {
+                            "Ref": "ParentStackName"
+                        }
+                    },
+                    {
+                        "Key": "HARole",
+                        "Value": {
+                            "Ref": "NodeDesignation"
+                        }
+                    }
+                ],
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
