@@ -67,7 +67,7 @@
                     "default": "Solace Docker URL"
                 },
                 "AdminPassword": {
-                    "default": "Password to access SolOS admin console and SEMP"
+                    "default": "Password to access Solace admin console and SEMP"
                 },
                 "ContainerLoggingFormat": {
                     "default": "Container logging format"
@@ -107,11 +107,11 @@
     },
     "Parameters": {
         "SolaceDockerURL": {
-            "Description": "URL to Solace Docker Image obtained via registration here: http://dev.solace.com/downloads/download_vmr-ce-docker",
+            "Description": "URL to Solace PubSub+ Docker Image obtained via registration here: http://dev.solace.com/downloads/",
             "Type": "String"
         },
         "AdminPassword": {
-            "Description": "Require password to access SolOS admin console and SEMP",
+            "Description": "Password to allow Solace admin access to configure the message broker instances",
             "Type": "String",
             "NoEcho": "True"
         },
@@ -124,7 +124,7 @@
             ],
             "ConstraintDescription": "Must be a valid container logging format.",
             "Default": "graylog",
-            "Description": "Solace VMR logging format in CloudWatch",
+            "Description": "Solace message broker logging format in CloudWatch",
             "Type": "String"
         },
         "AvailabilityZones": {
@@ -151,6 +151,8 @@
         },
         "MessageRouterNodeInstanceType": {
             "AllowedValues": [
+                "t2.small",
+                "t2.medium",
                 "t2.large",
                 "t2.xlarge",
                 "m3.large",
@@ -163,7 +165,7 @@
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Solace Message Router. Note: Make sure that your region supports the selected instance type before continuing",
+            "Description": "Instance Type for Solace message broker message routing nodes. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
         "MessageRouterNodeStorage": {
@@ -208,6 +210,8 @@
         },
         "MonitorNodeInstanceType": {
             "AllowedValues": [
+                "t2.micro",
+                "t2.small",
                 "t2.medium",
                 "t2.large",
                 "t2.xlarge",
@@ -218,8 +222,8 @@
                 "c4.xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
-            "Default": "t2.large",
-            "Description": "Instance Type for Solace Message Router. Note: Make sure that your region supports the selected instance type before continuing",
+            "Default": "t2.micro",
+            "Description": "Instance Type for Solace message broker monitoring node. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
         "QSS3BucketName": {
@@ -376,7 +380,7 @@
             "Properties": {
                 "TemplateURL": {
                     "Fn::Sub": [
-                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/solace-vmr.template",
+                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}templates/solace.template",
                         {
                             "QSS3Region": {
                                 "Fn::If": [

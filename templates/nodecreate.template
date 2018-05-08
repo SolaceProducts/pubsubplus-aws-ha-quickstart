@@ -3,11 +3,11 @@
     "Description": "CloudFormation sub-template for Single Node EC2 deployment within Solace HA Cluster. (qs-1nm1r54hd)",
     "Parameters": {
         "SolaceDockerURL": {
-            "Description": "Required URL to enterprise or Evaluation VMR, not Community",
+            "Description": "Required URL to Solace PubSub+ Standard or Enterprise Evaluation Edition",
             "Type": "String"
         },
         "AdminPassword": {
-            "Description": "Required password to access SolOS admin console and SEMP",
+            "Description": "Password to access Solace admin console and SEMP",
             "Type": "String",
             "NoEcho": "True"
         },
@@ -20,7 +20,7 @@
             ],
             "ConstraintDescription": "Must be a valid container logging format.",
             "Default": "graylog",
-            "Description": "Solace VMR logging format in CloudWatch",
+            "Description": "Solace message broker logging format in CloudWatch",
             "Type": "String"
         },
         "BootDiskSize": {
@@ -51,7 +51,7 @@
         "NodeInstanceType": {
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.large",
-            "Description": "Instance Type for Kafka brokers; select m3/m4 or i2 instance types for us-west-1 and sa-east-1",
+            "Description": "Instance Type for Solace PubSub+ message broker nodes",
             "Type": "String"
         },
         "NodeSecurityGroup": {
@@ -289,10 +289,10 @@
                         "log_stream_name = {instance_id}/cfn-wire.log\n",
                         "datetime_format = \n",
 
-                        "[/var/log/solace-vmr.log]\n",
-                        "file = /var/log/solace-vmr.log\n",
+                        "[/var/log/solace.log]\n",
+                        "file = /var/log/solace.log\n",
                         "log_group_name = ", { "Ref": "CloudFormationLogs" }, "\n",
-                        "log_stream_name = {instance_id}/solace-vmr.log\n",
+                        "log_stream_name = {instance_id}/solace.log\n",
                         "datetime_format = \n"
                         ] ] },
                         "mode": "000444",
@@ -672,7 +672,7 @@
                                     { "Ref": "ContainerLoggingFormat" },
                                 "  -g ",
                                     { "Ref": "CloudFormationLogs" },
-                                "  -r ${instance_id}/solace-vmr.log",
+                                "  -r ${instance_id}/solace.log",
                                 " \n",
                                 "## Signal back information for outputs (now that all nodes are up) \n",
                                 "/opt/aws/bin/cfn-signal -e 0 -r 'Solace HA deployment complete' '",
