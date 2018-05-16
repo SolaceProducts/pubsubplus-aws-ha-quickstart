@@ -6,17 +6,17 @@
 
 This Quick Start template installs Solace PubSub+ software message brokers in fault tolerant high-availability (HA) redundancy groups. HA redundancy provides 1:1 message broker sparing to increase overall service availability. If one of the message brokers fails, or is taken out of service, the other one automatically takes over and provides service to the clients that were previously served by the now out-of-service message broker.  To increase availability, the message brokers are deployed across 3 availability zones.
 
-To learn more about message broker redundancy see the [Redundancy Documentation](http://docs.solace.com/Features/SW-Broker-Redundancy-and-Fault-Tolerance.htm).  If you are not familiar with Solace PubSub+ or high-availability configurations it is recommended that you review this document. 
+To learn more about message broker redundancy see the [Redundancy Documentation](http://192.168.1.192/home/public/RND/Docs/Cust_Doc_New_Feature_Branches/8.10.0_vmr/Features/SW-Broker-Redundancy-and-Fault-Tolerance.htm ).  If you are not familiar with Solace PubSub+ or high-availability configurations it is recommended that you review this document. 
 
 ![alt text](/images/Solace-AWS-HA-PoC-2AZ.png "Proof of Concept Environment for Solace PubSub+ Software Message Brokers")
 
 Alternatively this Quick Start can create message brokers in an environment suitable for Proof-of-Concept testing where loss of an AWS Availability Zone will not cause loss of access to mission critical data.
 
-To learn more about connectivity to the HA redundancy group see the AWS [VPC Gateway Documentation](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html).
+To learn more about connectivity to the HA redundancy group see the AWS [VPC Gateway Documentation](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html ).
 
 # Minimum Resource Requirements
 
-Below is the list of AWS resources that will be deployed by the Quick Start. Please consult the [Amazon VPC Limits](https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Appendix_Limits.html) page and ensure that your AWS region is within the limit range per resource before launching:
+Below is the list of AWS resources that will be deployed by the Quick Start. Please consult the [Amazon VPC Limits](https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Appendix_Limits.html ) page and ensure that your AWS region is within the limit range per resource before launching:
 
 | Resource                   | Deploy |
 |----------------------------|--------|
@@ -33,7 +33,7 @@ Below is the list of AWS resources that will be deployed by the Quick Start. Ple
 
 ## Required IAM roles
 
-Look for `AWS::IAM::Role` in the source for the list of required IAM roles to create the stacks.
+Look for `AWS::IAM::Role` in the templates source for the list of required IAM roles to create the stacks.
 
 # How to Deploy a Message Broker in an HA Group
 
@@ -45,22 +45,22 @@ You can use this quick start with either PubSub+ `Standard` or PubSub+ `Enterpri
 
 | PubSub+ Standard | PubSub+ Enterprise Evaluation Edition
 | :---: | :---: |
-| Free, up to 1k simultaneous connections,<br/>up to 100k messages per second | 90-day trial version, unlimited |
+| Free, up to 1k simultaneous connections,<br/>up to 10k messages per second | 90-day trial version, unlimited |
 | <a href="http://dev.solace.com/downloads/download_vmr-ce-docker" target="_blank"><img src="images/register.png"/></a> | <a href="http://dev.solace.com/downloads/download-vmr-evaluation-edition-docker/" target="_blank"><img src="images/register.png"/></a> |
 
 **Step 2**: Go to the AWS Cloud Formation service and launch the template. The following links are for your convenience and take you directly to the message broker templates.
 
 **Note:** Using `Launch Quick Start (for new VPC)` launches the AWS infrastructure stacks needed with the message broker stack on top (recommended). However, if you have previously launched this Quick Start within your target region and would like to re-deploy just the message broker stack on top of the existing AWS infrastructure stacks, you can use `Launch Quick Start (for existing VPC)`.
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-products/solace-aws-ha-quickstart/latest/templates/solace-master.template" target="_blank">
+<a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-products/solace-aws-ha-quickstart/latest/templates/solace-master.template" target="_blank">
     <img src="/images/launch-button-new.png"/>
 </a>
 
-<a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-products/solace-aws-ha-quickstart/latest/templates/solace.template" target="_blank">
+<a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-products/solace-aws-ha-quickstart/latest/templates/solace.template" target="_blank">
     <img src="/images/launch-button-existing.png"/>
 </a>
 
-* If you want to take a look under the hood, you can view the AWS CloudFormation template that automates the deployment. You can customize the template during launch or download and extend it for other projects.
+* If you want to take a look under the hood, you can view the AWS CloudFormation template that automates the deployment. You can customize the template during launch or download and extend it for other projects. For that copy your extended version of `scripts`, `submodules` and `templates` directories in a  folder in an S3 bucket and make them public.
 
 <a href="https://raw.githubusercontent.com/SolaceProducts/solace-aws-ha-quickstart/master/templates/solace-master.template" target="_blank">
     <img src="/images/view-template-new.png"/>
@@ -72,36 +72,60 @@ You can use this quick start with either PubSub+ `Standard` or PubSub+ `Enterpri
 
 # Filling In the Templates
 
-Selecting the 'Launch Quick Start (for new VPC)' above will take you to the AWS "Select Template" tab with the Solace template referenced in region `us-east-1`. You can change the deployment region using the drop-down menu in the top right corner. Hit the next button in the bottom right corner once you are done.
+Selecting the 'Launch Quick Start' above will take you to the AWS "Select Template" tab with the Solace template. You can change the deployment region using the drop-down menu in the top right corner. Hit the next button in the bottom right corner once you are done.
 
 ![alt text](/images/Select-Template.png "Select Template")
 
-The next screen will allow you to fill in the details of the root AWS stack for this solution:
+<br/><br/>
 
-| Field                      | Value                                                                          |
-|----------------------------|--------------------------------------------------------------------------------|
-| Stack name                 | Default is Solace-HA, any unique name will suffice |
-| **Solace Parameters**      |  |
-| SolaceDockerURL            | URL from the registration email. Can also use load versions hosted remotely (if so, a .md5 file needs to be created in the same remote directory) |
-| AdminPassword              | Password to allow Solace admin access to configure the message broker instances |
-| ContainerLoggingFormat     | The format of the logs sent by the message broker to the CloudWatch service (see [documentation](https://docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/Docker-Tasks/Configuring-VMR-Container-Logging.htm?Highlight=log%20output#Config-Out-Form) for details) |
-| **Network Parameters**     |  |
-| NumberOfAZs                | Default is 3. Depends on number of `AvailibilityZones` selected |
-| AvailabilityZones          | Pick 3 AZs from the drop-down menu, alternatively pick 2 for PoC or limited Region. Must equal `NumberOfAZs` |
-| ProductionEnv              | True will create Private subnets and accompanying public ELB with health-check if production deployment |
-| RemoteAccessCIDR           | IP range that can send/receive messages, use 0.0.0.0/0 if unsure |
-| SSHAccessCIDR              | IP range that can configure message broker, use 0.0.0.0/0 if unsure |
-| **EC2 Parameters**         |  |
-| KeyPairName                | Pick from your existing key pairs, create new AWSW key pair if required |
-| BootDiskSize               | Default is 24GB minimum is 20GB |
-| MessageRouterNodeInstance  | Default is t2.large which is the minimum |
-| MessageRouterNodeStorage   | Default is 0 which means ephemeral, non-zero will cause new io1 disk creation for message-spool which will not delete on stack termination |
-| MonitorNodeInstance        | Default is t2.large which is the minimum | 
-| **AWS Quick Start Config**  |  |   
-| QSS3BucketName             | Leave at default. References the S3 bucket where the templates are hosted |
-| QSS3KeyPrefix              | Leave at default. References the path to the Quick Start resources within the S3 bucket |
+The next screen will allow you to fill in the details for the selected launch option.
 
 ![alt text](/images/specify-details.png "Specify Details")
+
+<br/><br/>
+
+### Launch option 1: Parameters for deploying into a new VPC
+
+| Parameter label (name)     | Default   | Description                                                        |
+|----------------------------|-----------|--------------------------------------------------------------------|
+| Stack name                 | Solace-HA | Any globally unique name                                           |
+| **Solace Parameters**      |           |                                                                    |
+| Solace Docker URL (SolaceDockerURL) | _Requires_ _input_ | URL from the registration email from Step 1. Can also use load versions hosted remotely (if so, a .md5 file needs to be created in the same remote directory) |
+| Password to access Solace admin console and SEMP (AdminPassword) | _Requires_ _input_ | Password to allow Solace admin access to configure the message broker instances |
+| Container logging format (ContainerLoggingFormat) | graylog | The format of the logs sent by the message broker to the CloudWatch service (see [documentation](http://192.168.1.192/home/public/RND/Docs/Cust_Doc_New_Feature_Branches/8.10.0_vmr/Configuring-and-Managing/SW-Broker-Specific-Config/Docker-Tasks/Configuring-VMR-Container-Logging.htm?Highlight=logging#Config-Out-Form ) for details) |
+| **Network Configuration**  |           |                                                                    |
+| Number of Availability Zones (NumberOfAZs) | 3 | The number of Availability Zones (2 may be used for Proof-of-Concept testing or 3 for Production) you want to use in your deployment. This count must match the number of selections in the Availability Zones parameter; otherwise, your deployment will fail with an AWS CloudFormation template validation error. (Note that some regions provide only one or two Availability Zones.) |
+| Availability Zones (AvailabilityZones) | _Requires_ _input_ | Choose two or three Availability Zones from this list, which shows the available zones within your selected region. The logical order of your selections is preserved in your deployment. After you make your selections, make sure that the value of the Number of Availability Zones parameter matches the number of selections. |
+| Create production ready environment (CreatePrivateSubnets) | true | Whether to create and use Private subnets and accompanying public ELB with health-check, which is recommended for production deployment. In this case SSH access to the Solace message broker nodes is only possible through the bastion hosts. |
+| Permitted IP range for SSH Access (SSHAccessCIDR) | _Requires_ _input_ | The CIDR IP range that is permitted to access the message broker nodes via SSH for management purposes. We recommend that you set this value to a trusted IP range. You can use 0.0.0.0/0 for unrestricted access - not recommended for non-production use. |
+| Allowed External Access CIDR (RemoteAccessCIDR) | _Requires_ _input_ | The CIDR IP range that is permitted to access the message broker nodes. We recommend that you set this value to a trusted IP range. For example, you might want to grant only your corporate network  access to the software. You can use 0.0.0.0/0 for unrestricted access - not recommended for non-production use. |
+| **Common Amazon EC2 Configuration** | |                                                                     |
+| Key Pair Name (KeyPairName) | _Requires_ _input_ | A new or an existing public/private key pair within the AWS Region, which allows you to connect securely to your instances after launch. |
+| Boot Disk Capacity (BootDiskSize) | 24 | Amazon EBS storage allocated for the boot disk, in GiBs. The Quick Start supports 8-128 GiB. |
+| **MessageRouterInstance Configuration** | |                                                                     |
+| Instance Type (MessageRouterNode InstanceType) | m4.large | The EC2 instance type for the Solace VMR primary and backup instances in Availability Zones 1 and 2. The m series are recommended for production use. <br/> The available CPU and memory of the selected machine type will limit the maximum connection scaling tier for the Solace message broker. For requirements, refer to the [Solace documentation](http://192.168.1.192/home/public/RND/Docs/Cust_Doc_New_Feature_Branches/8.10.0_vmr/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm#Compare) |
+| Persistent Storage (MessageRouterNode Storage) | 0 | Amazon EBS storage allocated for each block device, in GiBs. The Quick Start supports up to 640 GiB per device. The default value of 0 (zero) indicates emphemeral storage only. A non-zero value will cause a new Provisioned IOPS SSD (io1) disk to be created for message-spool. This disk will not be deleted on stack termination. |
+| **MonitorInstance Configuration** | |                                                                     |
+| Instance Type (MonitorNodeInstanceType) | t2.micro | The EC2 instance type for the Solace VMR monitor instance in Availability Zone 3 (or Availability Zone 2, if you’re using only two zones). |
+| **AWS Quick Start Configuration** | |                                                                     |
+| Quick Start S3 Bucket Name (QSS3BucketName) | solace-products | S3 bucket where the Quick Start templates and scripts are installed. Change this parameter to specify the S3 bucket name you’ve created for your copy of Quick Start assets, if you decide to customize or extend the Quick Start for your own use. |
+| Quick Start S3 Key Prefix (QSS3KeyPrefix) | solace-aws-ha-quickstart/latest/ | Specifies the S3 folder for your copy of Quick Start assets. Change this parameter if you decide to customize or extend the Quick Start for your own use. |
+
+### Launch option 2: Parameters for deploying into an existing VPC
+
+If you are deploying into an existing VPC, most of the parameters are the same as for the new VPC option with the following additions:
+
+| Parameter label (name)     | Default   | Description                                                        |
+|----------------------------|-----------|--------------------------------------------------------------------|
+| **Network Configuration**  |           |                                                                    |
+| VPC ID (VPCID)             | _Requires_ _input_ | Choose the ID of your existing VPC stack - for a value, refer to the `VPCID` in the "VPCStack"'s `Outputs` tab in the AWS CloudFormation view (e.g., vpc-0343606e). This VPC must exist with the proper configuration for Solace cluster access. |
+| Public Subnet IDs (Public SubnetIDs) | _Requires_ _input_ | Choose public subnet IDs in your existing VPC from this list (e.g., subnet-4b8d329f,subnet-bd73afc8,subnet-a01106c2), matching your deployment architecture. |
+| Private Subnet IDs (PrivateSubnetIDs) | _Requires_ _input_ | Choose private subnet IDs in your existing VPC from this list (e.g., subnet-4b8d329f,subnet-bd73afc8,subnet-a01106c2), matching your deployment architecture. Note: This parameter is ignored if you set the Use private subnets parameter to false, however you must still provide at least one item from the list (any) to satisfy parameter validation. |
+| Security group allowed to access console ssh (SSHSecurityGroupID) | _Requires_ _input_ | The ID of the security group in your existing VPC that is allowed to access the console via SSH  - for a value, refer to the `BastionSecurityGroupID` in the "BastionStack"'s `Outputs` tab in the AWS CloudFormation view (e.g., sg-7f16e910). Note: This parameter is ignored if you set the Use private subnets parameter to false. |
+
+<br/><br/>
+
+Select [next] after completing the parameters form to get to the "Options" screen.
 
 Select [next] on the "Options" screen unless you want to add tags, use specific IAM roles, or blend in custom stacks.
 
@@ -111,7 +135,7 @@ Acknowledge that resources will be created and select [Create] in bottom right c
 
 # Stack structure
 
-The Quick Start will create the nested VPC, Bastion, and Solace stacks using their respective templates. The SolaceStack further creates sub-stacks for the deployment of the primary, backup and monitor message brokers. You’ll see all these listed in the AWS CloudFormation console, as illustrated in below. Following the links in the Resources tab provides detailed information about the underlying resources.
+The Quick Start will create the nested VPC, Bastion, and Solace stacks using their respective templates. The SolaceStack further creates sub-stacks for the deployment of the primary, backup and monitor message brokers. You’ll see all these listed in the AWS CloudFormation console, as illustrated below. Following the links in the Resources tab provides detailed information about the underlying resources.
  
 ![alt text](/images/stacks-after-deploy-success.png "Created stacks after deployment")
 
@@ -154,7 +178,7 @@ sudo docker exec -it solace /usr/sw/loads/currentload/bin/cli -A
 
 ## Management tools access through the ELB
 
-Non-CLI [management tools](https://docs.solace.com/Management-Tools.htm ) can access the message broker cluster through the ELB’s public DNS host name at port 8080. Use the user `admin` and the password you set for the "AdminPassword".
+Non-CLI [management tools](http://192.168.1.192/home/public/RND/Docs/Cust_Doc_New_Feature_Branches/8.10.0_vmr/Management-Tools.htm ) can access the message broker cluster through the ELB’s public DNS host name at port 8080. Use the user `admin` and the password you set for the "AdminPassword".
 
 # Message Broker Logs
 

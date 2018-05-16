@@ -20,8 +20,8 @@
                         "UsePrivateSubnets",
                         "PublicSubnetIDs",
                         "PrivateSubnetIDs",
-                        "RemoteAccessCIDR",
-                        "SSHSecurityGroupID"
+                        "SSHSecurityGroupID",
+                        "RemoteAccessCIDR"
                     ]
                 },
                 {
@@ -141,16 +141,20 @@
                 "t2.medium",
                 "t2.large",
                 "t2.xlarge",
+                "t2.2xlarge",
                 "m3.large",
                 "m3.xlarge",
                 "m4.large",
                 "m4.xlarge",
                 "m4.2xlarge",
                 "m4.4xlarge",
-                "c4.xlarge"
+                "m5.large",
+                "m5.xlarge",
+                "m5.2xlarge",
+                "m5.4xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
-            "Default": "t2.large",
+            "Default": "m4.large",
             "Description": "Instance Type for Solace message broker message routing nodes. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
@@ -176,11 +180,8 @@
                 "t2.medium",
                 "t2.large",
                 "t2.xlarge",
-                "m3.large",
-                "m3.xlarge",
                 "m4.large",
-                "m4.xlarge",
-                "c4.xlarge"
+                "m5.large"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.micro",

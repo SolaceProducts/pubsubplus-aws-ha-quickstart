@@ -93,6 +93,12 @@
                 "KeyPairName": {
                     "default": "Key Pair Name"
                 },
+                "SSHAccessCIDR": {
+                    "default": "Permitted IP range for console ssh access"
+                },
+                "RemoteAccessCIDR": {
+                    "default": "Allowed External Access CIDR"
+                },
                 "CreatePrivateSubnets": {
                     "default": "Create production ready enviroment"
                 },
@@ -128,7 +134,7 @@
             "Type": "String"
         },
         "AvailabilityZones": {
-            "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved. The number of zones to choose should be equal to 'Number of Availability Zones' previously specified",
+            "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved. The number of zones to choose must be equal to 'Number of Availability Zones' previously specified",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"
         },
         "NumberOfAZs": {
@@ -155,16 +161,20 @@
                 "t2.medium",
                 "t2.large",
                 "t2.xlarge",
+                "t2.2xlarge",
                 "m3.large",
                 "m3.xlarge",
                 "m4.large",
                 "m4.xlarge",
                 "m4.2xlarge",
                 "m4.4xlarge",
-                "c4.xlarge"
+                "m5.large",
+                "m5.xlarge",
+                "m5.2xlarge",
+                "m5.4xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
-            "Default": "t2.large",
+            "Default": "m4.large",
             "Description": "Instance Type for Solace message broker message routing nodes. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
@@ -215,11 +225,8 @@
                 "t2.medium",
                 "t2.large",
                 "t2.xlarge",
-                "m3.large",
-                "m3.xlarge",
                 "m4.large",
-                "m4.xlarge",
-                "c4.xlarge"
+                "m5.large"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.micro",

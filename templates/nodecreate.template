@@ -50,7 +50,7 @@
         },
         "NodeInstanceType": {
             "ConstraintDescription": "Must be a valid EC2 instance type.",
-            "Default": "t2.large",
+            "Default": "m4.large",
             "Description": "Instance Type for Solace PubSub+ message broker nodes",
             "Type": "String"
         },
