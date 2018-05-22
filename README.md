@@ -39,14 +39,14 @@ Look for `AWS::IAM::Role` in the templates source for the list of required IAM r
 
 This is a two step process:
 
-**Step 1**: Go to the Solace Developer Portal and request a Solace PubSub+ software message broker. This process will return an email with a Download link. To get going, right click "Copy Hyperlink" on the "Download the Solace PubSub+ Software Message Broker for Docker" hyperlink. This will be needed in the following section.
+**Step 1**: Go to the Solace Developer Portal and copy the download URL of the Solace PubSub+ software message broker **Docker** image. 
 
-You can use this quick start with either PubSub+ `Standard` or PubSub+ `Enterprise Evaluation Edition`.
+You can use this quick start template with either PubSub+ `Standard` or PubSub+ `Enterprise Evaluation Edition`.
 
-| PubSub+ Standard | PubSub+ Enterprise Evaluation Edition
+| PubSub+ Standard<br/>Docker Image | PubSub+ Enterprise Evaluation Edition<br/>Docker Image
 | :---: | :---: |
 | Free, up to 1k simultaneous connections,<br/>up to 10k messages per second | 90-day trial version, unlimited |
-| <a href="http://dev.solace.com/downloads/download_vmr-ce-docker" target="_blank"><img src="images/register.png"/></a> | <a href="http://dev.solace.com/downloads/download-vmr-evaluation-edition-docker/" target="_blank"><img src="images/register.png"/></a> |
+| [Get URL of Standard Docker Image](http://dev.solace.com/downloads/) | [Get URL of Evaluation Docker Image](http://dev.solace.com/downloads#eval) |
 
 **Step 2**: Go to the AWS Cloud Formation service and launch the template. The following links are for your convenience and take you directly to the message broker templates.
 

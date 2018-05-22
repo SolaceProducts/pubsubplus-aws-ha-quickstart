@@ -74,6 +74,10 @@ if [[ ${solace_url} == *"em.solace.com"* ]]; then
   LOAD_NAME="`echo $REAL_LINK | awk -v FS="(download/|?)" '{print $2}'`"
   # a redirect link provided by solace
   wget -O ${solace_directory}/solos.info -nv  https://products.solace.com/download/${LOAD_NAME}_MD5
+elif [[ ${solace_url} == *"solace.com/download"* ]]; then
+  REAL_LINK=${solace_url}
+  # the new download url
+  wget -O ${solace_directory}/solos.info -nv  ${solace_url}_MD5
 else
   REAL_LINK=${solace_url}
   # an already-existing load (plus its md5 file) hosted somewhere else (e.g. in an s3 bucket)
