@@ -45,8 +45,8 @@ You can use this quick start with either PubSub+ `Standard` or PubSub+ `Enterpri
 
 | PubSub+ Standard | PubSub+ Enterprise Evaluation Edition
 | :---: | :---: |
-| Free, up to 1k simultaneous connections,<br/>up to 10k messages per second | 90-day trial version, unlimited |
-| <a href="http://dev.solace.com/downloads/download_vmr-ce-docker" target="_blank"><img src="images/register.png"/></a> | <a href="http://dev.solace.com/downloads/download-vmr-evaluation-edition-docker/" target="_blank"><img src="images/register.png"/></a> |
+| Free | 90-day trial version of PubSub+ Enterprise |
+| [Copy Standard URL](http://dev.solace.com/downloads) | [Copy Enterprise Evaluation URL](http://dev.solace.com/downloads#eval) |
 
 **Step 2**: Go to the AWS Cloud Formation service and launch the template. The following links are for your convenience and take you directly to the message broker templates.
 
