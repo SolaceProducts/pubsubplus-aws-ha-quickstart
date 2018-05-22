@@ -6,7 +6,7 @@
 
 This Quick Start template installs Solace PubSub+ software message brokers in fault tolerant high-availability (HA) redundancy groups. HA redundancy provides 1:1 message broker sparing to increase overall service availability. If one of the message brokers fails, or is taken out of service, the other one automatically takes over and provides service to the clients that were previously served by the now out-of-service message broker.  To increase availability, the message brokers are deployed across 3 availability zones.
 
-To learn more about message broker redundancy see the [Redundancy Documentation](http://192.168.1.192/home/public/RND/Docs/Cust_Doc_New_Feature_Branches/8.10.0_vmr/Features/SW-Broker-Redundancy-and-Fault-Tolerance.htm ).  If you are not familiar with Solace PubSub+ or high-availability configurations it is recommended that you review this document. 
+To learn more about message broker redundancy see the [Redundancy Documentation](https://docs.solace.com/Features/SW-Broker-Redundancy-and-Fault-Tolerance.htm ).  If you are not familiar with Solace PubSub+ or high-availability configurations it is recommended that you review this document. 
 
 ![alt text](/images/Solace-AWS-HA-PoC-2AZ.png "Proof of Concept Environment for Solace PubSub+ Software Message Brokers")
 
@@ -45,7 +45,7 @@ You can use this quick start template with either PubSub+ `Standard` or PubSub+ 
 
 | PubSub+ Standard<br/>Docker Image | PubSub+ Enterprise Evaluation Edition<br/>Docker Image
 | :---: | :---: |
-| Free, up to 1k simultaneous connections,<br/>up to 10k messages per second | 90-day trial version, unlimited |
+| Free, up to 1k simultaneous connections,<br/>up to 10k messages per second | 90-day trial version of PubSub+ Enterprise |
 | [Get URL of Standard Docker Image](http://dev.solace.com/downloads/) | [Get URL of Evaluation Docker Image](http://dev.solace.com/downloads#eval) |
 
 **Step 2**: Go to the AWS Cloud Formation service and launch the template. The following links are for your convenience and take you directly to the message broker templates.
@@ -60,7 +60,7 @@ You can use this quick start template with either PubSub+ `Standard` or PubSub+ 
     <img src="/images/launch-button-existing.png"/>
 </a>
 
-* If you want to take a look under the hood, you can view the AWS CloudFormation template that automates the deployment. You can customize the template during launch or download and extend it for other projects. For that copy your extended version of `scripts`, `submodules` and `templates` directories in a  folder in an S3 bucket and make them public.
+* If you want to take a look under the hood, you can view the AWS CloudFormation template that automates the deployment. You can customize the template during launch or download and extend it for other projects. For that, copy your extended version of `scripts`, `submodules` and `templates` directories in a  folder in an S3 bucket and make them public.
 
 <a href="https://raw.githubusercontent.com/SolaceProducts/solace-aws-ha-quickstart/master/templates/solace-master.template" target="_blank">
     <img src="/images/view-template-new.png"/>
@@ -72,7 +72,7 @@ You can use this quick start template with either PubSub+ `Standard` or PubSub+ 
 
 # Filling In the Templates
 
-Selecting the 'Launch Quick Start' above will take you to the AWS "Select Template" tab with the Solace template. You can change the deployment region using the drop-down menu in the top right corner. Hit the next button in the bottom right corner once you are done.
+Selecting the 'Launch Quick Start' button shown above will take you to the AWS "Select Template" tab with the Solace template. You can change the deployment region using the drop-down menu in the top right corner. Hit the next button in the bottom right corner once you are done.
 
 ![alt text](/images/Select-Template.png "Select Template")
 
