@@ -46,7 +46,7 @@ You can use this quick start template with either PubSub+ `Standard` or PubSub+ 
 | PubSub+ Standard<br/>Docker Image | PubSub+ Enterprise Evaluation Edition<br/>Docker Image
 | :---: | :---: |
 | Free, up to 1k simultaneous connections,<br/>up to 10k messages per second | 90-day trial version of PubSub+ Enterprise |
-| [Get URL of Standard Docker Image](http://dev.solace.com/downloads/) | [Get URL of Evaluation Docker Image](http://dev.solace.com/downloads#eval) |
+| [Get URL of Standard Docker Image](http://dev.solace.com/downloads/) | [Get URL of Evaluation Docker Image](http://dev.solace.com/downloads#eval ) |
 
 **Step 2**: Go to the AWS Cloud Formation service and launch the template. The following links are for your convenience and take you directly to the message broker templates.
 
@@ -92,7 +92,7 @@ The next screen will allow you to fill in the details for the selected launch op
 | **Solace Parameters**      |           |                                                                    |
 | Solace Docker URL (SolaceDockerURL) | _Requires_ _input_ | URL from the registration email from Step 1. Can also use load versions hosted remotely (if so, a .md5 file needs to be created in the same remote directory) |
 | Password to access Solace admin console and SEMP (AdminPassword) | _Requires_ _input_ | Password to allow Solace admin access to configure the message broker instances |
-| Container logging format (ContainerLoggingFormat) | graylog | The format of the logs sent by the message broker to the CloudWatch service (see [documentation](http://192.168.1.192/home/public/RND/Docs/Cust_Doc_New_Feature_Branches/8.10.0_vmr/Configuring-and-Managing/SW-Broker-Specific-Config/Docker-Tasks/Configuring-VMR-Container-Logging.htm?Highlight=logging#Config-Out-Form ) for details) |
+| Container logging format (ContainerLoggingFormat) | graylog | The format of the logs sent by the message broker to the CloudWatch service (see [documentation](https://docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/Docker-Tasks/Configuring-VMR-Container-Logging.htm?Highlight=logging#Config-Out-Form ) for details) |
 | **Network Configuration**  |           |                                                                    |
 | Number of Availability Zones (NumberOfAZs) | 3 | The number of Availability Zones (2 may be used for Proof-of-Concept testing or 3 for Production) you want to use in your deployment. This count must match the number of selections in the Availability Zones parameter; otherwise, your deployment will fail with an AWS CloudFormation template validation error. (Note that some regions provide only one or two Availability Zones.) |
 | Availability Zones (AvailabilityZones) | _Requires_ _input_ | Choose two or three Availability Zones from this list, which shows the available zones within your selected region. The logical order of your selections is preserved in your deployment. After you make your selections, make sure that the value of the Number of Availability Zones parameter matches the number of selections. |
@@ -103,7 +103,7 @@ The next screen will allow you to fill in the details for the selected launch op
 | Key Pair Name (KeyPairName) | _Requires_ _input_ | A new or an existing public/private key pair within the AWS Region, which allows you to connect securely to your instances after launch. |
 | Boot Disk Capacity (BootDiskSize) | 24 | Amazon EBS storage allocated for the boot disk, in GiBs. The Quick Start supports 8-128 GiB. |
 | **MessageRouterInstance Configuration** | |                                                                     |
-| Instance Type (MessageRouterNode InstanceType) | m4.large | The EC2 instance type for the Solace VMR primary and backup instances in Availability Zones 1 and 2. The m series are recommended for production use. <br/> The available CPU and memory of the selected machine type will limit the maximum connection scaling tier for the Solace message broker. For requirements, refer to the [Solace documentation](http://192.168.1.192/home/public/RND/Docs/Cust_Doc_New_Feature_Branches/8.10.0_vmr/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm#Compare) |
+| Instance Type (MessageRouterNode InstanceType) | m4.large | The EC2 instance type for the Solace VMR primary and backup instances in Availability Zones 1 and 2. The m series are recommended for production use. <br/> The available CPU and memory of the selected machine type will limit the maximum connection scaling tier for the Solace message broker. For requirements, refer to the [Solace documentation](https://docs.solace.com/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm#Compare) |
 | Persistent Storage (MessageRouterNode Storage) | 0 | Amazon EBS storage allocated for each block device, in GiBs. The Quick Start supports up to 640 GiB per device. The default value of 0 (zero) indicates emphemeral storage only. A non-zero value will cause a new Provisioned IOPS SSD (io1) disk to be created for message-spool. This disk will not be deleted on stack termination. |
 | **MonitorInstance Configuration** | |                                                                     |
 | Instance Type (MonitorNodeInstanceType) | t2.micro | The EC2 instance type for the Solace VMR monitor instance in Availability Zone 3 (or Availability Zone 2, if you’re using only two zones). |
@@ -178,11 +178,11 @@ sudo docker exec -it solace /usr/sw/loads/currentload/bin/cli -A
 
 ## Management tools access through the ELB
 
-Non-CLI [management tools](http://192.168.1.192/home/public/RND/Docs/Cust_Doc_New_Feature_Branches/8.10.0_vmr/Management-Tools.htm ) can access the message broker cluster through the ELB’s public DNS host name at port 8080. Use the user `admin` and the password you set for the "AdminPassword".
+Non-CLI [management tools](https://docs.solace.com/Management-Tools.htm ) can access the message broker cluster through the ELB’s public DNS host name at port 8080. Use the user `admin` and the password you set for the "AdminPassword".
 
 # Message Broker Logs
 
-Both host and container logs get logged to [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/) on the region where the deployment occurred. The message broker logs can be found under the `*/solace.log` log stream. The `ContainerLoggingFormat` field can be used to control the log output format.
+Both host and container logs get logged to [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/ ) on the region where the deployment occurred. The message broker logs can be found under the `*/solace.log` log stream. The `ContainerLoggingFormat` field can be used to control the log output format.
 
 ![alt text](/images/CloudWatch_logging.png "CloudWatch Logging")
 
