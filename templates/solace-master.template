@@ -113,7 +113,7 @@
     },
     "Parameters": {
         "SolaceDockerURL": {
-            "Description": "URL to Solace PubSub+ Docker Image obtained via registration here: http://dev.solace.com/downloads/",
+            "Description": "Download URL to Solace PubSub+ Docker Image obtained here: http://dev.solace.com/downloads/",
             "Type": "String"
         },
         "AdminPassword": {

@@ -4,7 +4,7 @@
 
 ![alt text](/images/Solace-AWS-HA-Prod-3AZ.png "Production Environment for Solace PubSub+ Software Message Brokers")
 
-This Quick Start template installs Solace PubSub+ software message brokers in fault tolerant high-availability (HA) redundancy groups. HA redundancy provides 1:1 message broker sparing to increase overall service availability. If one of the message brokers fails, or is taken out of service, the other one automatically takes over and provides service to the clients that were previously served by the now out-of-service message broker.  To increase availability, the message brokers are deployed across 3 availability zones.
+This Quick Start template installs Solace PubSub+ software message brokers in fault tolerant high-availability (HA) redundancy groups. HA redundancy provides 1:1 message broker redundancy to increase overall service availability. If one of the message brokers fails, or is taken out of service, the other one automatically takes over and provides service to the clients that were previously served by the now out-of-service message broker.  To increase availability, the message brokers are deployed across 3 availability zones.
 
 To learn more about message broker redundancy see the [Redundancy Documentation](https://docs.solace.com/Features/SW-Broker-Redundancy-and-Fault-Tolerance.htm ).  If you are not familiar with Solace PubSub+ or high-availability configurations it is recommended that you review this document. 
 
@@ -90,7 +90,7 @@ The next screen will allow you to fill in the details for the selected launch op
 |----------------------------|-----------|--------------------------------------------------------------------|
 | Stack name                 | Solace-HA | Any globally unique name                                           |
 | **Solace Parameters**      |           |                                                                    |
-| Solace Docker URL (SolaceDockerURL) | _Requires_ _input_ | URL from the registration email from Step 1. Can also use load versions hosted remotely (if so, a .md5 file needs to be created in the same remote directory) |
+| Solace Docker URL (SolaceDockerURL) | _Requires_ _input_ | Solace PubSub+ software message broker Docker image download URL from Step 1. Can also use load versions hosted remotely (if so, a .md5 file needs to be created in the same remote directory) |
 | Password to access Solace admin console and SEMP (AdminPassword) | _Requires_ _input_ | Password to allow Solace admin access to configure the message broker instances |
 | Container logging format (ContainerLoggingFormat) | graylog | The format of the logs sent by the message broker to the CloudWatch service (see [documentation](https://docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/Docker-Tasks/Configuring-VMR-Container-Logging.htm?Highlight=logging#Config-Out-Form ) for details) |
 | **Network Configuration**  |           |                                                                    |
@@ -103,10 +103,10 @@ The next screen will allow you to fill in the details for the selected launch op
 | Key Pair Name (KeyPairName) | _Requires_ _input_ | A new or an existing public/private key pair within the AWS Region, which allows you to connect securely to your instances after launch. |
 | Boot Disk Capacity (BootDiskSize) | 24 | Amazon EBS storage allocated for the boot disk, in GiBs. The Quick Start supports 8-128 GiB. |
 | **MessageRouterInstance Configuration** | |                                                                     |
-| Instance Type (MessageRouterNode InstanceType) | m4.large | The EC2 instance type for the Solace VMR primary and backup instances in Availability Zones 1 and 2. The m series are recommended for production use. <br/> The available CPU and memory of the selected machine type will limit the maximum connection scaling tier for the Solace message broker. For requirements, refer to the [Solace documentation](https://docs.solace.com/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm#Compare) |
+| Instance Type (MessageRouterNode InstanceType) | m4.large | The EC2 instance type for the Solace message broker primary and backup instances in Availability Zones 1 and 2. The m series are recommended for production use. <br/> The available CPU and memory of the selected machine type will limit the maximum connection scaling tier for the Solace message broker. For requirements, refer to the [Solace documentation](https://docs.solace.com/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm#Compare) |
 | Persistent Storage (MessageRouterNode Storage) | 0 | Amazon EBS storage allocated for each block device, in GiBs. The Quick Start supports up to 640 GiB per device. The default value of 0 (zero) indicates emphemeral storage only. A non-zero value will cause a new Provisioned IOPS SSD (io1) disk to be created for message-spool. This disk will not be deleted on stack termination. |
 | **MonitorInstance Configuration** | |                                                                     |
-| Instance Type (MonitorNodeInstanceType) | t2.micro | The EC2 instance type for the Solace VMR monitor instance in Availability Zone 3 (or Availability Zone 2, if you’re using only two zones). |
+| Instance Type (MonitorNodeInstanceType) | t2.micro | The EC2 instance type for the Solace message broker monitor instance in Availability Zone 3 (or Availability Zone 2, if you’re using only two zones). |
 | **AWS Quick Start Configuration** | |                                                                     |
 | Quick Start S3 Bucket Name (QSS3BucketName) | solace-products | S3 bucket where the Quick Start templates and scripts are installed. Change this parameter to specify the S3 bucket name you’ve created for your copy of Quick Start assets, if you decide to customize or extend the Quick Start for your own use. |
 | Quick Start S3 Key Prefix (QSS3KeyPrefix) | solace-aws-ha-quickstart/latest/ | Specifies the S3 folder for your copy of Quick Start assets. Change this parameter if you decide to customize or extend the Quick Start for your own use. |
