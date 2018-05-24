@@ -30,13 +30,14 @@ script:
   - sed -i "s@MessageRouterNodeInstanceTypeParameterValue@$MESSAGEROUTERNODEINSTANCETYPE@g" ci/solace-aws-ha-3az-prod-travistest.json
   - aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"
   - aws s3 sync . s3://solace-cf-quickstart-travistest/solace/messagebroker/latest --acl public-read
-  - aws cloudformation create-stack --stack-name messagebroker-ha-travistest --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure DELETE --capabilities CAPABILITY_IAM
+  - export TESTSTACKPREFIX="$(date +%s)"; export TESTSTACKNAME="$TESTSTACKPREFIX-sol-aws-travistest";
+  - aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure DELETE --capabilities CAPABILITY_IAM
   - echo "Waiting for stack create complete"
   - "travis_wait 30 sleep 1800 &"
-  - until aws cloudformation describe-stacks --stack-name messagebroker-ha-travistest | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
-  - aws cloudformation describe-stacks --stack-name messagebroker-ha-travistest | cat
+  - until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
+  - aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | cat
   - echo "Pausing to get the ELB ready"; sleep 10
-  - url="$(aws elb describe-load-balancers | grep DNSName | grep messagebroker | awk -F '"' '{print $4}')"; echo $url
+  - url="$(aws elb describe-load-balancers | grep DNSName | grep $TESTSTACKPREFIX | awk -F '"' '{print $4}')"; echo $url
   - curl -O https://sftp.solace.com/download/SDKPERF_C_LINUX64
   - tar -xvf SDKPERF_C_LINUX64
   - pubSubTools/sdkperf_c -cip=$url -mn=100000 -mr=0 -ptl=t1 -stl=t1 | grep "Total Messages"
@@ -47,13 +48,12 @@ after_success:
   - echo "YAML linted"
   - echo "Cloudformation tested"
   - echo "Messaging tested"
-  - if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "SOL-4551" ]; then aws s3 sync . s3://sol-4551/solace-aws-ha-quickstart/latest --acl public-read; fi
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ]; then aws s3 sync . s3://solace-products/solace-aws-ha-quickstart/latest --acl public-read; fi
 
 after_script:
   - aws s3 rb s3://solace-cf-quickstart-travistest --force
-  - aws cloudformation delete-stack --stack-name messagebroker-ha-travistest
+  - aws cloudformation delete-stack --stack-name $TESTSTACKNAME
   - echo "Waiting for stack delete complete"
-  - stackid="$(aws cloudformation describe-stacks --stack-name messagebroker-ha-travistest | grep StackId | awk -F '"' '{print $4}')"
+  - stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep StackId | awk -F '"' '{print $4}')"
   - if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
 
