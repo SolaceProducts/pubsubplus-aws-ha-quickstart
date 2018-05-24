@@ -11,6 +11,7 @@ env:
 before_install:
   - echo "Installing AWS CLI"
   - pip install --upgrade --user awscli
+  - aws cloudformation describe-stacks | grep StackName
   - echo "Installing test gems"
   - gem install yaml-lint
   - echo "Fixing to handle submodules then clone them"
