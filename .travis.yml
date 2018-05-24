@@ -30,7 +30,7 @@ script:
   - sed -i "s@MessageRouterNodeInstanceTypeParameterValue@$MESSAGEROUTERNODEINSTANCETYPE@g" ci/solace-aws-ha-3az-prod-travistest.json
   - aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"
   - aws s3 sync . s3://solace-cf-quickstart-travistest/solace/messagebroker/latest --acl public-read
-  - export TESTSTACKPREFIX="$(date +%s)"; export TESTSTACKNAME="$TESTSTACKPREFIX-sol-aws-travistest";
+  - export TESTSTACKPREFIX="T$(date +%s)"; export TESTSTACKNAME="$TESTSTACKPREFIX-sol-aws-travistest";
   - aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure DELETE --capabilities CAPABILITY_IAM
   - echo "Waiting for stack create complete"
   - "travis_wait 30 sleep 1800 &"
