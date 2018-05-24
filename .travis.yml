@@ -18,11 +18,11 @@ before_install:
   - git submodule sync
   - git submodule init
   - git submodule update
-  - aws cloudformation describe-stacks | grep StackName
   
 install: true
 
 script:
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then echo "Cancelling for Pull Requests because secrets are not supported!"; travis_terminate 0; fi'
   - aws cloudformation validate-template --template-body file://templates/solace-master.template
   - aws cloudformation validate-template --template-body file://templates/solace.template
   - aws cloudformation validate-template --template-body file://templates/nodecreate.template
