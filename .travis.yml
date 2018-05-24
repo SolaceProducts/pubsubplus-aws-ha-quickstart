@@ -36,7 +36,7 @@ script:
   - until aws cloudformation describe-stacks --stack-name messagebroker-ha-travistest | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
   - aws cloudformation describe-stacks --stack-name messagebroker-ha-travistest | cat
   - echo "Pausing to get the ELB ready"; sleep 10
-  - url="$(aws elb describe-load-balancers | grep DNSName | grep messagebroker-ha-travis | awk -F '"' '{print $4}')"; echo $url
+  - url="$(aws elb describe-load-balancers | grep DNSName | grep messagebroker | awk -F '"' '{print $4}')"; echo $url
   - curl -O https://sftp.solace.com/download/SDKPERF_C_LINUX64
   - tar -xvf SDKPERF_C_LINUX64
   - pubSubTools/sdkperf_c -cip=$url -mn=100000 -mr=0 -ptl=t1 -stl=t1 | grep "Total Messages"
