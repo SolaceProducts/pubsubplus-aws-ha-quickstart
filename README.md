@@ -89,7 +89,7 @@ The next screen will allow you to fill in the details for the selected launch op
 | Parameter label (name)     | Default   | Description                                                        |
 |----------------------------|-----------|--------------------------------------------------------------------|
 | Stack name                 | Solace-HA | Any globally unique name                                           |
-| **Solace Parameters**      |           |                                                                    |
+| **Solace Configuration**      |           |                                                                    |
 | Solace Docker URL (SolaceDockerURL) | _Requires_ _input_ | Solace PubSub+ software message broker Docker image download URL from Step 1. Can also use load versions hosted remotely (if so, a .md5 file needs to be created in the same remote directory) |
 | Password to access Solace admin console and SEMP (AdminPassword) | _Requires_ _input_ | Password to allow Solace admin access to configure the message broker instances |
 | Container logging format (ContainerLoggingFormat) | graylog | The format of the logs sent by the message broker to the CloudWatch service (see [documentation](https://docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/Docker-Tasks/Configuring-VMR-Container-Logging.htm?Highlight=logging#Config-Out-Form ) for details) |

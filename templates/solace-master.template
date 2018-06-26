@@ -6,7 +6,7 @@
             "ParameterGroups": [
                 {
                     "Label": {
-                        "default": "Solace Parameters"
+                        "default": "Solace Configuration"
                     },
                     "Parameters": [
                         "SolaceDockerURL",
