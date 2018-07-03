@@ -17,7 +17,7 @@
     },
     {
         "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "us-east-2a,us-east-2b,us-east-2c" 
+        "ParameterValue": "SolaceStackRegionNAMEa,SolaceStackRegionNAMEb,SolaceStackRegionNAMEc" 
     },
     {
         "ParameterKey": "CreatePrivateSubnets",
