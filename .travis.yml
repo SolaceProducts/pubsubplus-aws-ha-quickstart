@@ -5,7 +5,7 @@ git:
 
 env:
   global:
-  - AWS_DEFAULT_REGION=us-east-2
+  - AWS_DEFAULT_REGION=eu-west-2
   - MESSAGEROUTERNODEINSTANCETYPE=t2.small
   
 before_install:
