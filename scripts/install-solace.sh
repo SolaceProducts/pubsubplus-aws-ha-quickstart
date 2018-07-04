@@ -143,7 +143,7 @@ if [ -z "${SOLACE_IMAGE_ID}" ] ; then
   exit 1
 fi
 echo "`date` INFO: Successfully loaded ${solace_uri} to local docker repo"
-echo "`date` INFO: Solace message broker image and tag: `docker images | grep solace | awk '{print $1, $2}'`"
+echo "`date` INFO: Solace message broker image and tag: `docker images | grep solace | awk '{print $1,":",$2}'`"
 
 # Decide which scaling tier applies based on system memory
 # and set maxconnectioncount, ulimit, devshm and swap accordingly
@@ -300,7 +300,7 @@ docker create \
     --env "redundancy_group_node_backup${backup_stack}_connectvia=${BACKUP_IP}" \
     --env "redundancy_group_node_monitor${monitor_stack}_nodetype=monitoring" \
     --env "redundancy_group_node_monitor${monitor_stack}_connectvia=${MONITOR_IP}" \
-   --name=solace ${VMR_VERSION}
+   --name=solace ${SOLACE_IMAGE_ID}
 
 
 # Start the solace service and enable it at system start up.
