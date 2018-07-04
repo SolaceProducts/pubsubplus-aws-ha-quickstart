@@ -1,7 +1,7 @@
 [
     {   
         "ParameterKey": "SolaceDockerURL",
-        "ParameterValue": "solace/solace-pubsub-standard:latest"
+        "ParameterValue": "SolaceDockerURLParameterValue"
     },
     {
         "ParameterKey": "AdminPassword",
