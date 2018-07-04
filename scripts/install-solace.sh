@@ -74,6 +74,9 @@ echo "config_file=$config_file , solace_directory=$solace_directory , admin_pass
       logging_group=$logging_group , logging_stream=$logging_stream , Leftovers: $@"
 export admin_password=`cat ${admin_password_file}`
 
+# Create working dir if needed
+mkdir -p ${solace_directory}
+
 echo "`date` INFO: RETRIEVE SOLACE DOCKER IMAGE"
 echo "###############################################################"
 # Determine first if solace_uri is a valid docker registry uri
