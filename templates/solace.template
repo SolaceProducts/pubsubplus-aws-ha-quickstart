@@ -7,7 +7,7 @@
                 {
                     "Label": { "default": "Solace Configuration" },
                     "Parameters": [
-                        "SolaceDockerURL",
+                        "SolaceDockerImage",
                         "AdminPassword",
                         "ContainerLoggingFormat"
                     ]
@@ -32,14 +32,14 @@
                     ]
                 },
                 {
-                    "Label": { "default": "MessageRouterInstance Configuration" },
+                    "Label": { "default": "Message Router Instance Configuration" },
                     "Parameters": [
                         "MessageRouterNodeInstanceType",
                         "MessageRouterNodeStorage"
                     ]
                 },
                 {
-                    "Label": { "default": "MonitorInstance Configuration" },
+                    "Label": { "default": "Monitor Instance Configuration" },
                     "Parameters": [ "MonitorNodeInstanceType" ]
                 },
                 {
@@ -51,8 +51,8 @@
                 }
             ],
             "ParameterLabels": {
-                "SolaceDockerURL": {
-                    "default": "Solace Docker URL"
+                "SolaceDockerImage": {
+                    "default": "Solace docker image reference"
                 },
                 "AdminPassword": {
                     "default": "Password to access Solace admin console and SEMP"
@@ -106,12 +106,13 @@
         }
     },
     "Parameters": {
-        "SolaceDockerURL": {
-            "Description": "Required URL to Solace PubSub+ Standard or Enterprise Evaluation Edition",
+        "SolaceDockerImage": {
+            "Description": "Solace PubSub+ message broker docker image reference: a docker registry name with optional tag or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a url to a remotely hosted load version",
+            "Default": "solace/solace-pubsub-standard:latest",
             "Type": "String"
         },
         "AdminPassword": {
-            "Description": "Required password to access SolOS admin console and SEMP",
+            "Description": "Required password to access Solace admin console and SEMP",
             "Type": "String",
             "NoEcho": "True"
         },
@@ -443,8 +444,8 @@
                     ]
                 },
                 "Parameters": {
-                    "SolaceDockerURL": {
-                        "Ref": "SolaceDockerURL"
+                    "SolaceDockerImage": {
+                        "Ref": "SolaceDockerImage"
                     },
                     "AdminPassword": {
                         "Ref": "AdminPassword"
@@ -524,8 +525,8 @@
                     ]
                 },
                 "Parameters": {
-                    "SolaceDockerURL": {
-                        "Ref": "SolaceDockerURL"
+                    "SolaceDockerImage": {
+                        "Ref": "SolaceDockerImage"
                     },
                     "AdminPassword": {
                         "Ref": "AdminPassword"
@@ -605,8 +606,8 @@
                     ]
                 },
                 "Parameters": {
-                    "SolaceDockerURL": {
-                        "Ref": "SolaceDockerURL"
+                    "SolaceDockerImage": {
+                        "Ref": "SolaceDockerImage"
                     },
                     "AdminPassword": {
                         "Ref": "AdminPassword"

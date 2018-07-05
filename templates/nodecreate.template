@@ -2,8 +2,9 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "CloudFormation sub-template for Single Node EC2 deployment within Solace HA Cluster. (qs-1nm1r54hd)",
     "Parameters": {
-        "SolaceDockerURL": {
-            "Description": "Required URL to Solace PubSub+ Standard or Enterprise Evaluation Edition",
+        "SolaceDockerImage": {
+            "Description": "Solace PubSub+ message broker docker image reference: a docker registry name with optional tag or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a url to a remotely hosted load version",
+            "Default": "solace/solace-pubsub-standard:latest",
             "Type": "String"
         },
         "AdminPassword": {
@@ -765,7 +766,7 @@
                                 "$AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/solace",
                                 "  -u ",
                                 {
-                                    "Ref": "SolaceDockerURL"
+                                    "Ref": "SolaceDockerImage"
                                 },
                                 "  -p /mnt/vmr/secrets/solOSpasswd",
                                 "  -s ",

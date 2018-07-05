@@ -9,7 +9,7 @@
                         "default": "Solace Configuration"
                     },
                     "Parameters": [
-                        "SolaceDockerURL",
+                        "SolaceDockerImage",
                         "AdminPassword",
                         "ContainerLoggingFormat"
                     ]
@@ -37,7 +37,7 @@
                 },
                 {
                     "Label": {
-                        "default": "MessageRouterInstance Configuration"
+                        "default": "Message Router Instance Configuration"
                     },
                     "Parameters": [
                         "MessageRouterNodeInstanceType",
@@ -46,7 +46,7 @@
                 },
                 {
                     "Label": {
-                        "default": "MonitorInstance Configuration"
+                        "default": "Monitor Instance Configuration"
                     },
                     "Parameters": [
                         "MonitorNodeInstanceType"
@@ -63,8 +63,8 @@
                 }
             ],
             "ParameterLabels": {
-                "SolaceDockerURL": {
-                    "default": "Solace Docker URL"
+                "SolaceDockerImage": {
+                    "default": "Solace docker image reference"
                 },
                 "AdminPassword": {
                     "default": "Password to access Solace admin console and SEMP"
@@ -112,8 +112,9 @@
         }
     },
     "Parameters": {
-        "SolaceDockerURL": {
-            "Description": "Download URL to Solace PubSub+ Docker Image obtained here: http://dev.solace.com/downloads/",
+        "SolaceDockerImage": {
+            "Description": "Solace PubSub+ message broker docker image reference: a docker registry name with optional tag or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a url to a remotely hosted load version",
+            "Default": "solace/solace-pubsub-standard:latest",
             "Type": "String"
         },
         "AdminPassword": {
@@ -400,8 +401,8 @@
                     ]
                 },
                 "Parameters": {
-                    "SolaceDockerURL": {
-                        "Ref": "SolaceDockerURL"
+                    "SolaceDockerImage": {
+                        "Ref": "SolaceDockerImage"
                     },
                     "AdminPassword": {
                         "Ref": "AdminPassword"
