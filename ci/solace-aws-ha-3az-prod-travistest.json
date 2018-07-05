@@ -1,7 +1,7 @@
 [
     {   
-        "ParameterKey": "SolaceDockerURL",
-        "ParameterValue": "SolaceDockerURLParameterValue"
+        "ParameterKey": "SolaceDockerImage",
+        "ParameterValue": "SolaceDockerImageParameterValue"
     },
     {
         "ParameterKey": "AdminPassword",
