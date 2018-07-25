@@ -14,14 +14,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# This script will obtain the Solace message broker's docker image from
+# sources and installs and runs it in a docker container
+# solace_uri specifies where to get the docker image from
+# - default (not specified): PubSub+ Standard from docker hub
+# - Other public docker registry URI
+# - solace.com/download
+# - specified location of a docker image tarball URL
+#
+
 
 
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
 # Initialize our own variables:
 config_file=""
-solace_directory=""
-solace_url=""
+solace_directory="."
+solace_uri="solace/solace-pubsub-standard:latest"   # default to pull latest PubSub+ standard from docker hub
 admin_password_file=""
 disk_size=""
 disk_volume=""
@@ -42,7 +52,7 @@ while getopts "c:d:p:s:u:v:f:g:r:" opt; do
     ;;
   s)  disk_size=$OPTARG
     ;;
-  u)  solace_url=$OPTARG
+  u)  solace_uri=$OPTARG
     ;;
   v)  disk_volume=$OPTARG
     ;;
@@ -60,76 +70,80 @@ shift $((OPTIND-1))
 
 verbose=1
 echo "config_file=$config_file , solace_directory=$solace_directory , admin_password_file=$admin_password_file , \
-      solace_url=$solace_url , disk_size=$disk_size , volume=$disk_volume , logging_format=$logging_format , \
+      solace_uri=$solace_uri , disk_size=$disk_size , volume=$disk_volume , logging_format=$logging_format , \
       logging_group=$logging_group , logging_stream=$logging_stream , Leftovers: $@"
 export admin_password=`cat ${admin_password_file}`
 
-#Load the VMR
-mkdir $solace_directory
+# Create working dir if needed
+mkdir -p ${solace_directory}
+
 echo "`date` INFO: RETRIEVE SOLACE DOCKER IMAGE"
-echo "#############################################################"
-if [[ ${solace_url} == *"em.solace.com"* ]]; then
-  wget -q -O ${solace_directory}/solace-redirect ${solace_url} || echo "There has been an issue with downloading the redirect"
-  REAL_LINK=`egrep -o "https://[a-zA-Z0-9\.\/\_\?\=%]*" ${solace_directory}/solace-redirect`
-  LOAD_NAME="`echo $REAL_LINK | awk -v FS="(download/|?)" '{print $2}'`"
-  # a redirect link provided by solace
-  wget -O ${solace_directory}/solos.info -nv  https://products.solace.com/download/${LOAD_NAME}_MD5
-elif [[ ${solace_url} == *"solace.com/download"* ]]; then
-  REAL_LINK=${solace_url}
-  # the new download url
-  wget -O ${solace_directory}/solos.info -nv  ${solace_url}_MD5
-else
-  REAL_LINK=${solace_url}
-  # an already-existing load (plus its md5 file) hosted somewhere else (e.g. in an s3 bucket)
-  wget -O ${solace_directory}/solos.info -nv  ${solace_url}.md5
-fi
-
-IFS=' ' read -ra SOLOS_INFO <<< `cat ${solace_directory}/solos.info`
-MD5_SUM=${SOLOS_INFO[0]}
-SolOS_LOAD=${SOLOS_INFO[1]}
-if [ -z ${MD5_SUM} ]; then
-  echo "`date` ERROR: Missing md5sum for the Solace load" | tee /dev/stderr | tee /dev/stderr
-  exit 1
-fi
-echo "`date` INFO: Reference md5sum is: ${MD5_SUM}"
-
-
-
-echo "`date` INFO: Download from URL provided and validate"
-wget -q -O  ${solace_directory}/${SolOS_LOAD} ${REAL_LINK}
-
-LOCAL_OS_INFO=`md5sum ${SolOS_LOAD}`
-IFS=' ' read -ra SOLOS_INFO <<< ${LOCAL_OS_INFO}
-LOCAL_MD5_SUM=${SOLOS_INFO[0]}
-if [ ${LOCAL_MD5_SUM} != ${MD5_SUM} ]; then
-  echo "`date` ERROR: Possible corrupt Solace load, md5sum do not match" | tee /dev/stderr
-  exit 1
-else
-  echo "`date` INFO: Successfully downloaded ${SolOS_LOAD}"
-fi
-
-# Make sure Docker is actually up
+echo "###############################################################"
+# Determine first if solace_uri is a valid docker registry uri
+## First make sure Docker is actually up
 docker_running=""
-loop_guard=6
+loop_guard=10
 loop_count=0
 while [ ${loop_count} != ${loop_guard} ]; do
-  sleep 10
   docker_running=`service docker status | grep -o running`
   if [ ${docker_running} != "running" ]; then
     ((loop_count++))
     echo "`date` WARN: Tried to launch Solace but Docker in state ${docker_running}"
+    sleep 5
   else
     echo "`date` INFO: Docker in state ${docker_running}"
     break
   fi
 done
-echo "`date` INFO: LOAD DOCKER IMAGE INTO LOCAL STORE"
-echo "##################################################################"
-if [ `docker images "solace-*" -q` ] ; then docker rmi -f `docker images "solace-*" -q`; fi;
-docker load -i ${solace_directory}/${SolOS_LOAD}
-
-export VMR_VERSION=`docker images | grep solace | awk '{print $3}'`
-echo "`date` INFO: Solace message broker image: ${VMR_IMAGE}"
+## Remove any existing solace image
+if [ "`docker images | grep solace-`" ] ; then
+  echo "`date` INFO: Removing existing Solace images from local docker repo"
+  docker rmi -f `docker images | grep solace- | awk '{print $3}'`
+fi
+## Try to load solace_uri as a docker registry uri
+echo "`date` Testing ${solace_uri} for docker registry uri:"
+if [ -z "`docker pull ${solace_uri}`" ] ; then
+  echo "`date` INFO: Found that ${solace_uri} was not a docker registry uri, retrying if it is a download link"
+  if [[ ${solace_uri} == *"solace.com/download"* ]]; then
+    REAL_LINK=${solace_uri}
+    # the new download url
+    wget -O ${solace_directory}/solos.info -nv  ${solace_uri}_MD5
+  else
+    REAL_LINK=${solace_uri}
+    # an already-existing load (plus its md5 file) hosted somewhere else (e.g. in an s3 bucket)
+    wget -O ${solace_directory}/solos.info -nv  ${solace_uri}.md5
+  fi
+  IFS=' ' read -ra SOLOS_INFO <<< `cat ${solace_directory}/solos.info`
+  MD5_SUM=${SOLOS_INFO[0]}
+  SolOS_LOAD=${SOLOS_INFO[1]}
+  if [ -z ${MD5_SUM} ]; then
+    echo "`date` ERROR: Missing md5sum for the Solace load - exiting." | tee /dev/stderr
+    exit 1
+  fi
+  echo "`date` INFO: Reference md5sum is: ${MD5_SUM}"
+  echo "`date` INFO: Now download from URL provided and validate"
+  wget -q -O  ${solace_directory}/${SolOS_LOAD} ${REAL_LINK}
+  ## Check MD5
+  LOCAL_OS_INFO=`md5sum ${SolOS_LOAD}`
+  IFS=' ' read -ra SOLOS_INFO <<< ${LOCAL_OS_INFO}
+  LOCAL_MD5_SUM=${SOLOS_INFO[0]}
+  if [ -z "${MD5_SUM}" || "${LOCAL_MD5_SUM}" != "${MD5_SUM}" ]; then
+    echo "`date` ERROR: Possible corrupt Solace load, md5sum do not match - exiting." | tee /dev/stderr
+    exit 1
+  else
+    echo "`date` INFO: Successfully downloaded ${SolOS_LOAD}"
+  fi
+  ## Load the image tarball
+  docker load -i ${solace_directory}/${SolOS_LOAD}
+fi
+## Image details
+export SOLACE_IMAGE_ID=`docker images | grep solace | awk '{print $3}'`
+if [ -z "${SOLACE_IMAGE_ID}" ] ; then
+  echo "`date` ERROR: Could not load a valid Solace docker image - exiting." | tee /dev/stderr
+  exit 1
+fi
+echo "`date` INFO: Successfully loaded ${solace_uri} to local docker repo"
+echo "`date` INFO: Solace message broker image and tag: `docker images | grep solace | awk '{print $1,":",$2}'`"
 
 # Decide which scaling tier applies based on system memory
 # and set maxconnectioncount, ulimit, devshm and swap accordingly
@@ -286,7 +300,7 @@ docker create \
     --env "redundancy_group_node_backup${backup_stack}_connectvia=${BACKUP_IP}" \
     --env "redundancy_group_node_monitor${monitor_stack}_nodetype=monitoring" \
     --env "redundancy_group_node_monitor${monitor_stack}_connectvia=${MONITOR_IP}" \
-   --name=solace ${VMR_VERSION}
+   --name=solace ${SOLACE_IMAGE_ID}
 
 
 # Start the solace service and enable it at system start up.
@@ -355,7 +369,7 @@ if [ "${is_primary}" = "true" ]; then
   done
 
   if [ ${count} -eq ${loop_guard} ]; then
-    echo "`date` ERROR: Solace redundancy group never came up" | tee /dev/stderr
+    echo "`date` ERROR: Solace redundancy group never came up - exiting." | tee /dev/stderr
     exit 1
   fi
 
@@ -390,7 +404,7 @@ if [ "${is_primary}" = "true" ]; then
   done
 
   if [ ${count} -eq ${loop_guard} ]; then
-    echo "`date` ERROR: Backup never became 'Active' or 'Standby'" | tee /dev/stderr
+    echo "`date` ERROR: Backup never became 'Active' or 'Standby' - exiting." | tee /dev/stderr
     exit 1
   fi
 

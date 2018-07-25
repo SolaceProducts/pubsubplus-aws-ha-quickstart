@@ -39,14 +39,23 @@ Look for `AWS::IAM::Role` in the templates source for the list of required IAM r
 
 This is a two step process:
 
-**Step 1**: Go to the Solace Developer Portal and copy the download URL of the Solace PubSub+ software message broker **Docker** image. 
+**Step 1**: Obtain a reference to the docker image of the Solace  PubSub+ message broker to be deployed
 
-You can use this quick start template with either PubSub+ `Standard` or PubSub+ `Enterprise Evaluation Edition`.
+First, decide which [Solace PubSub+ message broker](https://docs.solace.com/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm ) and version is suitable to your use case.
 
-| PubSub+ Standard<br/>Docker Image | PubSub+ Enterprise Evaluation Edition<br/>Docker Image
-| :---: | :---: |
-| Free, up to 1k simultaneous connections,<br/>up to 10k messages per second | 90-day trial version of PubSub+ Enterprise |
-| [Get URL of Standard Docker Image](http://dev.solace.com/downloads/) | [Get URL of Evaluation Docker Image](http://dev.solace.com/downloads#eval ) |
+The docker image reference can be:
+
+*	A public or accessible private docker registry repository name with an optional tag. This is the recommended option if using PubSub+ Standard. The default is to use the latest message broker image [available from Docker Hub](https://hub.docker.com/r/solace/solace-pubsub-standard/ ) as `solace/solace-pubsub-standard:latest`, or use a specific version [tag](https://hub.docker.com/r/solace/solace-pubsub-standard/tags/ ).
+
+*	A docker image download URL
+     * If using Solace PubSub+ Enterprise Evaluation Edition, go to the Solace Downloads page. For the image reference, copy and use the download URL in the Solace PubSub+ Enterprise Evaluation Edition Docker Images section.
+
+         | PubSub+ Enterprise Evaluation Edition<br/>Docker Image
+         | :---: |
+         | 90-day trial version of PubSub+ Enterprise |
+         | [Get URL of Evaluation Docker Image](http://dev.solace.com/downloads#eval ) |
+
+     * If you have purchased a Docker image of Solace PubSub+ Enterprise, Solace will give you information for how to download the compressed tar archive package from a secure Solace server. Contact Solace Support at support@solace.com if you require assistance. Then you can host this tar archive together with its MD5 on a file server and use the download URL as the image reference.
 
 **Step 2**: Go to the AWS Cloud Formation service and launch the template. The following links are for your convenience and take you directly to the message broker templates.
 
@@ -89,8 +98,8 @@ The next screen will allow you to fill in the details for the selected launch op
 | Parameter label (name)     | Default   | Description                                                        |
 |----------------------------|-----------|--------------------------------------------------------------------|
 | Stack name                 | Solace-HA | Any globally unique name                                           |
-| **Solace Parameters**      |           |                                                                    |
-| Solace Docker URL (SolaceDockerURL) | _Requires_ _input_ | Solace PubSub+ software message broker Docker image download URL from Step 1. Can also use load versions hosted remotely (if so, a .md5 file needs to be created in the same remote directory) |
+| **Solace Configuration**      |           |                                                                    |
+| Solace docker image reference (SolaceDockerImage) | solace/solace-pubsub-standard:latest | A reference to the Solace PubSub+ message broker docker image, from step 1. Either the image name with optional tag in an accessible docker registry or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a URL to a remotely hosted image version, e.g. on S3 |
 | Password to access Solace admin console and SEMP (AdminPassword) | _Requires_ _input_ | Password to allow Solace admin access to configure the message broker instances |
 | Container logging format (ContainerLoggingFormat) | graylog | The format of the logs sent by the message broker to the CloudWatch service (see [documentation](https://docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/Docker-Tasks/Configuring-VMR-Container-Logging.htm?Highlight=logging#Config-Out-Form ) for details) |
 | **Network Configuration**  |           |                                                                    |
