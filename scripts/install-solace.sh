@@ -124,7 +124,7 @@ if [ -z "`docker pull ${solace_uri}`" ] ; then
   echo "`date` INFO: Now download from URL provided and validate"
   wget -q -O  ${solace_directory}/${SolOS_LOAD} ${REAL_LINK}
   ## Check MD5
-  LOCAL_OS_INFO=`md5sum ${SolOS_LOAD}`
+  LOCAL_OS_INFO=`md5sum ${solace_directory}/${SolOS_LOAD}`
   IFS=' ' read -ra SOLOS_INFO <<< ${LOCAL_OS_INFO}
   LOCAL_MD5_SUM=${SOLOS_INFO[0]}
   if [ -z "${MD5_SUM}" || "${LOCAL_MD5_SUM}" != "${MD5_SUM}" ]; then
