@@ -64,7 +64,7 @@
             ],
             "ParameterLabels": {
                 "SolaceDockerImage": {
-                    "default": "Solace docker image reference"
+                    "default": "Solace Docker image reference"
                 },
                 "AdminPassword": {
                     "default": "Password to access Solace admin console and SEMP"
@@ -94,7 +94,7 @@
                     "default": "Key Pair Name"
                 },
                 "SSHAccessCIDR": {
-                    "default": "Permitted IP range for console ssh access"
+                    "default": "Permitted IP range for console SSH access"
                 },
                 "RemoteAccessCIDR": {
                     "default": "Allowed External Access CIDR"
@@ -113,7 +113,7 @@
     },
     "Parameters": {
         "SolaceDockerImage": {
-            "Description": "Solace PubSub+ message broker docker image reference: a docker registry name with optional tag or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a url to a remotely hosted load version",
+            "Description": "Solace PubSub+ message broker Docker image reference: a Docker registry name with optional tag or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a url to a remotely hosted load version",
             "Default": "solace/solace-pubsub-standard:latest",
             "Type": "String"
         },

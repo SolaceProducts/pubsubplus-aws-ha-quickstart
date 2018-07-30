@@ -52,7 +52,7 @@
             ],
             "ParameterLabels": {
                 "SolaceDockerImage": {
-                    "default": "Solace docker image reference"
+                    "default": "Solace Docker image reference"
                 },
                 "AdminPassword": {
                     "default": "Password to access Solace admin console and SEMP"
@@ -82,7 +82,7 @@
                     "default": "Allowed External Access CIDR"
                 },
                 "SSHSecurityGroupID": {
-                    "default": "Security group allowed to access console ssh"
+                    "default": "Security group allowed to access console SSH"
                 },
                 "UsePrivateSubnets": {
                     "default": "Use private subnets"
