@@ -39,15 +39,15 @@ Look for `AWS::IAM::Role` in the templates source for the list of required IAM r
 
 This is a two step process:
 
-**Step 1**: Obtain a reference to the docker image of the Solace  PubSub+ message broker to be deployed
+**Step 1**: Obtain a reference to the Docker image of the Solace PubSub+ message broker to be deployed
 
 First, decide which [Solace PubSub+ message broker](https://docs.solace.com/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm ) and version is suitable to your use case.
 
-The docker image reference can be:
+The Docker image reference can be:
 
-*	A public or accessible private docker registry repository name with an optional tag. This is the recommended option if using PubSub+ Standard. The default is to use the latest message broker image [available from Docker Hub](https://hub.docker.com/r/solace/solace-pubsub-standard/ ) as `solace/solace-pubsub-standard:latest`, or use a specific version [tag](https://hub.docker.com/r/solace/solace-pubsub-standard/tags/ ).
+*	A public or accessible private Docker registry repository name with an optional tag. This is the recommended option if using PubSub+ Standard. The default is to use the latest message broker image [available from Docker Hub](https://hub.docker.com/r/solace/solace-pubsub-standard/ ) as `solace/solace-pubsub-standard:latest`, or use a specific version [tag](https://hub.docker.com/r/solace/solace-pubsub-standard/tags/ ).
 
-*	A docker image download URL
+*	A Docker image download URL
      * If using Solace PubSub+ Enterprise Evaluation Edition, go to the Solace Downloads page. For the image reference, copy and use the download URL in the Solace PubSub+ Enterprise Evaluation Edition Docker Images section.
 
          | PubSub+ Enterprise Evaluation Edition<br/>Docker Image
@@ -99,7 +99,7 @@ The next screen will allow you to fill in the details for the selected launch op
 |----------------------------|-----------|--------------------------------------------------------------------|
 | Stack name                 | Solace-HA | Any globally unique name                                           |
 | **Solace Configuration**      |           |                                                                    |
-| Solace docker image reference (SolaceDockerImage) | solace/solace-pubsub-standard:latest | A reference to the Solace PubSub+ message broker docker image, from step 1. Either the image name with optional tag in an accessible docker registry or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a URL to a remotely hosted image version, e.g. on S3 |
+| Solace Docker image reference (SolaceDockerImage) | solace/solace-pubsub-standard:latest | A reference to the Solace PubSub+ message broker Docker image, from step 1. Either the image name with optional tag in an accessible Docker registry or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a URL to a remotely hosted image version, e.g. on S3 |
 | Password to access Solace admin console and SEMP (AdminPassword) | _Requires_ _input_ | Password to allow Solace admin access to configure the message broker instances |
 | Container logging format (ContainerLoggingFormat) | graylog | The format of the logs sent by the message broker to the CloudWatch service (see [documentation](https://docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/Docker-Tasks/Configuring-VMR-Container-Logging.htm?Highlight=logging#Config-Out-Form ) for details) |
 | **Network Configuration**  |           |                                                                    |
@@ -111,10 +111,10 @@ The next screen will allow you to fill in the details for the selected launch op
 | **Common Amazon EC2 Configuration** | |                                                                     |
 | Key Pair Name (KeyPairName) | _Requires_ _input_ | A new or an existing public/private key pair within the AWS Region, which allows you to connect securely to your instances after launch. |
 | Boot Disk Capacity (BootDiskSize) | 24 | Amazon EBS storage allocated for the boot disk, in GiBs. The Quick Start supports 8-128 GiB. |
-| **MessageRouterInstance Configuration** | |                                                                     |
+| **Message Router Instance Configuration** | |                                                                     |
 | Instance Type (MessageRouterNode InstanceType) | m4.large | The EC2 instance type for the Solace message broker primary and backup instances in Availability Zones 1 and 2. The m series are recommended for production use. <br/> The available CPU and memory of the selected machine type will limit the maximum connection scaling tier for the Solace message broker. For requirements, refer to the [Solace documentation](https://docs.solace.com/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm#Compare) |
 | Persistent Storage (MessageRouterNode Storage) | 0 | Amazon EBS storage allocated for each block device, in GiBs. The Quick Start supports up to 640 GiB per device. The default value of 0 (zero) indicates emphemeral storage only. A non-zero value will cause a new Provisioned IOPS SSD (io1) disk to be created for message-spool. This disk will not be deleted on stack termination. |
-| **MonitorInstance Configuration** | |                                                                     |
+| **Monitor Instance Configuration** | |                                                                     |
 | Instance Type (MonitorNodeInstanceType) | t2.micro | The EC2 instance type for the Solace message broker monitor instance in Availability Zone 3 (or Availability Zone 2, if you’re using only two zones). |
 | **AWS Quick Start Configuration** | |                                                                     |
 | Quick Start S3 Bucket Name (QSS3BucketName) | solace-products | S3 bucket where the Quick Start templates and scripts are installed. Change this parameter to specify the S3 bucket name you’ve created for your copy of Quick Start assets, if you decide to customize or extend the Quick Start for your own use. |
@@ -130,7 +130,7 @@ If you are deploying into an existing VPC, most of the parameters are the same a
 | VPC ID (VPCID)             | _Requires_ _input_ | Choose the ID of your existing VPC stack - for a value, refer to the `VPCID` in the "VPCStack"'s `Outputs` tab in the AWS CloudFormation view (e.g., vpc-0343606e). This VPC must exist with the proper configuration for Solace cluster access. |
 | Public Subnet IDs (Public SubnetIDs) | _Requires_ _input_ | Choose public subnet IDs in your existing VPC from this list (e.g., subnet-4b8d329f,subnet-bd73afc8,subnet-a01106c2), matching your deployment architecture. |
 | Private Subnet IDs (PrivateSubnetIDs) | _Requires_ _input_ | Choose private subnet IDs in your existing VPC from this list (e.g., subnet-4b8d329f,subnet-bd73afc8,subnet-a01106c2), matching your deployment architecture. Note: This parameter is ignored if you set the Use private subnets parameter to false, however you must still provide at least one item from the list (any) to satisfy parameter validation. |
-| Security group allowed to access console ssh (SSHSecurityGroupID) | _Requires_ _input_ | The ID of the security group in your existing VPC that is allowed to access the console via SSH  - for a value, refer to the `BastionSecurityGroupID` in the "BastionStack"'s `Outputs` tab in the AWS CloudFormation view (e.g., sg-7f16e910). Note: This parameter is ignored if you set the Use private subnets parameter to false. |
+| Security group allowed to access console SSH (SSHSecurityGroupID) | _Requires_ _input_ | The ID of the security group in your existing VPC that is allowed to access the console via SSH  - for a value, refer to the `BastionSecurityGroupID` in the "BastionStack"'s `Outputs` tab in the AWS CloudFormation view (e.g., sg-7f16e910). Note: This parameter is ignored if you set the Use private subnets parameter to false. |
 
 <br/><br/>
 
