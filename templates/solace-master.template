@@ -37,11 +37,11 @@
                 },
                 {
                     "Label": {
-                        "default": "Message Router Instance Configuration"
+                        "default": "Message Broker Instance Configuration"
                     },
                     "Parameters": [
-                        "MessageRouterNodeInstanceType",
-                        "MessageRouterNodeStorage"
+                        "MessageBrokerNodeInstanceType",
+                        "MessageBrokerNodeStorage"
                     ]
                 },
                 {
@@ -64,7 +64,7 @@
             ],
             "ParameterLabels": {
                 "SolaceDockerImage": {
-                    "default": "Solace docker image reference"
+                    "default": "Solace Docker image reference"
                 },
                 "AdminPassword": {
                     "default": "Password to access Solace admin console and SEMP"
@@ -81,10 +81,10 @@
                 "BootDiskSize": {
                     "default": "Boot Disk Capacity (GiB)"
                 },
-                "MessageRouterNodeInstanceType": {
+                "MessageBrokerNodeInstanceType": {
                     "default": "Instance Type"
                 },
-                "MessageRouterNodeStorage": {
+                "MessageBrokerNodeStorage": {
                     "default": "Persistent Storage"
                 },
                 "MonitorNodeInstanceType": {
@@ -94,7 +94,7 @@
                     "default": "Key Pair Name"
                 },
                 "SSHAccessCIDR": {
-                    "default": "Permitted IP range for console ssh access"
+                    "default": "Permitted IP range for console SSH access"
                 },
                 "RemoteAccessCIDR": {
                     "default": "Allowed External Access CIDR"
@@ -113,7 +113,7 @@
     },
     "Parameters": {
         "SolaceDockerImage": {
-            "Description": "Solace PubSub+ message broker docker image reference: a docker registry name with optional tag or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a url to a remotely hosted load version",
+            "Description": "Solace PubSub+ message broker Docker image reference: a Docker registry name with optional tag or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a url to a remotely hosted load version",
             "Default": "solace/solace-pubsub-standard:latest",
             "Type": "String"
         },
@@ -156,7 +156,7 @@
             "MinValue": "8",
             "Type": "Number"
         },
-        "MessageRouterNodeInstanceType": {
+        "MessageBrokerNodeInstanceType": {
             "AllowedValues": [
                 "t2.small",
                 "t2.medium",
@@ -179,7 +179,7 @@
             "Description": "Instance Type for Solace message broker message routing nodes. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
-        "MessageRouterNodeStorage": {
+        "MessageBrokerNodeStorage": {
             "ConstraintDescription": "No more than 640 GiB per device.",
             "Default": "0",
             "Description": "Allocated EBS storage for each block device (in GiB); 0 indicates ephemeral storage only. Non-zero will cause a new io1 disk creation for message-spool which will NOT be deleted on stack termination",
@@ -416,11 +416,11 @@
                     "BootDiskSize": {
                         "Ref": "BootDiskSize"
                     },
-                    "MessageRouterNodeInstanceType": {
-                        "Ref": "MessageRouterNodeInstanceType"
+                    "MessageBrokerNodeInstanceType": {
+                        "Ref": "MessageBrokerNodeInstanceType"
                     },
-                    "MessageRouterNodeStorage": {
-                        "Ref": "MessageRouterNodeStorage"
+                    "MessageBrokerNodeStorage": {
+                        "Ref": "MessageBrokerNodeStorage"
                     },
                     "MonitorNodeInstanceType": {
                         "Ref": "MonitorNodeInstanceType"

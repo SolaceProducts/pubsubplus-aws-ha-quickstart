@@ -6,7 +6,7 @@ git:
 env:
   global:
   - AWS_DEFAULT_REGION=eu-west-2
-  - MESSAGEROUTERNODEINSTANCETYPE=t2.small
+  - MESSAGEBROKERNODEINSTANCETYPE=t2.small
   
 before_install:
   - echo "Installing AWS CLI"
@@ -28,7 +28,7 @@ script:
   - aws cloudformation validate-template --template-body file://templates/nodecreate.template
   - yaml-lint -n templates/
   - sed -i "s@SolaceDockerImageParameterValue@$SOLACE_DOCKER_URL_PARAMETER_VALUE@g" ci/solace-aws-ha-3az-prod-travistest.json
-  - sed -i "s@MessageRouterNodeInstanceTypeParameterValue@$MESSAGEROUTERNODEINSTANCETYPE@g" ci/solace-aws-ha-3az-prod-travistest.json
+  - sed -i "s@MessageBrokerNodeInstanceTypeParameterValue@$MESSAGEBROKERNODEINSTANCETYPE@g" ci/solace-aws-ha-3az-prod-travistest.json
   - sed -i "s@SolaceStackRegionNAME@$AWS_DEFAULT_REGION@g" ci/solace-aws-ha-3az-prod-travistest.json
   - aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"
   - aws s3 sync . s3://solace-cf-quickstart-travistest/solace/messagebroker/latest --acl public-read

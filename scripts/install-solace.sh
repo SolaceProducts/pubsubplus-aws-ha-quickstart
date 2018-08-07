@@ -124,7 +124,7 @@ if [ -z "`docker pull ${solace_uri}`" ] ; then
   echo "`date` INFO: Now download from URL provided and validate"
   wget -q -O  ${solace_directory}/${SolOS_LOAD} ${REAL_LINK}
   ## Check MD5
-  LOCAL_OS_INFO=`md5sum ${SolOS_LOAD}`
+  LOCAL_OS_INFO=`md5sum ${solace_directory}/${SolOS_LOAD}`
   IFS=' ' read -ra SOLOS_INFO <<< ${LOCAL_OS_INFO}
   LOCAL_MD5_SUM=${SOLOS_INFO[0]}
   if [ -z "${MD5_SUM}" || "${LOCAL_MD5_SUM}" != "${MD5_SUM}" ]; then
@@ -193,14 +193,14 @@ cd ${solace_directory}
 
 host_name=`hostname`
 host_info=`grep ${host_name} ${config_file}`
-local_role=`echo $host_info | grep -o -E 'Monitor|MessageRouterPrimary|MessageRouterBackup'`
+local_role=`echo $host_info | grep -o -E 'Monitor|MessageBrokerPrimary|MessageBrokerBackup'`
 
-primary_stack=`cat ${config_file} | grep MessageRouterPrimary | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
-backup_stack=`cat ${config_file} | grep MessageRouterBackup | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
+primary_stack=`cat ${config_file} | grep MessageBrokerPrimary | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
+backup_stack=`cat ${config_file} | grep MessageBrokerBackup | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
 monitor_stack=`cat ${config_file} | grep Monitor | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
 
 # Get the IP addressed for node
-for role in Monitor MessageRouterPrimary MessageRouterBackup
+for role in Monitor MessageBrokerPrimary MessageBrokerBackup
 do
   role_info=`grep ${role} ${config_file}`
   role_name=${role_info%% *}
@@ -209,10 +209,10 @@ do
     Monitor )
       MONITOR_IP=${role_ip}
       ;;
-    MessageRouterPrimary )
+    MessageBrokerPrimary )
       PRIMARY_IP=${role_ip}
       ;;
-    MessageRouterBackup )
+    MessageBrokerBackup )
       BACKUP_IP=${role_ip}
       ;;
   esac
@@ -224,13 +224,13 @@ case $local_role in
     ROUTER_NAME="monitor${monitor_stack}"
     REDUNDANCY_CFG=""
   ;;
-  MessageRouterPrimary )
+  MessageBrokerPrimary )
     NODE_TYPE="message_routing"
     ROUTER_NAME="primary${primary_stack}"
     REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${BACKUP_IP} --env redundancy_activestandbyrole=primary --env configsync_enable=yes"
     is_primary="true"
   ;;
-  MessageRouterBackup )
+  MessageBrokerBackup )
     NODE_TYPE="message_routing"
     ROUTER_NAME="backup${backup_stack}"
     REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${PRIMARY_IP} --env redundancy_activestandbyrole=backup --env configsync_enable=yes"
