@@ -432,11 +432,11 @@
                     "install_solace": {
                         "commands": {
                             "01_create_secrets_directory": {
-                                "command": "mkdir -p /mnt/vmr/secrets"
+                                "command": "mkdir -p /mnt/pubsubplus/secrets"
                             }
                         },
                         "files": {
-                            "/mnt/vmr/secrets/solOSpasswd": {
+                            "/mnt/pubsubplus/secrets/solOSpasswd": {
                                 "content": {
                                     "Fn::Join": [
                                         "",
@@ -506,10 +506,10 @@
                                 "owner": "root",
                                 "group": "root"
                             },
-                            "/etc/init.d/solace-vmr": {
+                            "/etc/init.d/solace-pubsubplus": {
                                 "source": {
                                     "Fn::Sub": [
-                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/init.d/solace-vmr",
+                                        "https://${QSS3BucketName}.${QSS3Region}.amazonaws.com/${QSS3KeyPrefix}scripts/init.d/solace-pubsubplus",
                                         {
                                             "QSS3Region": {
                                                 "Fn::If": [
@@ -768,7 +768,7 @@
                                 {
                                     "Ref": "SolaceDockerImage"
                                 },
-                                "  -p /mnt/vmr/secrets/solOSpasswd",
+                                "  -p /mnt/pubsubplus/secrets/solOSpasswd",
                                 "  -s ",
                                 {
                                     "Ref": "PersistentStorage"

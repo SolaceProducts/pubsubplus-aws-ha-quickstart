@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-#       /etc/rc.d/init.d/solace-vmr
+#       /etc/rc.d/init.d/solace-pubsubplus
 #
-#       Daemon for solace vmr on init.d systems
+#       Daemon for solace pubsubplus on init.d systems
 #
 # chkconfig:   2345 95 05
 # description: Daemon for solace.com
@@ -14,14 +14,14 @@
 # Should-Stop:
 # Default-Start: 2 3 4 5
 # Default-Stop:  0 1 6
-# Short-Description: start and stop solace vmr
+# Short-Description: start and stop solace pubsubplus
 # Description: Daemon for solace.com
 ### END INIT INFO
 
 # Source function library.
 . /etc/rc.d/init.d/functions
 
-prog="solace-vmr"
+prog="solace-pubsubplus"
 unshare=/usr/bin/unshare
 exec="/usr/bin/docker"
 pidfile="/var/run/$prog.pid"

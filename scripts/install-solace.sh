@@ -252,10 +252,10 @@ else
 
   mkfs.xfs  ${disk_volume}1 -m crc=0
   UUID=`blkid -s UUID -o value ${disk_volume}1`
-  echo "UUID=${UUID} /opt/vmr xfs defaults 0 0" >> /etc/fstab
-  mkdir /opt/vmr
+  echo "UUID=${UUID} /opt/pubsubplus xfs defaults 0 0" >> /etc/fstab
+  mkdir /opt/pubsubplus
   mount -a
-  SPOOL_MOUNT="-v /opt/vmr:/usr/sw/internalSpool -v /opt/vmr:/usr/sw/adb -v /opt/vmr:/usr/sw/internalSpool/softAdb"
+  SPOOL_MOUNT="-v /opt/pubsubplus:/usr/sw/internalSpool -v /opt/pubsubplus:/usr/sw/adb -v /opt/pubsubplus:/usr/sw/internalSpool/softAdb"
 fi
 
 # Start up the SolOS docker instance with HA config keys
@@ -270,7 +270,7 @@ docker create \
    --restart=always \
    -v jail:/usr/sw/jail \
    -v var:/usr/sw/var \
-   -v /mnt/vmr/secrets:/run/secrets \
+   -v /mnt/pubsubplus/secrets:/run/secrets \
    ${SPOOL_MOUNT} \
    --log-driver=awslogs \
    --log-opt awslogs-group=${logging_group} \
@@ -304,11 +304,11 @@ docker create \
 
 
 # Start the solace service and enable it at system start up.
-chkconfig --add solace-vmr
+chkconfig --add solace-pubsubplus
 echo "`date` INFO: Starting Solace service"
-service solace-vmr start
+service solace-pubsubplus start
 
-# Poll the VMR SEMP port until it is Up
+# Poll the message broker SEMP port until it is Up
 loop_guard=30
 pause=10
 count=0
@@ -318,11 +318,11 @@ while [ ${count} -lt ${loop_guard} ]; do
     -q "<rpc semp-version='soltr/8_7VMR'><show><service/></show></rpc>" \
     -v "/rpc-reply/rpc/show/service/services/service[name='SEMP']/enabled[text()]"`
 
-  is_vmr_up=`echo ${online_results} | jq '.valueSearchResult' -`
-  echo "`date` INFO: SEMP service 'enabled' status is: ${is_vmr_up}"
+  is_messagebroker_up=`echo ${online_results} | jq '.valueSearchResult' -`
+  echo "`date` INFO: SEMP service 'enabled' status is: ${is_messagebroker_up}"
 
   run_time=$((${count} * ${pause}))
-  if [ "${is_vmr_up}" = "\"true\"" ]; then
+  if [ "${is_messagebroker_up}" = "\"true\"" ]; then
     echo "`date` INFO: Solace message broker SEMP service is up, after ${run_time} seconds"
     break
   fi
@@ -331,11 +331,11 @@ while [ ${count} -lt ${loop_guard} ]; do
   sleep ${pause}
 done
 
-# Remove all VMR Secrets from the host; at this point, the VMR should have come up
+# Remove all message broker Secrets from the host; at this point, the message broker should have come up
 # and it won't be needing those files anymore
 rm ${admin_password_file}
 
-# Poll the redundancy status on the Primary VMR
+# Poll the redundancy status on the Primary message broker
 if [ "${is_primary}" = "true" ]; then
   loop_guard=30
   pause=10
