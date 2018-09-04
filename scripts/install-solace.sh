@@ -127,7 +127,7 @@ if [ -z "`docker pull ${solace_uri}`" ] ; then
   LOCAL_OS_INFO=`md5sum ${solace_directory}/${SolOS_LOAD}`
   IFS=' ' read -ra SOLOS_INFO <<< ${LOCAL_OS_INFO}
   LOCAL_MD5_SUM=${SOLOS_INFO[0]}
-  if [ -z "${MD5_SUM}" || "${LOCAL_MD5_SUM}" != "${MD5_SUM}" ]; then
+  if [ -z "${MD5_SUM}" ] || [ "${LOCAL_MD5_SUM}" != "${MD5_SUM}" ]; then
     echo "`date` ERROR: Possible corrupt Solace load, md5sum do not match - exiting." | tee /dev/stderr
     exit 1
   else
