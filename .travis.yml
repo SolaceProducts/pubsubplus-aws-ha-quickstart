@@ -18,6 +18,7 @@ before_install:
   - git submodule sync
   - git submodule init
   - git submodule update
+  - echo `python -V`
   
 install: true
 
