@@ -9,6 +9,8 @@ env:
   - MESSAGEBROKERNODEINSTANCETYPE=t2.small
   
 before_install:
+  - sudo add-apt-repository ppa:deadsnakes/ppa
+  - sudo apt-get update
   - sudo apt-get install python2.7
   - echo "Installing AWS CLI"
   - pip install --upgrade --user awscli
