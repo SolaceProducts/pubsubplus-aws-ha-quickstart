@@ -9,6 +9,7 @@ env:
   - MESSAGEBROKERNODEINSTANCETYPE=t2.small
   
 before_install:
+  - sudo apt-get install python2.7
   - echo "Installing AWS CLI"
   - pip install --upgrade --user awscli
   - echo "Installing test gems"
@@ -18,7 +19,6 @@ before_install:
   - git submodule sync
   - git submodule init
   - git submodule update
-  - echo `python -V`
   
 install: true
 
