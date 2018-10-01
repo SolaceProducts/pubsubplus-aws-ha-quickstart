@@ -17,11 +17,7 @@ before_install:
   - pip install --upgrade awscli
   - echo "Installing test gems"
   - sudo apt-get install build-essential
-  - sudo apt-get install curl
-  - \curl -sSL https://get.rvm.io | bash -s stable
-  - source ~/.rvm/scripts/rvm
-  - rvm install 2.5.0
-  - rvm use 2.5.0 --default
+  - ruby -v
   - gem install yaml-lint
   - echo "Fixing to handle submodules then clone them"
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules; cat .gitmodules
