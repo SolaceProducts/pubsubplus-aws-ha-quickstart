@@ -14,7 +14,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install python2.7
   - echo "Installing AWS CLI"
-  - pip install --upgrade --user awscli
+  - pip install --upgrade awscli
   - echo "Installing test gems"
   - sudo apt-get install build-essential
   - sudo apt-get install curl
