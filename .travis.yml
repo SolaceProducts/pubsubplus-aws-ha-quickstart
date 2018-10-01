@@ -1,5 +1,6 @@
-language: ruby
-
+language: python
+python:
+  - "2.7"
 git:
   submodules: false
 
@@ -15,6 +16,12 @@ before_install:
   - echo "Installing AWS CLI"
   - pip install --upgrade --user awscli
   - echo "Installing test gems"
+  - sudo apt-get install build-essential
+  - sudo apt-get install curl
+  - \curl -sSL https://get.rvm.io | bash -s stable
+  - source ~/.rvm/scripts/rvm
+  - rvm install 2.5.0
+  - rvm use 2.5.0 --default
   - gem install yaml-lint
   - echo "Fixing to handle submodules then clone them"
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules; cat .gitmodules
