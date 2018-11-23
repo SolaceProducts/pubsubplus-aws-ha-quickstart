@@ -1,5 +1,6 @@
-language: ruby
-
+language: python
+python:
+  - "2.7"
 git:
   submodules: false
 
@@ -9,9 +10,14 @@ env:
   - MESSAGEBROKERNODEINSTANCETYPE=t2.small
   
 before_install:
+  - sudo add-apt-repository ppa:deadsnakes/ppa -y
+  - sudo apt-get update
+  - sudo apt-get install python2.7
   - echo "Installing AWS CLI"
-  - pip install --upgrade --user awscli
+  - pip install --upgrade awscli
   - echo "Installing test gems"
+  - sudo apt-get install build-essential
+  - ruby -v
   - gem install yaml-lint
   - echo "Fixing to handle submodules then clone them"
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules; cat .gitmodules
