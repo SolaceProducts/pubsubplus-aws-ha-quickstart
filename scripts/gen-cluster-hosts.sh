@@ -27,7 +27,7 @@
 # to SOLACE_HOSTS_FILE (default is /tmp/solacehosts)
 
 
-murl_top=http://instance-data/latest/meta-data
+murl_top=http://169.254.169.254/latest/meta-data
 
 SOLACE_HOSTS_FILE=${SOLACE_HOSTS_FILE:-/tmp/solacehosts}
 
