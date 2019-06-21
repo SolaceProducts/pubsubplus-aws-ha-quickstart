@@ -97,6 +97,7 @@
             "Type": "AWS::EC2::Subnet::Id"
         }
     },
+    "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
                 "AMZNLINUXHVM": "amzn-ami-hvm-2018.03.0.20181129-x86_64-gp2"
