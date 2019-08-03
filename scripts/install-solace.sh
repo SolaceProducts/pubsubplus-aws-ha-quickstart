@@ -291,6 +291,9 @@ docker create \
    --env "username_admin_globalaccesslevel=admin" \
    --env "username_admin_passwordfilepath=$(basename ${admin_password_file})" \
    --env "service_ssh_port=2222" \
+   --env "service_webtransport_port=60080" \
+   --env "service_webtransport_tlsport=60443" \
+   --env "service_semp_tlsport=60943" \
    ${REDUNDANCY_CFG} \
    --env "redundancy_group_passwordfilepath=$(basename ${admin_password_file})" \
    --env "redundancy_enable=yes" \
