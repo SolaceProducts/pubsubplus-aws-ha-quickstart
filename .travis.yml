@@ -61,8 +61,8 @@ after_success:
 
 after_script:
   - #aws s3 rb s3://solace-cf-quickstart-travistest --force
-  - #aws cloudformation delete-stack --stack-name $TESTSTACKNAME
-  - #echo "Waiting for stack delete complete"
-  - #stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep StackId | awk -F '"' '{print $4}')"
-  - #if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
+  - aws cloudformation delete-stack --stack-name $TESTSTACKNAME
+  - echo "Waiting for stack delete complete"
+  - stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep StackId | awk -F '"' '{print $4}')"
+  - if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
 

@@ -33,7 +33,7 @@
     },
     {
         "ParameterKey": "MessageBrokerNodeStorage",
-        "ParameterValue": "0"
+        "ParameterValue": "20"
     },
     {
         "ParameterKey": "MonitorNodeInstanceType",
