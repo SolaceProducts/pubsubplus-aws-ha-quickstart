@@ -253,7 +253,7 @@ else
   mkfs.xfs  ${disk_volume}1 -m crc=0
   UUID=`blkid -s UUID -o value ${disk_volume}1`
   echo "UUID=${UUID} /opt/pubsubplus xfs defaults 0 0" >> /etc/fstab
-  mkdir /opt/pubsubplus; ; chown 1000001 /opt/pubsubplus
+  mkdir /opt/pubsubplus
   mount -a
   SPOOL_MOUNT="-v /opt/pubsubplus:/usr/sw/internalSpool -v /opt/pubsubplus:/usr/sw/adb -v /opt/pubsubplus:/usr/sw/internalSpool/softAdb"
 fi
