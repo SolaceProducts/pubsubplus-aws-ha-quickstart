@@ -33,7 +33,7 @@ script:
   - aws cloudformation validate-template --template-body file://templates/solace.template
   - aws cloudformation validate-template --template-body file://templates/nodecreate.template
   - yaml-lint -n templates/
-  - sed -i "s@SolaceDockerImageParameterValue@https://bczoma-s3-1.s3.ca-central-1.amazonaws.com/solace-pubsub-standard-100.0openshift_scc2.0.112-docker.tar.gz@g" ci/solace-aws-ha-3az-prod-travistest.json
+  - sed -i "s@SolaceDockerImageParameterValue@bczoma/solacetest:100.0openshift_scc2.0.131@g" ci/solace-aws-ha-3az-prod-travistest.json
   - sed -i "s@MessageBrokerNodeInstanceTypeParameterValue@$MESSAGEBROKERNODEINSTANCETYPE@g" ci/solace-aws-ha-3az-prod-travistest.json
   - sed -i "s@SolaceStackRegionNAME@$AWS_DEFAULT_REGION@g" ci/solace-aws-ha-3az-prod-travistest.json
   - aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"
