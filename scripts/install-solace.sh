@@ -237,6 +237,9 @@ case $local_role in
   ;;
 esac
 
+chown -R 1000001 $(dirname ${admin_password_file})
+chmod 700 $(dirname ${admin_password_file})
+
 if [ $disk_size == "0" ]; then
   SPOOL_MOUNT="-v internalSpool:/usr/sw/internalSpool -v adbBackup:/usr/sw/adb -v softAdb:/usr/sw/internalSpool/softAdb"
 else
@@ -252,9 +255,10 @@ else
 
   mkfs.xfs  ${disk_volume}1 -m crc=0
   UUID=`blkid -s UUID -o value ${disk_volume}1`
-  echo "UUID=${UUID} /opt/pubsubplus xfs defaults 0 0" >> /etc/fstab
+  echo "UUID=${UUID} /opt/pubsubplus xfs defaults,uid=1000001 0 0" >> /etc/fstab
   mkdir /opt/pubsubplus
   mount -a
+  chown 1000001 -R /opt/pubsubplus/
   SPOOL_MOUNT="-v /opt/pubsubplus:/usr/sw/internalSpool -v /opt/pubsubplus:/usr/sw/adb -v /opt/pubsubplus:/usr/sw/internalSpool/softAdb"
 fi
 
