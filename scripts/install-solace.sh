@@ -40,8 +40,6 @@ logging_format=""
 logging_group=""
 logging_stream=""
 
-verbose=0
-
 while getopts "c:d:p:s:u:v:f:g:r:" opt; do
   case "$opt" in
   c)  config_file=$OPTARG
@@ -68,7 +66,6 @@ done
 shift $((OPTIND-1))
 [ "$1" = "--" ] && shift
 
-verbose=1
 echo "config_file=$config_file , solace_directory=$solace_directory , admin_password_file=$admin_password_file , \
       solace_uri=$solace_uri , disk_size=$disk_size , volume=$disk_volume , logging_format=$logging_format , \
       logging_group=$logging_group , logging_stream=$logging_stream , Leftovers: $@"
@@ -103,6 +100,7 @@ fi
 ## Try to load solace_uri as a docker registry uri
 echo "`date` Testing ${solace_uri} for docker registry uri:"
 if [ -z "`docker pull ${solace_uri}`" ] ; then
+  # If NOT in this branch then load was successful
   echo "`date` INFO: Found that ${solace_uri} was not a docker registry uri, retrying if it is a download link"
   if [[ ${solace_uri} == *"solace.com/download"* ]]; then
     REAL_LINK=${solace_uri}
@@ -237,11 +235,18 @@ case $local_role in
   ;;
 esac
 
+# Setup password file permissions
 chown -R 1000001 $(dirname ${admin_password_file})
 chmod 700 $(dirname ${admin_password_file})
 
-if [ $disk_size == "0" ]; then
-  SPOOL_MOUNT="-v internalSpool:/usr/sw/internalSpool -v adbBackup:/usr/sw/adb -v softAdb:/usr/sw/internalSpool/softAdb"
+if [[ ${disk_size} == "0" ]]; then
+  #Create new volumes that the PubSub+ Message Broker container can use to consume and store data.
+  docker volume create --name=jail
+  docker volume create --name=var
+  docker volume create --name=softAdb
+  docker volume create --name=diagnostics
+  docker volume create --name=internalSpool
+  SPOOL_MOUNT="-v jail:/usr/sw/jail -v var:/usr/sw/var -v softAdb:/usr/sw/internalSpool/softAdb -v diagnostics:/var/lib/solace/diags -v internalSpool:/usr/sw/internalSpool"
 else
   echo "`date` Create primary partition on new disk"
   (
@@ -257,58 +262,70 @@ else
   UUID=`blkid -s UUID -o value ${disk_volume}1`
   echo "UUID=${UUID} /opt/pubsubplus xfs defaults,uid=1000001 0 0" >> /etc/fstab
   mkdir /opt/pubsubplus
+  mkdir /opt/pubsubplus/jail
+  mkdir /opt/pubsubplus/var
+  mkdir /opt/pubsubplus/softAdb
+  mkdir /opt/pubsubplus/diagnostics
+  mkdir /opt/pubsubplus/internalSpool
   mount -a
   chown 1000001 -R /opt/pubsubplus/
-  SPOOL_MOUNT="-v /opt/pubsubplus:/usr/sw/internalSpool -v /opt/pubsubplus:/usr/sw/adb -v /opt/pubsubplus:/usr/sw/internalSpool/softAdb"
+  SPOOL_MOUNT="-v /opt/pubsubplus/jail:/usr/sw/jail -v /opt/pubsubplus/var:/usr/sw/var -v /opt/pubsubplus/softAdb:/usr/sw/internalSpool/softAdb -v /opt/pubsubplus/diagnostics:/var/lib/solace/diags -v /opt/pubsubplus/internalSpool:/usr/sw/internalSpool"
 fi
 
-# Start up the SolOS docker instance with HA config keys
-echo "`date` INFO: Executing 'docker create'"
+#Define a create script
+tee ~/docker-create <<-EOF
+#!/bin/bash
 docker create \
-   --uts=host \
-   --shm-size=${shmsize} \
-   --ulimit core=-1 \
-   --ulimit memlock=-1 \
-   --ulimit nofile=${ulimit_nofile} \
-   --net=host \
-   --restart=always \
-   -v jail:/usr/sw/jail \
-   -v var:/usr/sw/var \
-   -v /mnt/pubsubplus/secrets:/run/secrets \
-   ${SPOOL_MOUNT} \
-   --log-driver=awslogs \
-   --log-opt awslogs-group=${logging_group} \
-   --log-opt awslogs-stream=${logging_stream} \
-   --env "system_scaling_maxconnectioncount=${maxconnectioncount}" \
-   --env "logging_debug_output=all" \
-   --env "logging_debug_format=${logging_format}" \
-   --env "logging_command_output=all" \
-   --env "logging_command_format=${logging_format}" \
-   --env "logging_system_output=all" \
-   --env "logging_system_format=${logging_format}" \
-   --env "logging_event_output=all" \
-   --env "logging_event_format=${logging_format}" \
-   --env "logging_kernel_output=all" \
-   --env "logging_kernel_format=${logging_format}" \
-   --env "nodetype=${NODE_TYPE}" \
-   --env "routername=${ROUTER_NAME}" \
-   --env "username_admin_globalaccesslevel=admin" \
-   --env "username_admin_passwordfilepath=$(basename ${admin_password_file})" \
-   --env "service_ssh_port=2222" \
-   --env "service_webtransport_port=60080" \
-   --env "service_webtransport_tlsport=60443" \
-   --env "service_semp_tlsport=60943" \
-   ${REDUNDANCY_CFG} \
-   --env "redundancy_group_passwordfilepath=$(basename ${admin_password_file})" \
-   --env "redundancy_enable=yes" \
-    --env "redundancy_group_node_primary${primary_stack}_nodetype=message_routing" \
-    --env "redundancy_group_node_primary${primary_stack}_connectvia=${PRIMARY_IP}" \
-    --env "redundancy_group_node_backup${backup_stack}_nodetype=message_routing" \
-    --env "redundancy_group_node_backup${backup_stack}_connectvia=${BACKUP_IP}" \
-    --env "redundancy_group_node_monitor${monitor_stack}_nodetype=monitoring" \
-    --env "redundancy_group_node_monitor${monitor_stack}_connectvia=${MONITOR_IP}" \
-   --name=solace ${SOLACE_IMAGE_ID}
+ --uts=host \
+ --shm-size=${shmsize} \
+ --ulimit core=-1 \
+ --ulimit memlock=-1 \
+ --ulimit nofile=${ulimit_nofile} \
+ --net=host \
+ --restart=always \
+ -v jail:/usr/sw/jail \
+ -v var:/usr/sw/var \
+ -v /mnt/pubsubplus/secrets:/run/secrets \
+ ${SPOOL_MOUNT} \
+ --log-driver awslogs \
+ --log-opt awslogs-group=${logging_group} \
+ --log-opt awslogs-stream=${logging_stream} \
+ --env "system_scaling_maxconnectioncount=${maxconnectioncount}" \
+ --env "logging_debug_output=all" \
+ --env "logging_debug_format=${logging_format}" \
+ --env "logging_command_output=all" \
+ --env "logging_command_format=${logging_format}" \
+ --env "logging_system_output=all" \
+ --env "logging_system_format=${logging_format}" \
+ --env "logging_event_output=all" \
+ --env "logging_event_format=${logging_format}" \
+ --env "logging_kernel_output=all" \
+ --env "logging_kernel_format=${logging_format}" \
+ --env "nodetype=${NODE_TYPE}" \
+ --env "routername=${ROUTER_NAME}" \
+ --env "username_admin_globalaccesslevel=admin" \
+ --env "username_admin_passwordfilepath=$(basename ${admin_password_file})" \
+ --env "service_ssh_port=2222" \
+ --env "service_webtransport_port=60080" \
+ --env "service_webtransport_tlsport=60443" \
+ --env "service_semp_tlsport=60943" \
+ ${REDUNDANCY_CFG} \
+ --env "redundancy_group_passwordfilepath=$(basename ${admin_password_file})" \
+ --env "redundancy_enable=yes" \
+  --env "redundancy_group_node_primary${primary_stack}_nodetype=message_routing" \
+  --env "redundancy_group_node_primary${primary_stack}_connectvia=${PRIMARY_IP}" \
+  --env "redundancy_group_node_backup${backup_stack}_nodetype=message_routing" \
+  --env "redundancy_group_node_backup${backup_stack}_connectvia=${BACKUP_IP}" \
+  --env "redundancy_group_node_monitor${monitor_stack}_nodetype=monitoring" \
+  --env "redundancy_group_node_monitor${monitor_stack}_connectvia=${MONITOR_IP}" \
+ --name=solace ${SOLACE_IMAGE_ID}
+EOF
 
+#Make the file executable
+chmod +x ~/docker-create
+
+echo "`date` INFO: Creating the Solace container"
+~/docker-create
 
 # Start the solace service and enable it at system start up.
 chkconfig --add solace-pubsubplus
