@@ -283,8 +283,6 @@ docker create \
  --ulimit nofile=${ulimit_nofile} \
  --net=host \
  --restart=always \
- -v jail:/usr/sw/jail \
- -v var:/usr/sw/var \
  -v /mnt/pubsubplus/secrets:/run/secrets \
  ${SPOOL_MOUNT} \
  --log-driver awslogs \
