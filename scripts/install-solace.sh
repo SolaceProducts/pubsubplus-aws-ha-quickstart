@@ -187,6 +187,15 @@ chmod 0600 /var/lib/solace/swap
 swapon -f /var/lib/solace/swap
 grep -q 'solace\/swap' /etc/fstab || sudo sh -c 'echo "/var/lib/solace/swap none swap sw 0 0" >> /etc/fstab'
 
+echo "`date` INFO: Applying TCP for WAN optimizations" &>> ${LOG_FILE}
+echo '
+  net.core.rmem_max = 134217728
+  net.core.wmem_max = 134217728
+  net.ipv4.tcp_rmem = 4096 25165824 67108864
+  net.ipv4.tcp_wmem = 4096 25165824 67108864
+  net.ipv4.tcp_mtu_probing=1' | sudo tee /etc/sysctl.d/98-solace-sysctl.conf
+sudo sysctl -p /etc/sysctl.d/98-solace-sysctl.conf
+
 cd ${solace_directory}
 
 host_name=`hostname`
