@@ -929,11 +929,11 @@
                     },{
                     "LoadBalancerPort" : "80",
                     "InstancePort" : "80",
-                    "Protocol" : "HTTP"
+                    "Protocol" : "TCP"
                     },{
                     "LoadBalancerPort" : "8080",
                     "InstancePort" : "8080",
-                    "Protocol" : "HTTP"
+                    "Protocol" : "TCP"
                     }
                 ]
             }
