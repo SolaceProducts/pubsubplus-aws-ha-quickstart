@@ -57,6 +57,6 @@
     },
     {
         "ParameterKey": "QSS3KeyPrefix",
-        "ParameterValue": "solace/messagebroker/latest/"
+        "ParameterValue": "solace/eventbroker/latest/"
     }
 ]
