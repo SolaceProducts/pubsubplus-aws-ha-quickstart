@@ -34,8 +34,8 @@
                 {
                     "Label": { "default": "Message Broker Instance Configuration" },
                     "Parameters": [
-                        "MessageBrokerNodeInstanceType",
-                        "MessageBrokerNodeStorage"
+                        "EventBrokerNodeInstanceType",
+                        "EventBrokerNodeStorage"
                     ]
                 },
                 {
@@ -63,10 +63,10 @@
                 "BootDiskSize": {
                     "default": "Boot Disk Capacity (GiB)"
                 },
-                "MessageBrokerNodeInstanceType": {
+                "EventBrokerNodeInstanceType": {
                     "default": "Instance Type"
                 },
-                "MessageBrokerNodeStorage": {
+                "EventBrokerNodeStorage": {
                     "default": "Persistent Storage"
                 },
                 "MonitorNodeInstanceType": {
@@ -136,7 +136,7 @@
             "MinValue": "8",
             "Type": "Number"
         },
-        "MessageBrokerNodeInstanceType": {
+        "EventBrokerNodeInstanceType": {
             "AllowedValues": [
                 "t2.small",
                 "t2.medium",
@@ -159,7 +159,7 @@
             "Description": "Instance Type for Solace message broker message routing nodes. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
-        "MessageBrokerNodeStorage": {
+        "EventBrokerNodeStorage": {
             "ConstraintDescription": "No more than 640 GiB per device.",
             "Default": "0",
             "Description": "Allocated EBS storage for each block device (in GiB); 0 indicates ephemeral storage only. Non-zero will cause a new io1 disk creation for message-spool which will NOT be deleted on stack termination",
@@ -426,7 +426,7 @@
                 "Roles": [ { "Ref": "SolaceVMRRole" } ]
             }
         },
-        "MessageBrokerPrimaryStack": {
+        "EventBrokerPrimaryStack": {
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
@@ -467,13 +467,13 @@
                     },
                     "NodeDesignation": "message-router-primary",
                     "NodeInstanceType": {
-                        "Ref": "MessageBrokerNodeInstanceType"
+                        "Ref": "EventBrokerNodeInstanceType"
                     },
                     "NodeSecurityGroup": {
                         "Fn::Join": [
                             ",",
                             [
-                                { "Ref" : "MessageBrokerSecurityGroup" },
+                                { "Ref" : "EventBrokerSecurityGroup" },
                                 { "Ref" : "SolaceInternalSecurityGroup" },
                                 { "Ref" : "SolaceInternalSecurityGroupMember" },
                                 { "Ref" : "RemoteMgmtSecurityGroup" }
@@ -484,7 +484,7 @@
                         "Ref": "AWS::StackName"
                     },
                     "PersistentStorage": {
-                        "Ref": "MessageBrokerNodeStorage"
+                        "Ref": "EventBrokerNodeStorage"
                     },
                     "QSS3BucketName": {
                         "Ref": "QSS3BucketName"
@@ -507,7 +507,7 @@
                 }
             }
         },
-        "MessageBrokerBackupStack": {
+        "EventBrokerBackupStack": {
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
@@ -548,13 +548,13 @@
                     },
                     "NodeDesignation": "message-router-backup",
                     "NodeInstanceType": {
-                        "Ref": "MessageBrokerNodeInstanceType"
+                        "Ref": "EventBrokerNodeInstanceType"
                     },
                     "NodeSecurityGroup": {
                         "Fn::Join": [
                             ",",
                             [
-                                { "Ref" : "MessageBrokerSecurityGroup" },
+                                { "Ref" : "EventBrokerSecurityGroup" },
                                 { "Ref" : "SolaceInternalSecurityGroup" },
                                 { "Ref" : "SolaceInternalSecurityGroupMember" },
                                 { "Ref" : "RemoteMgmtSecurityGroup" }
@@ -565,7 +565,7 @@
                         "Ref": "AWS::StackName"
                     },
                     "PersistentStorage": {
-                        "Ref": "MessageBrokerNodeStorage"
+                        "Ref": "EventBrokerNodeStorage"
                     },
                     "QSS3BucketName": {
                         "Ref": "QSS3BucketName"
@@ -787,7 +787,7 @@
                 ]
             }
         },
-        "MessageBrokerSecurityGroup": {
+        "EventBrokerSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "VpcId": {
@@ -868,7 +868,7 @@
         "ClusterInfoCondition": {
             "Type": "AWS::CloudFormation::WaitCondition",
             "Condition": "EnableWaitConditions",
-            "DependsOn": ["MessageBrokerPrimaryStack", "MessageBrokerBackupStack", "MonitorStack"],
+            "DependsOn": ["EventBrokerPrimaryStack", "EventBrokerBackupStack", "MonitorStack"],
             "Properties": {
                 "Handle": {
                     "Ref": "ClusterInfoHandle"
@@ -879,17 +879,17 @@
         },
         "ELB": {
             "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
-            "DependsOn": ["MessageBrokerPrimaryStack"],
+            "DependsOn": ["EventBrokerPrimaryStack"],
             "Condition": "UsePrivateSubnetsCondition",
             "Properties":{
                 "SecurityGroups": [
-                    { "Ref" : "MessageBrokerSecurityGroup" },
+                    { "Ref" : "EventBrokerSecurityGroup" },
                     { "Ref" : "SolaceInternalSecurityGroupMember" }
                 ],
                 "Subnets" : { "Ref": "PublicSubnetIDs" },
                 "Instances" : [
-                    {"Fn::GetAtt": ["MessageBrokerPrimaryStack","Outputs.EC2ID"]},
-                    {"Fn::GetAtt": ["MessageBrokerBackupStack","Outputs.EC2ID"]},
+                    {"Fn::GetAtt": ["EventBrokerPrimaryStack","Outputs.EC2ID"]},
+                    {"Fn::GetAtt": ["EventBrokerBackupStack","Outputs.EC2ID"]},
                     {"Fn::GetAtt": ["MonitorStack","Outputs.EC2ID"]}
                 ],
                 "HealthCheck" : {

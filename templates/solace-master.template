@@ -40,8 +40,8 @@
                         "default": "Message Broker Instance Configuration"
                     },
                     "Parameters": [
-                        "MessageBrokerNodeInstanceType",
-                        "MessageBrokerNodeStorage"
+                        "EventBrokerNodeInstanceType",
+                        "EventBrokerNodeStorage"
                     ]
                 },
                 {
@@ -81,10 +81,10 @@
                 "BootDiskSize": {
                     "default": "Boot Disk Capacity (GiB)"
                 },
-                "MessageBrokerNodeInstanceType": {
+                "EventBrokerNodeInstanceType": {
                     "default": "Instance Type"
                 },
-                "MessageBrokerNodeStorage": {
+                "EventBrokerNodeStorage": {
                     "default": "Persistent Storage"
                 },
                 "MonitorNodeInstanceType": {
@@ -156,7 +156,7 @@
             "MinValue": "8",
             "Type": "Number"
         },
-        "MessageBrokerNodeInstanceType": {
+        "EventBrokerNodeInstanceType": {
             "AllowedValues": [
                 "t2.small",
                 "t2.medium",
@@ -179,7 +179,7 @@
             "Description": "Instance Type for Solace message broker message routing nodes. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
-        "MessageBrokerNodeStorage": {
+        "EventBrokerNodeStorage": {
             "ConstraintDescription": "No more than 640 GiB per device.",
             "Default": "0",
             "Description": "Allocated EBS storage for each block device (in GiB); 0 indicates ephemeral storage only. Non-zero will cause a new io1 disk creation for message-spool which will NOT be deleted on stack termination",
@@ -416,11 +416,11 @@
                     "BootDiskSize": {
                         "Ref": "BootDiskSize"
                     },
-                    "MessageBrokerNodeInstanceType": {
-                        "Ref": "MessageBrokerNodeInstanceType"
+                    "EventBrokerNodeInstanceType": {
+                        "Ref": "EventBrokerNodeInstanceType"
                     },
-                    "MessageBrokerNodeStorage": {
-                        "Ref": "MessageBrokerNodeStorage"
+                    "EventBrokerNodeStorage": {
+                        "Ref": "EventBrokerNodeStorage"
                     },
                     "MonitorNodeInstanceType": {
                         "Ref": "MonitorNodeInstanceType"

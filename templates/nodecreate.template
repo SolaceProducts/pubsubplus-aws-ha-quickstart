@@ -727,13 +727,13 @@
                                 {
                                     "Ref": "ParentStackName"
                                 },
-                                " MessageBrokerPrimaryStack NodeLaunchConfig\n",
+                                " EventBrokerPrimaryStack NodeLaunchConfig\n",
                                 "\n",
                                 "$AMI_SBIN/wait-for-child-resource.sh ",
                                 {
                                     "Ref": "ParentStackName"
                                 },
-                                " MessageBrokerBackupStack NodeLaunchConfig\n",
+                                " EventBrokerBackupStack NodeLaunchConfig\n",
                                 "\n",
                                 "## Now find the private IP addresses of all deployed nodes\n",
                                 "##   (generating /tmp/solacehosts and /tmp/<role> files)\n",

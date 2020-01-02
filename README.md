@@ -1,16 +1,16 @@
-[![Build Status](https://travis-ci.org/SolaceProducts/solace-aws-ha-quickstart.svg?branch=master)](https://travis-ci.org/SolaceProducts/solace-aws-ha-quickstart)
+[![Build Status](https://travis-ci.org/SolaceProducts/pubsubplus-aws-ha-quickstart.svg?branch=master)](https://travis-ci.org/SolaceProducts/pubsubplus-aws-ha-quickstart)
 
-# Install and Configure Solace PubSub+ Software Message Brokers in an HA Tuple using AWS Cloud Formation
+# Install and Configure Solace PubSub+ Event Broker: Software in an HA Tuple using AWS Cloud Formation
 
-![alt text](/images/Solace-AWS-HA-Prod-3AZ.png "Production Environment for Solace PubSub+ Software Message Brokers")
+![alt text](/images/Solace-AWS-HA-Prod-3AZ.png "Production Environment for Solace PubSub+ EBS")
 
-This Quick Start template installs Solace PubSub+ software message brokers in fault tolerant high-availability (HA) redundancy groups. HA redundancy provides 1:1 message broker redundancy to increase overall service availability. If one of the message brokers fails, or is taken out of service, the other one automatically takes over and provides service to the clients that were previously served by the now out-of-service message broker.  To increase availability, the message brokers are deployed across 3 availability zones.
+This Quick Start template installs Solace PubSub+ Event Broker: Software ((PubSub+ EBS)) in fault tolerant high-availability (HA) redundancy groups. HA redundancy provides 1:1 event broker redundancy to increase overall service availability. If one of the event brokers fails, or is taken out of service, the other one automatically takes over and provides service to the clients that were previously served by the now out-of-service event broker.  To increase availability, the event brokers are deployed across 3 availability zones.
 
-To learn more about message broker redundancy see the [Redundancy Documentation](https://docs.solace.com/Features/SW-Broker-Redundancy-and-Fault-Tolerance.htm ).  If you are not familiar with Solace PubSub+ or high-availability configurations it is recommended that you review this document. 
+To learn more about event broker redundancy see the [Redundancy Documentation](https://docs.solace.com/Features/SW-Broker-Redundancy-and-Fault-Tolerance.htm ).  If you are not familiar with Solace PubSub+ or high-availability configurations it is recommended that you review this document. 
 
-![alt text](/images/Solace-AWS-HA-PoC-2AZ.png "Proof of Concept Environment for Solace PubSub+ Software Message Brokers")
+![alt text](/images/Solace-AWS-HA-PoC-2AZ.png "Proof of Concept Environment for Solace PubSub+ EBS")
 
-Alternatively this Quick Start can create message brokers in an environment suitable for Proof-of-Concept testing where loss of an AWS Availability Zone will not cause loss of access to mission critical data.
+Alternatively this Quick Start can create event brokers in an environment suitable for Proof-of-Concept testing where loss of an AWS Availability Zone will not cause loss of access to mission critical data.
 
 To learn more about connectivity to the HA redundancy group see the AWS [VPC Gateway Documentation](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html ).
 
@@ -35,47 +35,47 @@ Below is the list of AWS resources that will be deployed by the Quick Start. Ple
 
 Look for `AWS::IAM::Role` in the templates source for the list of required IAM roles to create the stacks.
 
-# How to Deploy a Message Broker in an HA Group
+# How to Deploy PubSub+ EBS in an HA Group
 
 This is a two step process:
 
-**Step 1**: Obtain a reference to the Docker image of the Solace PubSub+ message broker to be deployed
+**Step 1**: Obtain a reference to the Docker image of the Solace PubSub+ EBS to be deployed
 
-First, decide which [Solace PubSub+ message broker](https://docs.solace.com/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm ) and version is suitable to your use case.
+First, decide which [Solace PubSub+ EBS](https://docs.solace.com/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm ) edition and version is suitable to your use case.
 
 The Docker image reference can be:
 
-*	A public or accessible private Docker registry repository name with an optional tag. This is the recommended option if using PubSub+ Standard. The default is to use the latest message broker image [available from Docker Hub](https://hub.docker.com/r/solace/solace-pubsub-standard/ ) as `solace/solace-pubsub-standard:latest`, or use a specific version [tag](https://hub.docker.com/r/solace/solace-pubsub-standard/tags/ ).
+*	A public or accessible private Docker registry repository name with an optional tag. This is the recommended option if using PubSub+ EBS Standard. The default is to use the latest event broker image [available from Docker Hub](https://hub.docker.com/r/solace/solace-pubsub-standard/ ) as `solace/solace-pubsub-standard:latest`, or use a specific version [tag](https://hub.docker.com/r/solace/solace-pubsub-standard/tags/ ).
 
 *	A Docker image download URL
-     * If using Solace PubSub+ Enterprise Evaluation Edition, go to the Solace Downloads page. For the image reference, copy and use the download URL in the Solace PubSub+ Enterprise Evaluation Edition Docker Images section.
+     * If using Solace PubSub+ EBS Enterprise Evaluation Edition, go to the Solace Downloads page. For the image reference, copy and use the download URL in the Solace PubSub+ EBS Enterprise Evaluation Edition Docker Images section.
 
-         | PubSub+ Enterprise Evaluation Edition<br/>Docker Image
+         | PubSub+ EBS Enterprise Evaluation Edition<br/>Docker Image
          | :---: |
          | 90-day trial version of PubSub+ Enterprise |
          | [Get URL of Evaluation Docker Image](http://dev.solace.com/downloads#eval ) |
 
      * If you have purchased a Docker image of Solace PubSub+ Enterprise, Solace will give you information for how to download the compressed tar archive package from a secure Solace server. Contact Solace Support at support@solace.com if you require assistance. Then you can host this tar archive together with its MD5 on a file server and use the download URL as the image reference.
 
-**Step 2**: Go to the AWS Cloud Formation service and launch the template. The following links are for your convenience and take you directly to the message broker templates.
+**Step 2**: Go to the AWS Cloud Formation service and launch the template. The following links are for your convenience and take you directly to the event broker templates.
 
-**Note:** Using `Launch Quick Start (for new VPC)` launches the AWS infrastructure stacks needed with the message broker stack on top (recommended). However, if you have previously launched this Quick Start within your target region and would like to re-deploy just the message broker stack on top of the existing AWS infrastructure stacks, you can use `Launch Quick Start (for existing VPC)`.
+**Note:** Using `Launch Quick Start (for new VPC)` launches the AWS infrastructure stacks needed with the event broker stack on top (recommended). However, if you have previously launched this Quick Start within your target region and would like to re-deploy just the event broker stack on top of the existing AWS infrastructure stacks, you can use `Launch Quick Start (for existing VPC)`.
 
-<a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-products/solace-aws-ha-quickstart/latest/templates/solace-master.template" target="_blank">
+<a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-products/pubsubplus-aws-ha-quickstart/latest/templates/solace-master.template" target="_blank">
     <img src="/images/launch-button-new.png"/>
 </a>
 
-<a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-products/solace-aws-ha-quickstart/latest/templates/solace.template" target="_blank">
+<a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=Solace-HA&templateURL=https://s3.amazonaws.com/solace-products/pubsubplus-aws-ha-quickstart/latest/templates/solace.template" target="_blank">
     <img src="/images/launch-button-existing.png"/>
 </a>
 
 * If you want to take a look under the hood, you can view the AWS CloudFormation template that automates the deployment. You can customize the template during launch or download and extend it for other projects. For that, copy your extended version of `scripts`, `submodules` and `templates` directories in a  folder in an S3 bucket and make them public.
 
-<a href="https://raw.githubusercontent.com/SolaceProducts/solace-aws-ha-quickstart/master/templates/solace-master.template" target="_blank">
+<a href="https://raw.githubusercontent.com/SolaceProducts/pubsubplus-aws-ha-quickstart/master/templates/solace-master.template" target="_blank">
     <img src="/images/view-template-new.png"/>
 </a>
 
-<a href="https://raw.githubusercontent.com/SolaceProducts/solace-aws-ha-quickstart/master/templates/solace.template" target="_blank">
+<a href="https://raw.githubusercontent.com/SolaceProducts/pubsubplus-aws-ha-quickstart/master/templates/solace.template" target="_blank">
     <img src="/images/view-template-existing.png"/>
 </a>
 
@@ -99,26 +99,26 @@ The next screen will allow you to fill in the details for the selected launch op
 |----------------------------|-----------|--------------------------------------------------------------------|
 | Stack name                 | Solace-HA | Any globally unique name                                           |
 | **Solace Configuration**      |           |                                                                    |
-| Solace Docker image reference (SolaceDockerImage) | solace/solace-pubsub-standard:latest | A reference to the Solace PubSub+ message broker Docker image, from step 1. Either the image name with optional tag in an accessible Docker registry or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a URL to a remotely hosted image version, e.g. on S3 |
-| Password to access Solace admin console and SEMP (AdminPassword) | _Requires_ _input_ | Password to allow Solace admin access to configure the message broker instances |
-| Container logging format (ContainerLoggingFormat) | graylog | The format of the logs sent by the message broker to the CloudWatch service (see [documentation](https://docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/Docker-Tasks/Configuring-VMR-Container-Logging.htm?Highlight=logging#Config-Out-Form ) for details) |
+| Solace Docker image reference (SolaceDockerImage) | solace/solace-pubsub-standard:latest | A reference to the Solace PubSub+ event broker Docker image, from step 1. Either the image name with optional tag in an accessible Docker registry or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a URL to a remotely hosted image version, e.g. on S3 |
+| Password to access Solace admin console and SEMP (AdminPassword) | _Requires_ _input_ | Password to allow Solace admin access to configure the event broker instances |
+| Container logging format (ContainerLoggingFormat) | graylog | The format of the logs sent by the event broker to the CloudWatch service (see [documentation](https://docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/Docker-Tasks/Configuring-VMR-Container-Logging.htm?Highlight=logging#Config-Out-Form ) for details) |
 | **Network Configuration**  |           |                                                                    |
 | Number of Availability Zones (NumberOfAZs) | 3 | The number of Availability Zones (2 may be used for Proof-of-Concept testing or 3 for Production) you want to use in your deployment. This count must match the number of selections in the Availability Zones parameter; otherwise, your deployment will fail with an AWS CloudFormation template validation error. (Note that some regions provide only one or two Availability Zones.) |
 | Availability Zones (AvailabilityZones) | _Requires_ _input_ | Choose two or three Availability Zones from this list, which shows the available zones within your selected region. The logical order of your selections is preserved in your deployment. After you make your selections, make sure that the value of the Number of Availability Zones parameter matches the number of selections. |
-| Create production ready environment (CreatePrivateSubnets) | true | Whether to create and use Private subnets and accompanying public ELB with health-check, which is recommended for production deployment. In this case SSH access to the Solace message broker nodes is only possible through the bastion hosts. |
-| Permitted IP range for SSH Access (SSHAccessCIDR) | _Requires_ _input_ | The CIDR IP range that is permitted to access the message broker nodes via SSH for management purposes. We recommend that you set this value to a trusted IP range. You can use 0.0.0.0/0 for unrestricted access - not recommended for non-production use. |
-| Allowed External Access CIDR (RemoteAccessCIDR) | _Requires_ _input_ | The CIDR IP range that is permitted to access the message broker nodes. We recommend that you set this value to a trusted IP range. For example, you might want to grant only your corporate network  access to the software. You can use 0.0.0.0/0 for unrestricted access - not recommended for non-production use. |
+| Create production ready environment (CreatePrivateSubnets) | true | Whether to create and use Private subnets and accompanying public ELB with health-check, which is recommended for production deployment. In this case SSH access to the Solace event broker nodes is only possible through the bastion hosts. |
+| Permitted IP range for SSH Access (SSHAccessCIDR) | _Requires_ _input_ | The CIDR IP range that is permitted to access the event broker nodes via SSH for management purposes. We recommend that you set this value to a trusted IP range. You can use 0.0.0.0/0 for unrestricted access - not recommended for non-production use. |
+| Allowed External Access CIDR (RemoteAccessCIDR) | _Requires_ _input_ | The CIDR IP range that is permitted to access the event broker nodes. We recommend that you set this value to a trusted IP range. For example, you might want to grant only your corporate network  access to the software. You can use 0.0.0.0/0 for unrestricted access - not recommended for non-production use. |
 | **Common Amazon EC2 Configuration** | |                                                                     |
 | Key Pair Name (KeyPairName) | _Requires_ _input_ | A new or an existing public/private key pair within the AWS Region, which allows you to connect securely to your instances after launch. |
 | Boot Disk Capacity (BootDiskSize) | 24 | Amazon EBS storage allocated for the boot disk, in GiBs. The Quick Start supports 8-128 GiB. |
-| **Message Broker Instance Configuration** | |                                                                     |
-| Instance Type (MessageBrokerNodeInstanceType) | m4.large | The EC2 instance type for the Solace message broker primary and backup instances in Availability Zones 1 and 2. The m series are recommended for production use. <br/> The available CPU and memory of the selected machine type will limit the maximum connection scaling tier for the Solace message broker. For requirements, refer to the [Solace documentation](https://docs.solace.com/Solace-SW-Broker-Set-Up/SW-Broker-Rel-Compat.htm#Connecti) |
-| Persistent Storage (MessageBrokerNodeStorage) | 0 | Amazon EBS storage allocated for each block device, in GiBs. The Quick Start supports up to 640 GiB per device. The default value of 0 (zero) indicates ephemeral storage only. A non-zero value will cause a new Provisioned IOPS SSD (io1) disk to be created for message-spool. This disk will not be deleted on stack termination. |
+| **Event Broker Instance Configuration** | |                                                                     |
+| Instance Type (EventBrokerNodeInstanceType) | m4.large | The EC2 instance type for the Solace event broker primary and backup instances in Availability Zones 1 and 2. The m series are recommended for production use. <br/> The available CPU and memory of the selected machine type will limit the maximum connection scaling tier for the Solace event broker. For requirements, refer to the [Solace documentation](https://docs.solace.com/Solace-SW-Broker-Set-Up/SW-Broker-Rel-Compat.htm#Connecti) |
+| Persistent Storage (EventBrokerNodeStorage) | 0 | Amazon EBS storage allocated for each block device, in GiBs. The Quick Start supports up to 640 GiB per device. The default value of 0 (zero) indicates ephemeral storage only. A non-zero value will cause a new Provisioned IOPS SSD (io1) disk to be created for message-spool. This disk will not be deleted on stack termination. |
 | **Monitor Instance Configuration** | |                                                                     |
-| Instance Type (MonitorNodeInstanceType) | t2.micro | The EC2 instance type for the Solace message broker monitor instance in Availability Zone 3 (or Availability Zone 2, if you’re using only two zones). |
+| Instance Type (MonitorNodeInstanceType) | t2.micro | The EC2 instance type for the Solace event broker monitor instance in Availability Zone 3 (or Availability Zone 2, if you’re using only two zones). |
 | **AWS Quick Start Configuration** | |                                                                     |
 | Quick Start S3 Bucket Name (QSS3BucketName) | solace-products | S3 bucket where the Quick Start templates and scripts are installed. Change this parameter to specify the S3 bucket name you’ve created for your copy of Quick Start assets, if you decide to customize or extend the Quick Start for your own use. |
-| Quick Start S3 Key Prefix (QSS3KeyPrefix) | solace-aws-ha-quickstart/latest/ | Specifies the S3 folder for your copy of Quick Start assets. Change this parameter if you decide to customize or extend the Quick Start for your own use. |
+| Quick Start S3 Key Prefix (QSS3KeyPrefix) | pubsubplus-aws-ha-quickstart/latest/ | Specifies the S3 folder for your copy of Quick Start assets. Change this parameter if you decide to customize or extend the Quick Start for your own use. |
 
 ### Launch option 2: Parameters for deploying into an existing VPC
 
@@ -144,28 +144,28 @@ Acknowledge that resources will be created and select [Create] in bottom right c
 
 # Stack structure
 
-The Quick Start will create the nested VPC, Bastion, and Solace stacks using their respective templates. The SolaceStack further creates sub-stacks for the deployment of the primary, backup and monitor message brokers. You’ll see all these listed in the AWS CloudFormation console, as illustrated below. Following the links in the Resources tab provides detailed information about the underlying resources.
+The Quick Start will create the nested VPC, Bastion, and Solace stacks using their respective templates. The SolaceStack further creates sub-stacks for the deployment of the primary, backup and monitor event brokers. You’ll see all these listed in the AWS CloudFormation console, as illustrated below. Following the links in the Resources tab provides detailed information about the underlying resources.
  
 ![alt text](/images/stacks-after-deploy-success.png "Created stacks after deployment")
 
 For external access to the deployment (explained in the next sections), the resources of interest are the
 *	the Elastic Load Balancer (ELB), and
-*	the EC2 instances for the primary, backup, and monitoring message brokers.
+*	the EC2 instances for the primary, backup, and monitoring event brokers.
 
-For messaging and management access to the active message broker, you will need to note the information about the ELB’s DNS host name, which can be obtained from the `SolaceStack > Resources > ELB, or the EC2 Dashboard > Load Balancing > Load Balancers` section:
+For messaging and management access to the active event broker, you will need to note the information about the ELB’s DNS host name, which can be obtained from the `SolaceStack > Resources > ELB, or the EC2 Dashboard > Load Balancing > Load Balancers` section:
  
 ![alt text](/images/elb-details.png "ELB details")
 
-For direct SSH access to the individual message brokers, the public DNS host names (elastic IPs) of the EC2 instances of the Bastion Hosts and the private DNS host names of the primary, backup, and monitoring message brokers are required. This can be obtained from the `EC2 Dashboard > Instances > Instances` section: 
+For direct SSH access to the individual event brokers, the public DNS host names (elastic IPs) of the EC2 instances of the Bastion Hosts and the private DNS host names of the primary, backup, and monitoring event brokers are required. This can be obtained from the `EC2 Dashboard > Instances > Instances` section: 
  
 ![alt text](/images/ec2-instance-details.png "EC2 instances details")
 
 
-# Gaining admin access to the message broker
+# Gaining admin access to the Solace PubSub+ EBS
 
-## Using SSH connection to the individual message brokers
+## Using SSH connection to the individual event brokers
 
-For persons used to working with Solace PubSub+ message broker console access, this is still available with the AWS EC2 instance:
+For persons used to working with Solace PubSub+ EBS console access, this is still available with the AWS EC2 instance:
 
 * Copy the Key Pair file used during deployment (KeyPairName) to the Linux Bastion Host. The key must not be publicly viewable.
 ```
@@ -176,7 +176,7 @@ scp -i <key.pem> <key.pem> ec2-user@<bastion-elastic-ip>:/home/ec2-user
 ```
 ssh -i <key.pem> ec2-user@<bastion-elastic-ip>
 ```
-* From the Linux Bastion Host, SSH to your desired EC2 host that is running the message broker.
+* From the Linux Bastion Host, SSH to your desired EC2 host that is running the event broker.
 ```
 ssh -i <key.pem> ec2-user@<ec2-host>
 ```
@@ -187,11 +187,11 @@ sudo docker exec -it solace /usr/sw/loads/currentload/bin/cli -A
 
 ## Management tools access through the ELB
 
-Non-CLI [management tools](https://docs.solace.com/Management-Tools.htm ) can access the message broker cluster through the ELB’s public DNS host name at port 8080. Use the user `admin` and the password you set for the "AdminPassword".
+Non-CLI [management tools](https://docs.solace.com/Management-Tools.htm ) can access the event broker cluster through the ELB’s public DNS host name at port 8080. Use the user `admin` and the password you set for the "AdminPassword".
 
-# Message Broker Logs
+# Event Broker Logs
 
-Both host and container logs get logged to [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/ ) on the region where the deployment occurred. The message broker logs can be found under the `*/solace.log` log stream. The `ContainerLoggingFormat` field can be used to control the log output format.
+Both host and container logs get logged to [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/ ) on the region where the deployment occurred. The event broker logs can be found under the `*/solace.log` log stream. The `ContainerLoggingFormat` field can be used to control the log output format.
 
 ![alt text](/images/CloudWatch_logging.png "CloudWatch Logging")
 
@@ -201,9 +201,9 @@ Quick Starts are automated reference deployments for key workloads on the AWS Cl
 
 # Testing data access to the HA cluster
 
-To test data traffic though the newly created message broker instances, visit the Solace developer portal and select your preferred API or protocol to [send and receive messages](http://dev.solace.com/get-started/send-receive-messages/). Under each language there is a Publish/Subscribe tutorial that will help you get started.
+To test data traffic though the newly created event broker instances, visit the Solace developer portal and select your preferred API or protocol to [send and receive messages](http://dev.solace.com/get-started/send-receive-messages/). Under each language there is a Publish/Subscribe tutorial that will help you get started.
 
-For data, the message broker cluster can be accessed through the ELB’s public DNS host name and the API or protocol specific port. 
+For data, the event broker cluster can be accessed through the ELB’s public DNS host name and the API or protocol specific port. 
 
 ![alt text](/images/solace_tutorial.png "getting started publish/subscribe")
 

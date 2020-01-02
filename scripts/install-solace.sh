@@ -200,14 +200,14 @@ cd ${solace_directory}
 
 host_name=`hostname`
 host_info=`grep ${host_name} ${config_file}`
-local_role=`echo $host_info | grep -o -E 'Monitor|MessageBrokerPrimary|MessageBrokerBackup'`
+local_role=`echo $host_info | grep -o -E 'Monitor|EventBrokerPrimary|EventBrokerBackup'`
 
-primary_stack=`cat ${config_file} | grep MessageBrokerPrimary | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
-backup_stack=`cat ${config_file} | grep MessageBrokerBackup | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
+primary_stack=`cat ${config_file} | grep EventBrokerPrimary | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
+backup_stack=`cat ${config_file} | grep EventBrokerBackup | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
 monitor_stack=`cat ${config_file} | grep Monitor | rev | cut -d "-" -f1 | rev | tr '[:upper:]' '[:lower:]'`
 
 # Get the IP addressed for node
-for role in Monitor MessageBrokerPrimary MessageBrokerBackup
+for role in Monitor EventBrokerPrimary EventBrokerBackup
 do
   role_info=`grep ${role} ${config_file}`
   role_name=${role_info%% *}
@@ -216,10 +216,10 @@ do
     Monitor )
       MONITOR_IP=${role_ip}
       ;;
-    MessageBrokerPrimary )
+    EventBrokerPrimary )
       PRIMARY_IP=${role_ip}
       ;;
-    MessageBrokerBackup )
+    EventBrokerBackup )
       BACKUP_IP=${role_ip}
       ;;
   esac
@@ -231,13 +231,13 @@ case $local_role in
     ROUTER_NAME="monitor${monitor_stack}"
     REDUNDANCY_CFG=""
   ;;
-  MessageBrokerPrimary )
+  EventBrokerPrimary )
     NODE_TYPE="message_routing"
     ROUTER_NAME="primary${primary_stack}"
     REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${BACKUP_IP} --env redundancy_activestandbyrole=primary --env configsync_enable=yes"
     is_primary="true"
   ;;
-  MessageBrokerBackup )
+  EventBrokerBackup )
     NODE_TYPE="message_routing"
     ROUTER_NAME="backup${backup_stack}"
     REDUNDANCY_CFG="--env redundancy_matelink_connectvia=${PRIMARY_IP} --env redundancy_activestandbyrole=backup --env configsync_enable=yes"
