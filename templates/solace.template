@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "CloudFormation template to deploy Solace PubSub+ HA Message Brokers on AWS. (qs-1nju7g5r0)",
+    "Description": "CloudFormation template to deploy Solace PubSub+ HA Event Brokers on AWS. (qs-1nju7g5r0)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -32,7 +32,7 @@
                     ]
                 },
                 {
-                    "Label": { "default": "Message Broker Instance Configuration" },
+                    "Label": { "default": "Event Broker Instance Configuration" },
                     "Parameters": [
                         "EventBrokerNodeInstanceType",
                         "EventBrokerNodeStorage"
@@ -716,6 +716,18 @@
                     },
                     {
                         "IpProtocol": "tcp",
+                        "FromPort": "55443",
+                        "ToPort": "55443",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "60443",
+                        "ToPort": "60443",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
                         "FromPort": "8000",
                         "ToPort": "8000",
                         "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
@@ -740,14 +752,20 @@
                     },
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
+                        "FromPort": "60080",
+                        "ToPort": "60080",
                         "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
                     },
                     {
                         "IpProtocol": "tcp",
                         "FromPort": "8080",
                         "ToPort": "8080",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "60943",
+                        "ToPort": "60943",
                         "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
                     },
                     {
@@ -793,7 +811,7 @@
                 "VpcId": {
                     "Ref": "VPCID"
                 },
-                "GroupDescription": "Message Broker Security Group",
+                "GroupDescription": "Event Broker Security Group",
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
@@ -807,6 +825,22 @@
                         "IpProtocol": "tcp",
                         "FromPort": "55003",
                         "ToPort": "55003",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "55443",
+                        "ToPort": "55443",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "60443",
+                        "ToPort": "60443",
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
@@ -845,6 +879,14 @@
                     },
                     {
                         "IpProtocol": "tcp",
+                        "FromPort": "60080",
+                        "ToPort": "60080",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
                         "FromPort": "8080",
                         "ToPort": "8080",
                         "CidrIp": {
@@ -853,8 +895,8 @@
                     },
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
+                        "FromPort": "60943",
+                        "ToPort": "60943",
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
