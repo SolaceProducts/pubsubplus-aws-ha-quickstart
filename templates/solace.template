@@ -722,8 +722,8 @@
                     },
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "60443",
-                        "ToPort": "60443",
+                        "FromPort": "1443",
+                        "ToPort": "1443",
                         "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
                     },
                     {
@@ -752,8 +752,8 @@
                     },
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "60080",
-                        "ToPort": "60080",
+                        "FromPort": "8008",
+                        "ToPort": "8008",
                         "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
                     },
                     {
@@ -764,8 +764,8 @@
                     },
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "60943",
-                        "ToPort": "60943",
+                        "FromPort": "1943",
+                        "ToPort": "1943",
                         "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
                     },
                     {
@@ -839,8 +839,8 @@
                     },
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "60443",
-                        "ToPort": "60443",
+                        "FromPort": "1443",
+                        "ToPort": "1443",
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
@@ -879,8 +879,8 @@
                     },
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "60080",
-                        "ToPort": "60080",
+                        "FromPort": "8008",
+                        "ToPort": "8008",
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
@@ -895,8 +895,8 @@
                     },
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "60943",
-                        "ToPort": "60943",
+                        "FromPort": "1943",
+                        "ToPort": "1943",
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
@@ -957,8 +957,8 @@
                     "InstancePort" : "55443",
                     "Protocol" : "TCP"
                     },{
-                    "LoadBalancerPort" : "60443",
-                    "InstancePort" : "60443",
+                    "LoadBalancerPort" : "1443",
+                    "InstancePort" : "1443",
                     "Protocol" : "TCP"
                     },{
                     "LoadBalancerPort" : "8000",
@@ -977,16 +977,16 @@
                     "InstancePort" : "1883",
                     "Protocol" : "TCP"
                     },{
-                    "LoadBalancerPort" : "60080",
-                    "InstancePort" : "60080",
+                    "LoadBalancerPort" : "8008",
+                    "InstancePort" : "8008",
                     "Protocol" : "TCP"
                     },{
                     "LoadBalancerPort" : "8080",
                     "InstancePort" : "8080",
                     "Protocol" : "TCP"
                     },{
-                    "LoadBalancerPort" : "60943",
-                    "InstancePort" : "60943",
+                    "LoadBalancerPort" : "1943",
+                    "InstancePort" : "1943",
                     "Protocol" : "TCP"
                     }
                 ]
