@@ -977,7 +977,7 @@
                     "InstancePort" : "1883",
                     "Protocol" : "TCP"
                     },{
-                    "LoadBalancerPort" : "80",
+                    "LoadBalancerPort" : "60080",
                     "InstancePort" : "60080",
                     "Protocol" : "TCP"
                     },{
