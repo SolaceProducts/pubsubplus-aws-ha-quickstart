@@ -957,7 +957,7 @@
                     "InstancePort" : "55443",
                     "Protocol" : "TCP"
                     },{
-                    "LoadBalancerPort" : "443",
+                    "LoadBalancerPort" : "60443",
                     "InstancePort" : "60443",
                     "Protocol" : "TCP"
                     },{
@@ -977,7 +977,7 @@
                     "InstancePort" : "1883",
                     "Protocol" : "TCP"
                     },{
-                    "LoadBalancerPort" : "60081",
+                    "LoadBalancerPort" : "60080",
                     "InstancePort" : "60080",
                     "Protocol" : "TCP"
                     },{
@@ -985,7 +985,7 @@
                     "InstancePort" : "8080",
                     "Protocol" : "TCP"
                     },{
-                    "LoadBalancerPort" : "943",
+                    "LoadBalancerPort" : "60943",
                     "InstancePort" : "60943",
                     "Protocol" : "TCP"
                     }
