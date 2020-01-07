@@ -57,7 +57,7 @@ after_success:
   - echo "YAML linted"
   - echo "Cloudformation tested"
   - echo "Messaging tested"
-  - if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ]; then aws s3 sync . s3://solace-products/solace-aws-ha-quickstart/latest --acl public-read; fi
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ]; then aws s3 sync . s3://solace-products/pubsubplus-aws-ha-quickstart/latest --acl public-read; fi
 
 after_script:
   - #aws s3 rb s3://solace-cf-quickstart-travistest --force
