@@ -1,14 +1,14 @@
 [![Build Status](https://travis-ci.org/SolaceProducts/pubsubplus-aws-ha-quickstart.svg?branch=master)](https://travis-ci.org/SolaceProducts/pubsubplus-aws-ha-quickstart)
 
-# Install and Configure Solace PubSub+ Event Broker: Software in an HA Tuple using AWS Cloud Formation
+# Install and Configure Solace PubSub+ Software Event Broker in an HA Tuple using AWS Cloud Formation
 
-![alt text](/images/Solace-AWS-HA-Prod-3AZ.png "Production Environment for Solace PubSub+ EBS")
+![alt text](/images/Solace-AWS-HA-Prod-3AZ.png "Production Environment for Solace PubSub+")
 
-This Quick Start template installs Solace PubSub+ Event Broker: Software ((PubSub+ EBS)) in fault tolerant high-availability (HA) redundancy groups. HA redundancy provides 1:1 event broker redundancy to increase overall service availability. If one of the event brokers fails, or is taken out of service, the other one automatically takes over and provides service to the clients that were previously served by the now out-of-service event broker.  To increase availability, the event brokers are deployed across 3 availability zones.
+This Quick Start template installs Solace PubSub+ Software Event Broker in fault tolerant high-availability (HA) redundancy groups. HA redundancy provides 1:1 event broker redundancy to increase overall service availability. If one of the event brokers fails, or is taken out of service, the other one automatically takes over and provides service to the clients that were previously served by the now out-of-service event broker.  To increase availability, the event brokers are deployed across 3 availability zones.
 
 To learn more about event broker redundancy see the [Redundancy Documentation](https://docs.solace.com/Features/SW-Broker-Redundancy-and-Fault-Tolerance.htm ).  If you are not familiar with Solace PubSub+ or high-availability configurations it is recommended that you review this document. 
 
-![alt text](/images/Solace-AWS-HA-PoC-2AZ.png "Proof of Concept Environment for Solace PubSub+ EBS")
+![alt text](/images/Solace-AWS-HA-PoC-2AZ.png "Proof of Concept Environment for Solace PubSub+ Software Event Broker")
 
 Alternatively this Quick Start can create event brokers in an environment suitable for Proof-of-Concept testing where loss of an AWS Availability Zone will not cause loss of access to mission critical data.
 
@@ -35,22 +35,22 @@ Below is the list of AWS resources that will be deployed by the Quick Start. Ple
 
 Look for `AWS::IAM::Role` in the templates source for the list of required IAM roles to create the stacks.
 
-# How to Deploy PubSub+ EBS in an HA Group
+# How to Deploy PubSub+ Software Event Broker in an HA Group
 
 This is a two step process:
 
-**Step 1**: Obtain a reference to the Docker image of the Solace PubSub+ EBS to be deployed
+**Step 1**: Obtain a reference to the Docker image of the event broker to be deployed
 
-First, decide which [Solace PubSub+ EBS](https://docs.solace.com/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm ) edition and version is suitable to your use case.
+First, decide which [Solace PubSub+ Software Event Broker](https://docs.solace.com/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm ) edition and version is suitable to your use case.
 
 The Docker image reference can be:
 
-*	A public or accessible private Docker registry repository name with an optional tag. This is the recommended option if using PubSub+ EBS Standard. The default is to use the latest event broker image [available from Docker Hub](https://hub.docker.com/r/solace/solace-pubsub-standard/ ) as `solace/solace-pubsub-standard:latest`, or use a specific version [tag](https://hub.docker.com/r/solace/solace-pubsub-standard/tags/ ).
+*	A public or accessible private Docker registry repository name with an optional tag. This is the recommended option if using PubSub+ Software Event Broker Standard. The default is to use the latest event broker image [available from Docker Hub](https://hub.docker.com/r/solace/solace-pubsub-standard/ ) as `solace/solace-pubsub-standard:latest`, or use a specific version [tag](https://hub.docker.com/r/solace/solace-pubsub-standard/tags/ ).
 
 *	A Docker image download URL
-     * If using Solace PubSub+ EBS Enterprise Evaluation Edition, go to the Solace Downloads page. For the image reference, copy and use the download URL in the Solace PubSub+ EBS Enterprise Evaluation Edition Docker Images section.
+     * If using Solace PubSub+ Software Event Broker Enterprise Evaluation Edition, go to the Solace Downloads page. For the image reference, copy and use the download URL in the Solace PubSub+ Software Event Broker Enterprise Evaluation Edition Docker Images section.
 
-         | PubSub+ EBS Enterprise Evaluation Edition<br/>Docker Image
+         | PubSub+ Software Event Broker Enterprise Evaluation Edition<br/>Docker Image
          | :---: |
          | 90-day trial version of PubSub+ Enterprise |
          | [Get URL of Evaluation Docker Image](http://dev.solace.com/downloads#eval ) |
@@ -110,10 +110,10 @@ The next screen will allow you to fill in the details for the selected launch op
 | Allowed External Access CIDR (RemoteAccessCIDR) | _Requires_ _input_ | The CIDR IP range that is permitted to access the event broker nodes. We recommend that you set this value to a trusted IP range. For example, you might want to grant only your corporate network  access to the software. You can use 0.0.0.0/0 for unrestricted access - not recommended for non-production use. |
 | **Common Amazon EC2 Configuration** | |                                                                     |
 | Key Pair Name (KeyPairName) | _Requires_ _input_ | A new or an existing public/private key pair within the AWS Region, which allows you to connect securely to your instances after launch. |
-| Boot Disk Capacity (BootDiskSize) | 24 | Amazon EBS storage allocated for the boot disk, in GiBs. The Quick Start supports 8-128 GiB. |
+| Boot Disk Capacity (BootDiskSize) | 24 | Amazon event broker storage allocated for the boot disk, in GiBs. The Quick Start supports 8-128 GiB. |
 | **Event Broker Instance Configuration** | |                                                                     |
 | Instance Type (EventBrokerNodeInstanceType) | m4.large | The EC2 instance type for the Solace event broker primary and backup instances in Availability Zones 1 and 2. The m series are recommended for production use. <br/> The available CPU and memory of the selected machine type will limit the maximum connection scaling tier for the Solace event broker. For requirements, refer to the [Solace documentation](https://docs.solace.com/Solace-SW-Broker-Set-Up/SW-Broker-Rel-Compat.htm#Connecti) |
-| Persistent Storage (EventBrokerNodeStorage) | 0 | Amazon EBS storage allocated for each block device, in GiBs. The Quick Start supports up to 640 GiB per device. The default value of 0 (zero) indicates ephemeral storage only. A non-zero value will cause a new Provisioned IOPS SSD (io1) disk to be created for message-spool. This disk will not be deleted on stack termination. |
+| Persistent Storage (EventBrokerNodeStorage) | 0 | Amazon event broker storage allocated for each block device, in GiBs. The Quick Start supports up to 640 GiB per device. The default value of 0 (zero) indicates ephemeral storage only. A non-zero value will cause a new Provisioned IOPS SSD (io1) disk to be created for message-spool. This disk will not be deleted on stack termination. |
 | **Monitor Instance Configuration** | |                                                                     |
 | Instance Type (MonitorNodeInstanceType) | t2.micro | The EC2 instance type for the Solace event broker monitor instance in Availability Zone 3 (or Availability Zone 2, if you’re using only two zones). |
 | **AWS Quick Start Configuration** | |                                                                     |
@@ -161,11 +161,11 @@ For direct SSH access to the individual event brokers, the public DNS host names
 ![alt text](/images/ec2-instance-details.png "EC2 instances details")
 
 
-# Gaining admin access to the Solace PubSub+ EBS
+# Gaining admin access to the Solace PubSub+ Software Event Broker
 
 ## Using SSH connection to the individual event brokers
 
-For persons used to working with Solace PubSub+ EBS console access, this is still available with the AWS EC2 instance:
+For persons used to working with event broker console access, this is still available with the AWS EC2 instance:
 
 * Copy the Key Pair file used during deployment (KeyPairName) to the Linux Bastion Host. The key must not be publicly viewable.
 ```
