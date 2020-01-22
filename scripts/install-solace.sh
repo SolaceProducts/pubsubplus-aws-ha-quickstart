@@ -317,7 +317,7 @@ docker create \
  --env "service_webtransport_tlsport=1443" \
  --env "service_semp_tlsport=1943" \
  ${REDUNDANCY_CFG} \
- --env "redundancy_group_passwordfilepath=$(basename ${admin_password_file})" \
+ --env "redundancy_authentication_presharedkey_key=`cat $(basename ${admin_password_file}) | awk '{x=$0;for(i=length;i<51;i++)x=x "0";}END{print x}' | base64`" \
  --env "redundancy_enable=yes" \
   --env "redundancy_group_node_primary${primary_stack}_nodetype=message_routing" \
   --env "redundancy_group_node_primary${primary_stack}_connectvia=${PRIMARY_IP}" \
