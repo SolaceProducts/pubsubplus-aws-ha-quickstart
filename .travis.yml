@@ -65,4 +65,6 @@ after_script:
   - echo "Waiting for stack delete complete"
   - stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep StackId | awk -F '"' '{print $4}')"
   - if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
+  - for volume in $(aws ec2 describe-volumes --region ${AWS_DEFAULT_REGION} --filters Name="status",Values="available" --query 'Volumes[*].VolumeId' --output text) ; do
+ aws ec2 delete-volume --volume-id $volume --region ${AWS_DEFAULT_REGION} ; done
 
