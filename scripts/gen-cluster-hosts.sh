@@ -20,7 +20,7 @@
 # instance.
 #
 # The assumption is that the Cloudformation Stack deploys 2 autoscaling groups.
-#	MessageBroker	(/tmp/routers)
+#	EventBroker	(/tmp/routers)
 #	MonitorNodes	(/tmp/monitors)
 #
 # The complete list of hosts for this stack is saved
@@ -85,9 +85,9 @@ done
 # The different models will have slightly different labels for the 
 # nodes associated with each group ... but it's simple to handle both cases.
 #pwd
-grep -q -e "-MessageBroker.*Stack-" ${SOLACE_HOSTS_FILE}
+grep -q -e "-EventBroker.*Stack-" ${SOLACE_HOSTS_FILE}
 if [ $? -eq 0 ] ; then
-    grep -e "-MessageBroker.*Stack-" ${SOLACE_HOSTS_FILE} \
+    grep -e "-EventBroker.*Stack-" ${SOLACE_HOSTS_FILE} \
     | awk '{print $1" ROUTERNODE"NR-1" "$2" "$3" "$4}' > /tmp/routers
 else
     cp ${SOLACE_HOSTS_FILE} /tmp/routers

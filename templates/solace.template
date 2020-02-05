@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "CloudFormation template to deploy Solace PubSub+ HA Message Brokers on AWS. (qs-1nju7g5r0)",
+    "Description": "CloudFormation template to deploy Solace PubSub+ HA Event Brokers on AWS. (qs-1nju7g5r0)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -32,10 +32,10 @@
                     ]
                 },
                 {
-                    "Label": { "default": "Message Broker Instance Configuration" },
+                    "Label": { "default": "Event Broker Instance Configuration" },
                     "Parameters": [
-                        "MessageBrokerNodeInstanceType",
-                        "MessageBrokerNodeStorage"
+                        "EventBrokerNodeInstanceType",
+                        "EventBrokerNodeStorage"
                     ]
                 },
                 {
@@ -63,10 +63,10 @@
                 "BootDiskSize": {
                     "default": "Boot Disk Capacity (GiB)"
                 },
-                "MessageBrokerNodeInstanceType": {
+                "EventBrokerNodeInstanceType": {
                     "default": "Instance Type"
                 },
-                "MessageBrokerNodeStorage": {
+                "EventBrokerNodeStorage": {
                     "default": "Persistent Storage"
                 },
                 "MonitorNodeInstanceType": {
@@ -136,7 +136,7 @@
             "MinValue": "8",
             "Type": "Number"
         },
-        "MessageBrokerNodeInstanceType": {
+        "EventBrokerNodeInstanceType": {
             "AllowedValues": [
                 "t2.small",
                 "t2.medium",
@@ -159,7 +159,7 @@
             "Description": "Instance Type for Solace message broker message routing nodes. Note: Make sure that your region supports the selected instance type before continuing",
             "Type": "String"
         },
-        "MessageBrokerNodeStorage": {
+        "EventBrokerNodeStorage": {
             "ConstraintDescription": "No more than 640 GiB per device.",
             "Default": "0",
             "Description": "Allocated EBS storage for each block device (in GiB); 0 indicates ephemeral storage only. Non-zero will cause a new io1 disk creation for message-spool which will NOT be deleted on stack termination",
@@ -244,7 +244,7 @@
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-/]*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
-            "Default": "solace-aws-ha-quickstart/latest/",
+            "Default": "pubsubplus-aws-ha-quickstart/latest/",
             "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
             "Type": "String"
         }
@@ -426,7 +426,7 @@
                 "Roles": [ { "Ref": "SolaceVMRRole" } ]
             }
         },
-        "MessageBrokerPrimaryStack": {
+        "EventBrokerPrimaryStack": {
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
@@ -467,13 +467,13 @@
                     },
                     "NodeDesignation": "message-router-primary",
                     "NodeInstanceType": {
-                        "Ref": "MessageBrokerNodeInstanceType"
+                        "Ref": "EventBrokerNodeInstanceType"
                     },
                     "NodeSecurityGroup": {
                         "Fn::Join": [
                             ",",
                             [
-                                { "Ref" : "MessageBrokerSecurityGroup" },
+                                { "Ref" : "EventBrokerSecurityGroup" },
                                 { "Ref" : "SolaceInternalSecurityGroup" },
                                 { "Ref" : "SolaceInternalSecurityGroupMember" },
                                 { "Ref" : "RemoteMgmtSecurityGroup" }
@@ -484,7 +484,7 @@
                         "Ref": "AWS::StackName"
                     },
                     "PersistentStorage": {
-                        "Ref": "MessageBrokerNodeStorage"
+                        "Ref": "EventBrokerNodeStorage"
                     },
                     "QSS3BucketName": {
                         "Ref": "QSS3BucketName"
@@ -507,7 +507,7 @@
                 }
             }
         },
-        "MessageBrokerBackupStack": {
+        "EventBrokerBackupStack": {
             "Type": "AWS::CloudFormation::Stack",
             "Properties": {
                 "TemplateURL": {
@@ -548,13 +548,13 @@
                     },
                     "NodeDesignation": "message-router-backup",
                     "NodeInstanceType": {
-                        "Ref": "MessageBrokerNodeInstanceType"
+                        "Ref": "EventBrokerNodeInstanceType"
                     },
                     "NodeSecurityGroup": {
                         "Fn::Join": [
                             ",",
                             [
-                                { "Ref" : "MessageBrokerSecurityGroup" },
+                                { "Ref" : "EventBrokerSecurityGroup" },
                                 { "Ref" : "SolaceInternalSecurityGroup" },
                                 { "Ref" : "SolaceInternalSecurityGroupMember" },
                                 { "Ref" : "RemoteMgmtSecurityGroup" }
@@ -565,7 +565,7 @@
                         "Ref": "AWS::StackName"
                     },
                     "PersistentStorage": {
-                        "Ref": "MessageBrokerNodeStorage"
+                        "Ref": "EventBrokerNodeStorage"
                     },
                     "QSS3BucketName": {
                         "Ref": "QSS3BucketName"
@@ -716,6 +716,18 @@
                     },
                     {
                         "IpProtocol": "tcp",
+                        "FromPort": "55443",
+                        "ToPort": "55443",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "1443",
+                        "ToPort": "1443",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
                         "FromPort": "8000",
                         "ToPort": "8000",
                         "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
@@ -740,14 +752,20 @@
                     },
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
+                        "FromPort": "8008",
+                        "ToPort": "8008",
                         "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
                     },
                     {
                         "IpProtocol": "tcp",
                         "FromPort": "8080",
                         "ToPort": "8080",
+                        "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "1943",
+                        "ToPort": "1943",
                         "SourceSecurityGroupId": { "Ref": "SolaceInternalSecurityGroupMember" } 
                     },
                     {
@@ -787,13 +805,13 @@
                 ]
             }
         },
-        "MessageBrokerSecurityGroup": {
+        "EventBrokerSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
                 "VpcId": {
                     "Ref": "VPCID"
                 },
-                "GroupDescription": "Message Broker Security Group",
+                "GroupDescription": "Event Broker Security Group",
                 "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
@@ -807,6 +825,22 @@
                         "IpProtocol": "tcp",
                         "FromPort": "55003",
                         "ToPort": "55003",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "55443",
+                        "ToPort": "55443",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "1443",
+                        "ToPort": "1443",
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
@@ -845,6 +879,14 @@
                     },
                     {
                         "IpProtocol": "tcp",
+                        "FromPort": "8008",
+                        "ToPort": "8008",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
                         "FromPort": "8080",
                         "ToPort": "8080",
                         "CidrIp": {
@@ -853,8 +895,8 @@
                     },
                     {
                         "IpProtocol": "tcp",
-                        "FromPort": "80",
-                        "ToPort": "80",
+                        "FromPort": "1943",
+                        "ToPort": "1943",
                         "CidrIp": {
                             "Ref": "RemoteAccessCIDR"
                         }
@@ -868,7 +910,7 @@
         "ClusterInfoCondition": {
             "Type": "AWS::CloudFormation::WaitCondition",
             "Condition": "EnableWaitConditions",
-            "DependsOn": ["MessageBrokerPrimaryStack", "MessageBrokerBackupStack", "MonitorStack"],
+            "DependsOn": ["EventBrokerPrimaryStack", "EventBrokerBackupStack", "MonitorStack"],
             "Properties": {
                 "Handle": {
                     "Ref": "ClusterInfoHandle"
@@ -879,17 +921,17 @@
         },
         "ELB": {
             "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
-            "DependsOn": ["MessageBrokerPrimaryStack"],
+            "DependsOn": ["EventBrokerPrimaryStack"],
             "Condition": "UsePrivateSubnetsCondition",
             "Properties":{
                 "SecurityGroups": [
-                    { "Ref" : "MessageBrokerSecurityGroup" },
+                    { "Ref" : "EventBrokerSecurityGroup" },
                     { "Ref" : "SolaceInternalSecurityGroupMember" }
                 ],
                 "Subnets" : { "Ref": "PublicSubnetIDs" },
                 "Instances" : [
-                    {"Fn::GetAtt": ["MessageBrokerPrimaryStack","Outputs.EC2ID"]},
-                    {"Fn::GetAtt": ["MessageBrokerBackupStack","Outputs.EC2ID"]},
+                    {"Fn::GetAtt": ["EventBrokerPrimaryStack","Outputs.EC2ID"]},
+                    {"Fn::GetAtt": ["EventBrokerBackupStack","Outputs.EC2ID"]},
                     {"Fn::GetAtt": ["MonitorStack","Outputs.EC2ID"]}
                 ],
                 "HealthCheck" : {
@@ -911,6 +953,14 @@
                     "InstancePort" : "55003",
                     "Protocol" : "TCP"
                     },{
+                    "LoadBalancerPort" : "55443",
+                    "InstancePort" : "55443",
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "1443",
+                    "InstancePort" : "1443",
+                    "Protocol" : "TCP"
+                    },{
                     "LoadBalancerPort" : "8000",
                     "InstancePort" : "8000",
                     "Protocol" : "TCP"
@@ -927,13 +977,17 @@
                     "InstancePort" : "1883",
                     "Protocol" : "TCP"
                     },{
-                    "LoadBalancerPort" : "80",
-                    "InstancePort" : "80",
-                    "Protocol" : "HTTP"
+                    "LoadBalancerPort" : "8008",
+                    "InstancePort" : "8008",
+                    "Protocol" : "TCP"
                     },{
                     "LoadBalancerPort" : "8080",
                     "InstancePort" : "8080",
-                    "Protocol" : "HTTP"
+                    "Protocol" : "TCP"
+                    },{
+                    "LoadBalancerPort" : "1943",
+                    "InstancePort" : "1943",
+                    "Protocol" : "TCP"
                     }
                 ]
             }

@@ -33,13 +33,14 @@ script:
   - aws cloudformation validate-template --template-body file://templates/solace.template
   - aws cloudformation validate-template --template-body file://templates/nodecreate.template
   - yaml-lint -n templates/
-  - sed -i "s@SolaceDockerImageParameterValue@$SOLACE_DOCKER_URL_PARAMETER_VALUE@g" ci/solace-aws-ha-3az-prod-travistest.json
-  - sed -i "s@MessageBrokerNodeInstanceTypeParameterValue@$MESSAGEBROKERNODEINSTANCETYPE@g" ci/solace-aws-ha-3az-prod-travistest.json
-  - sed -i "s@SolaceStackRegionNAME@$AWS_DEFAULT_REGION@g" ci/solace-aws-ha-3az-prod-travistest.json
+  - #sed -i "s@SolaceDockerImageParameterValue@${SOLACE_DOCKER_URL_PARAMETER_VALUE}@g" ci/solace-aws-ha-3az-prod-travistest.json
+  - sed -i "s@SolaceDockerImageParameterValue@solace/solace-pubsub-standard:latest@g" ci/solace-aws-ha-3az-prod-travistest.json
+  - sed -i "s@EventBrokerNodeInstanceTypeParameterValue@${MESSAGEBROKERNODEINSTANCETYPE}@g" ci/solace-aws-ha-3az-prod-travistest.json
+  - sed -i "s@SolaceStackRegionNAME@${AWS_DEFAULT_REGION}@g" ci/solace-aws-ha-3az-prod-travistest.json
   - aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"
-  - aws s3 sync . s3://solace-cf-quickstart-travistest/solace/messagebroker/latest --acl public-read
+  - aws s3 sync . s3://solace-cf-quickstart-travistest/solace/eventbroker/latest --acl public-read
   - export TESTSTACKPREFIX="T$(date +%s)"; export TESTSTACKNAME="$TESTSTACKPREFIX-sol-aws-travistest";
-  - aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure DELETE --capabilities CAPABILITY_IAM
+  - aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure DO_NOTHING --capabilities CAPABILITY_IAM
   - echo "Waiting for stack create complete"
   - "travis_wait 30 sleep 1800 &"
   - until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
@@ -57,12 +58,13 @@ after_success:
   - echo "YAML linted"
   - echo "Cloudformation tested"
   - echo "Messaging tested"
-  - if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ]; then aws s3 sync . s3://solace-products/solace-aws-ha-quickstart/latest --acl public-read; fi
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ]; then aws s3 sync . s3://solace-products/pubsubplus-aws-ha-quickstart/latest --acl public-read; fi
 
 after_script:
-  - aws s3 rb s3://solace-cf-quickstart-travistest --force
+  - #aws s3 rb s3://solace-cf-quickstart-travistest --force
   - aws cloudformation delete-stack --stack-name $TESTSTACKNAME
   - echo "Waiting for stack delete complete"
   - stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep StackId | awk -F '"' '{print $4}')"
   - if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
+  - for volume in $(aws ec2 describe-volumes --region ${AWS_DEFAULT_REGION} --filters Name="status",Values="available" --query 'Volumes[*].VolumeId' --output text) ; do aws ec2 delete-volume --volume-id $volume --region ${AWS_DEFAULT_REGION} ; done
 

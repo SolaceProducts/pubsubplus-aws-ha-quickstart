@@ -88,7 +88,7 @@
         "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-/]*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
-            "Default": "solace-aws-ha-quickstart/latest/",
+            "Default": "pubsubplus-aws-ha-quickstart/latest/",
             "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
             "Type": "String"
         },
@@ -100,52 +100,52 @@
     "Mappings": {
         "AWSAMIRegionMap": {
             "AMI": {
-                "AMZNLINUXHVM": "amzn-ami-hvm-2018.03.0.20181129-x86_64-gp2"
+                "AMZNLINUXHVM": "amzn-ami-hvm-2018.03.0.20190611-x86_64-gp2"
             },
             "ap-northeast-1": {
-                "AMZNLINUXHVM": "ami-00a5245b4816c38e6"
+                "AMZNLINUXHVM": "ami-079e6fb1e856e80c1"
             },
             "ap-northeast-2": {
-                "AMZNLINUXHVM": "ami-00dc207f8ba6dc919"
+                "AMZNLINUXHVM": "ami-0e4a253fb5f082688"
             },
             "ap-south-1": {
-                "AMZNLINUXHVM": "ami-0ad42f4f66f6c1cc9"
+                "AMZNLINUXHVM": "ami-01e074f40dfb9999d"
             },
             "ap-southeast-1": {
-                "AMZNLINUXHVM": "ami-05b3bcf7f311194b3"
+                "AMZNLINUXHVM": "ami-0d9233e8ce73df7b2"
             },
             "ap-southeast-2": {
-                "AMZNLINUXHVM": "ami-02fd0b06f06d93dfc"
+                "AMZNLINUXHVM": "ami-0c91f97cadcc8499e"
             },
             "ca-central-1": {
-                "AMZNLINUXHVM": "ami-07423fb63ea0a0930"
+                "AMZNLINUXHVM": "ami-003a0ba7ea76b2785"
             },
             "eu-central-1": {
-                "AMZNLINUXHVM": "ami-0cfbf4f6db41068ac"
+                "AMZNLINUXHVM": "ami-0ab838eeee7f316eb"
             },
             "eu-west-1": {
-                "AMZNLINUXHVM": "ami-08935252a36e25f85"
+                "AMZNLINUXHVM": "ami-071f4ce599deff521"
             },
             "eu-west-2": {
-                "AMZNLINUXHVM": "ami-01419b804382064e4"
+                "AMZNLINUXHVM": "ami-0e49551fc78560451"
             },
             "eu-west-3": {
-                "AMZNLINUXHVM": "ami-0dd7e7ed60da8fb83"
+                "AMZNLINUXHVM": "ami-0ec1d48c59dda554a"
             },
             "sa-east-1": {
-                "AMZNLINUXHVM": "ami-05145e0b28ad8e0b2"
+                "AMZNLINUXHVM": "ami-04b202bf877b5027b"
             },
             "us-east-1": {
-                "AMZNLINUXHVM": "ami-0080e4c5bc078760e"
+                "AMZNLINUXHVM": "ami-09d069a04349dc3cb"
             },
             "us-east-2": {
-                "AMZNLINUXHVM": "ami-0cd3dfa4e37921605"
+                "AMZNLINUXHVM": "ami-0d542ef84ec55d71c"
             },
             "us-west-1": {
-                "AMZNLINUXHVM": "ami-0ec6517f6edbf8044"
+                "AMZNLINUXHVM": "ami-04bc3da8f14823e88"
             },
             "us-west-2": {
-                "AMZNLINUXHVM": "ami-01e24be29428c15b2"
+                "AMZNLINUXHVM": "ami-01460aa81365561fe"
             }
         },
         "LinuxAMINameMap": {
@@ -727,13 +727,13 @@
                                 {
                                     "Ref": "ParentStackName"
                                 },
-                                " MessageBrokerPrimaryStack NodeLaunchConfig\n",
+                                " EventBrokerPrimaryStack NodeLaunchConfig\n",
                                 "\n",
                                 "$AMI_SBIN/wait-for-child-resource.sh ",
                                 {
                                     "Ref": "ParentStackName"
                                 },
-                                " MessageBrokerBackupStack NodeLaunchConfig\n",
+                                " EventBrokerBackupStack NodeLaunchConfig\n",
                                 "\n",
                                 "## Now find the private IP addresses of all deployed nodes\n",
                                 "##   (generating /tmp/solacehosts and /tmp/<role> files)\n",
