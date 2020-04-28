@@ -434,21 +434,21 @@ Resources:
       BlockDeviceMappings: !If
         - EphemeralStorage
         - - DeviceName: !FindInMap
-	            - Linux2BootDisk
+              - Linux2BootDisk
               - Amazon-Linux-HVM
               - BootDisk
             Ebs:
               VolumeSize: !Ref 'BootDiskSize'
               DeleteOnTermination: 'True'
         - - DeviceName: !FindInMap
-	            - Linux2BootDisk
+              - Linux2BootDisk
               - Amazon-Linux-HVM
               - BootDisk
             Ebs:
               VolumeSize: !Ref 'BootDiskSize'
               DeleteOnTermination: 'False'
           - DeviceName: !FindInMap
-	            - Linux2SpoolDisk
+              - Linux2SpoolDisk
               - Amazon-Linux-HVM
               - SpoolDisk
             Ebs:
@@ -473,7 +473,7 @@ Resources:
           GroupSet: !Ref 'NodeSecurityGroup'
           SubnetId: !Ref 'SubnetID'
       IamInstanceProfile: !Ref NodeProfile
-	    Tags:
+      Tags:
         - Key: Name
           Value: !Join
             - '-'
