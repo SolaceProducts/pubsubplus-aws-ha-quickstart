@@ -384,145 +384,104 @@ Resources:
                   - "\n"
             /tmp/gen-cluster-hosts.sh:
               source: !Sub
-						
                 - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/gen-cluster-hosts.sh
                 - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
                   S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-									   
-									  
-						
               mode: '000755'
               owner: root
               group: root
             /tmp/wait-for-child-resource.sh:
               source: !Sub
-						
                 - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/wait-for-child-resource.sh
                 - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
                   S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-									   
-									  
-						
               mode: '000755'
               owner: root
               group: root
             /tmp/wait-for-resource.sh:
               source: !Sub
-						
                 - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/wait-for-resource.sh
                 - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
                   S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-									   
-									  
-						
               mode: '000755'
               owner: root
               group: root
             /etc/init.d/solace-pubsubplus:
               source: !Sub
-						
                 - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/init.d/solace-pubsubplus
                 - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
                   S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-									   
-									  
-						
               mode: '000755'
               owner: root
               group: root
             /tmp/install-solace.sh:
               source: !Sub
-						
                 - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/install-solace.sh
                 - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
                   S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-									   
-									  
-						
               mode: '000755'
               owner: root
               group: root
             /tmp/semp_query.sh:
               source: !Sub
-						
                 - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/semp_query.sh
                 - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
                   S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-									   
-									  
-						
               mode: '000755'
               owner: root
               group: root
     Properties:
       BlockDeviceMappings: !If
-			   
         - EphemeralStorage
         - - DeviceName: !FindInMap
-							
-              - Linux2BootDisk
+	            - Linux2BootDisk
               - Amazon-Linux-HVM
               - BootDisk
             Ebs:
-						 
               VolumeSize: !Ref 'BootDiskSize'
               DeleteOnTermination: 'True'
         - - DeviceName: !FindInMap
-							
-              - Linux2BootDisk
+	            - Linux2BootDisk
               - Amazon-Linux-HVM
               - BootDisk
             Ebs:
-						 
               VolumeSize: !Ref 'BootDiskSize'
               DeleteOnTermination: 'False'
           - DeviceName: !FindInMap
-							
-              - Linux2SpoolDisk
+	            - Linux2SpoolDisk
               - Amazon-Linux-HVM
               - SpoolDisk
             Ebs:
-						 
               VolumeSize: !Ref 'PersistentStorage'
               DeleteOnTermination: 'False'
               VolumeType: io1
-				   
               Iops: !FindInMap
                 - IOPsMap
                 - !Ref 'PersistentStorage'
                 - IOPs
-			  
       ImageId: !FindInMap
         - AWSAMIRegionMap
         - !Ref 'AWS::Region'
         - AMZNLINUXHVM
-				   
       InstanceType: !Ref 'NodeInstanceType'
-			  
       KeyName: !Ref 'KeyPairName'
       NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeleteOnTermination: true
           Description: Main interface
           DeviceIndex: '0'
-				 
           GroupSet: !Ref 'NodeSecurityGroup'
-				 
           SubnetId: !Ref 'SubnetID'
       IamInstanceProfile: !Ref NodeProfile
-							
-      Tags:
+	    Tags:
         - Key: Name
           Value: !Join
             - '-'
-			   
             - - !Ref 'ParentStackName'
               - !Ref 'NodeDesignation'
         - Key: ParentStack
-			  
           Value: !Ref 'ParentStackName'
         - Key: HARole
-			  
           Value: !Ref 'NodeDesignation'
       UserData: !Base64
         Fn::Join:
@@ -560,8 +519,6 @@ Resources:
             - "\n"
             - "## Tag the instance (now that we're sure of launch index)\n"
             - "instance_id=$(curl -f http://169.254.169.254/latest/meta-data/instance-id)\n"
-
- 
             - instance_tag=
             - !Ref 'ParentStackName'
             - '-'
@@ -574,8 +531,6 @@ Resources:
             - "    --resources $instance_id --tags Key=Name,Value=$instance_tag\n"
             - "\n"
             - "cd /tmp\n"
-
- 
             - "# Install PubSub+\n"
             - $AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/solace
             - '  -u '
@@ -599,8 +554,6 @@ Resources:
 Outputs:
   EC2ID:
     Description: Reference to created ec2 instance
-		  
     Value: !Ref 'NodeLaunchConfig'
     Export:
-		   
       Name: !Sub '${AWS::StackName}-EC2ID'
