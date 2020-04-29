@@ -57,7 +57,7 @@
     },
     {
         "ParameterKey": "QSS3BucketRegion",
-        "ParameterValue": "SolaceStackRegion"
+        "ParameterValue": "SolaceStackRegionNAME"
     },
     {
         "ParameterKey": "QSS3KeyPrefix",
