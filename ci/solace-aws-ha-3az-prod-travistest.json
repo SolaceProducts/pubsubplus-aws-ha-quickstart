@@ -56,6 +56,10 @@
         "ParameterValue": "solace-cf-quickstart-travistest"
     },
     {
+        "ParameterKey": "QSS3BucketRegion",
+        "ParameterValue": "SolaceStackRegion"
+    },
+    {
         "ParameterKey": "QSS3KeyPrefix",
         "ParameterValue": "solace/eventbroker/latest/"
     }
