@@ -118,6 +118,7 @@ The next screen will allow you to fill in the details for the selected launch op
 | Instance Type (MonitorNodeInstanceType) | t2.micro | The EC2 instance type for the PubSub+ event broker monitor instance in Availability Zone 3 (or Availability Zone 2, if you’re using only two zones). |
 | **AWS Quick Start Configuration** | |                                                                     |
 | Quick Start S3 Bucket Name (QSS3BucketName) | solace-products | S3 bucket where the Quick Start templates and scripts are installed. Change this parameter to specify the S3 bucket name you’ve created for your copy of Quick Start assets, if you decide to customize or extend the Quick Start for your own use. |
+| Quick Start S3 bucket region (QSS3BucketRegion) | us-east-1 | The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value. |
 | Quick Start S3 Key Prefix (QSS3KeyPrefix) | pubsubplus-aws-ha-quickstart/latest/ | Specifies the S3 folder for your copy of Quick Start assets. Change this parameter if you decide to customize or extend the Quick Start for your own use. |
 
 ### Launch option 2: Parameters for deploying into an existing VPC
