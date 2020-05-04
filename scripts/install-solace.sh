@@ -146,32 +146,32 @@ echo "`date` INFO: Solace message broker image and tag: `docker images | grep so
 # Decide which scaling tier applies based on system memory
 # and set maxconnectioncount, ulimit, devshm and swap accordingly
 MEM_SIZE=`cat /proc/meminfo | grep MemTotal | tr -dc '0-9'`
-if [ ${MEM_SIZE} -lt 4000000 ]; then
-  # 100 if mem<4GiB
+if [ ${MEM_SIZE} -lt 6600000 ]; then
+  # 100 if mem<6,325MiB
   maxconnectioncount="100"
   shmsize="1g"
   ulimit_nofile="2448:6592"
   SWAP_SIZE="1024"
-elif [ ${MEM_SIZE} -lt 12000000 ]; then
-  # 1000 if 4GiB<=mem<12GiB
+elif [ ${MEM_SIZE} -lt 14500000 ]; then
+  # 1000 if 6,325MiB<=mem<13,916MiB
   maxconnectioncount="1000"
   shmsize="2g"
   ulimit_nofile="2448:10192"
   SWAP_SIZE="2048"
-elif [ ${MEM_SIZE} -lt 29000000 ]; then
-  # 10000 if 12GiB<=mem<28GiB
+elif [ ${MEM_SIZE} -lt 30600000 ]; then
+  # 10000 if 13,916MiB<=mem<29,215MiB
   maxconnectioncount="10000"
   shmsize="2g"
   ulimit_nofile="2448:42192"
   SWAP_SIZE="2048"
-elif [ ${MEM_SIZE} -lt 58000000 ]; then
-  # 100000 if 28GiB<=mem<56GiB
+elif [ ${MEM_SIZE} -lt 57500000 ]; then
+  # 100000 if 29,215MiB<=mem<54,840MiB
   maxconnectioncount="100000"
   shmsize="3380m"
   ulimit_nofile="2448:222192"
   SWAP_SIZE="2048"
 else
-  # 200000 if 56GiB<=mem
+  # 200000 if 54,840MiB<=mem
   maxconnectioncount="200000"
   shmsize="3380m"
   ulimit_nofile="2448:422192"
