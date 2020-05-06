@@ -606,9 +606,6 @@ Resources:
       Scheme: internet-facing
       Subnets: !Ref 'PublicSubnetIDs'
       Type: network
-      SecurityGroups:
-        - !Ref 'EventBrokerSecurityGroup'
-        - !Ref 'SolaceInternalSecurityGroupMember'
   Port55555NetworkLoadBalancerTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
