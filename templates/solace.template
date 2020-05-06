@@ -537,6 +537,10 @@ Resources:
       GroupDescription: Event Broker Security Group
       SecurityGroupIngress:
         - IpProtocol: tcp
+          FromPort: '5550'
+          ToPort: '5550'
+          CidrIp: !Ref 'RemoteAccessCIDR'
+        - IpProtocol: tcp
           FromPort: '55555'
           ToPort: '55555'
           CidrIp: !Ref 'RemoteAccessCIDR'
@@ -594,60 +598,60 @@ Resources:
       Timeout: '600'
       Count: '1'
   ELB:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     DependsOn:
       - EventBrokerPrimaryStack
     Condition: UsePrivateSubnetsCondition
     Properties:
+      Scheme: internet-facing
+      Subnets: !Ref 'PublicSubnetIDs'
+      Type: network
       SecurityGroups:
         - !Ref 'EventBrokerSecurityGroup'
         - !Ref 'SolaceInternalSecurityGroupMember'
-      Subnets: !Ref 'PublicSubnetIDs'
-      Instances:
-        - !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
-        - !GetAtt 'EventBrokerBackupStack.Outputs.EC2ID'
-        - !GetAtt 'MonitorStack.Outputs.EC2ID'
-      HealthCheck:
-        Target: !Join
-          - ''
-          - - 'HTTP:'
-            - 5550
-            - /health-check/guaranteed-active
-        Timeout: '3'
-        Interval: '5'
-        UnhealthyThreshold: '2'
-        HealthyThreshold: '2'
-      Listeners:
-        - LoadBalancerPort: '55555'
-          InstancePort: '55555'
-          Protocol: TCP
-        - LoadBalancerPort: '55003'
-          InstancePort: '55003'
-          Protocol: TCP
-        - LoadBalancerPort: '55443'
-          InstancePort: '55443'
-          Protocol: TCP
-        - LoadBalancerPort: '1443'
-          InstancePort: '1443'
-          Protocol: TCP
-        - LoadBalancerPort: '8000'
-          InstancePort: '8000'
-          Protocol: TCP
-        - LoadBalancerPort: '5672'
-          InstancePort: '5672'
-          Protocol: TCP
-        - LoadBalancerPort: '9000'
-          InstancePort: '9000'
-          Protocol: TCP
-        - LoadBalancerPort: '1883'
-          InstancePort: '1883'
-          Protocol: TCP
-        - LoadBalancerPort: '8008'
-          InstancePort: '8008'
-          Protocol: TCP
-        - LoadBalancerPort: '8080'
-          InstancePort: '8080'
-          Protocol: TCP
-        - LoadBalancerPort: '1943'
-          InstancePort: '1943'
-          Protocol: TCP
+    Port55555NetworkLoadBalancerTargetGroup:
+      Type: AWS::ElasticLoadBalancingV2::TargetGroup
+      Properties:
+        Port: 55555
+        Protocol: TCP
+        VpcId: !Ref 'VPCID'
+        HealthCheckPath: '/health-check/guaranteed-active'
+        HealthCheckPort: 5550
+        HealthCheckProtocol: 'HTTP'
+        Targets:
+        - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
+          Port: 55555
+        - Id: 'EventBrokerBackupStack.Outputs.EC2ID'
+          Port: 55555
+    Port8080NetworkLoadBalancerTargetGroup:
+      Type: AWS::ElasticLoadBalancingV2::TargetGroup
+      Properties:
+        Port: 8080
+        Protocol: TCP
+        VpcId: !Ref 'VPCID'
+        HealthCheckPath: '/health-check/guaranteed-active'
+        HealthCheckPort: 5550
+        HealthCheckProtocol: 'HTTP'
+        Targets:
+        - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
+          Port: 8080
+        - Id: 'EventBrokerBackupStack.Outputs.EC2ID'
+          Port: 8080
+    Port55555NetworkLoadBalancerListener:
+      Type: AWS::ElasticLoadBalancingV2::Listener
+      Properties:
+        DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref Port55555NetworkLoadBalancerTargetGroup
+        LoadBalancerArn: !Ref ELB
+        Port: '55555'
+        Protocol: TCP
+    Port8080NetworkLoadBalancerListener:
+      Type: AWS::ElasticLoadBalancingV2::Listener
+      Properties:
+        DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref Port8080NetworkLoadBalancerTargetGroup
+        LoadBalancerArn: !Ref ELB
+        Port: '8080'
+        Protocol: TCP
