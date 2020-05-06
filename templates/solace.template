@@ -609,49 +609,57 @@ Resources:
       SecurityGroups:
         - !Ref 'EventBrokerSecurityGroup'
         - !Ref 'SolaceInternalSecurityGroupMember'
-    Port55555NetworkLoadBalancerTargetGroup:
-      Type: AWS::ElasticLoadBalancingV2::TargetGroup
-      Properties:
+  Port55555NetworkLoadBalancerTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn:
+      - EventBrokerPrimaryStack
+    Properties:
+      Port: 55555
+      Protocol: TCP
+      VpcId: !Ref 'VPCID'
+      HealthCheckPath: '/health-check/guaranteed-active'
+      HealthCheckPort: 5550
+      HealthCheckProtocol: 'HTTP'
+      Targets:
+      - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
         Port: 55555
-        Protocol: TCP
-        VpcId: !Ref 'VPCID'
-        HealthCheckPath: '/health-check/guaranteed-active'
-        HealthCheckPort: 5550
-        HealthCheckProtocol: 'HTTP'
-        Targets:
-        - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
-          Port: 55555
-        - Id: 'EventBrokerBackupStack.Outputs.EC2ID'
-          Port: 55555
-    Port8080NetworkLoadBalancerTargetGroup:
-      Type: AWS::ElasticLoadBalancingV2::TargetGroup
-      Properties:
+      - Id: 'EventBrokerBackupStack.Outputs.EC2ID'
+        Port: 55555
+  Port8080NetworkLoadBalancerTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn:
+      - EventBrokerPrimaryStack
+    Properties:
+      Port: 8080
+      Protocol: TCP
+      VpcId: !Ref 'VPCID'
+      HealthCheckPath: '/health-check/guaranteed-active'
+      HealthCheckPort: 5550
+      HealthCheckProtocol: 'HTTP'
+      Targets:
+      - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
         Port: 8080
-        Protocol: TCP
-        VpcId: !Ref 'VPCID'
-        HealthCheckPath: '/health-check/guaranteed-active'
-        HealthCheckPort: 5550
-        HealthCheckProtocol: 'HTTP'
-        Targets:
-        - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
-          Port: 8080
-        - Id: 'EventBrokerBackupStack.Outputs.EC2ID'
-          Port: 8080
-    Port55555NetworkLoadBalancerListener:
-      Type: AWS::ElasticLoadBalancingV2::Listener
-      Properties:
-        DefaultActions:
-        - Type: forward
-          TargetGroupArn: !Ref Port55555NetworkLoadBalancerTargetGroup
-        LoadBalancerArn: !Ref ELB
-        Port: '55555'
-        Protocol: TCP
-    Port8080NetworkLoadBalancerListener:
-      Type: AWS::ElasticLoadBalancingV2::Listener
-      Properties:
-        DefaultActions:
-        - Type: forward
-          TargetGroupArn: !Ref Port8080NetworkLoadBalancerTargetGroup
-        LoadBalancerArn: !Ref ELB
-        Port: '8080'
-        Protocol: TCP
+      - Id: 'EventBrokerBackupStack.Outputs.EC2ID'
+        Port: 8080
+  Port55555NetworkLoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn:
+      - EventBrokerPrimaryStack
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref 'Port55555NetworkLoadBalancerTargetGroup'
+      LoadBalancerArn: !Ref 'ELB'
+      Port: '55555'
+      Protocol: TCP
+  Port8080NetworkLoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn:
+      - EventBrokerPrimaryStack
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref 'Port8080NetworkLoadBalancerTargetGroup'
+      LoadBalancerArn: !Ref 'ELB'
+      Port: '8080'
+      Protocol: TCP
