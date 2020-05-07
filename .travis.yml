@@ -47,7 +47,7 @@ script:
   - aws cloudformation describe-stack-events --stack-name $TESTSTACKNAME
   - aws cloudformation describe-stacks --stack-name $TESTSTACKNAME
   - echo "Pausing to get the ELB ready"; sleep 10
-  - url="$(aws elb describe-load-balancers | grep DNSName | grep $TESTSTACKPREFIX | awk -F '"' '{print $4}')"; echo $url
+  - url="$(aws elbv2 describe-load-balancers | grep DNSName | grep $TESTSTACKPREFIX | awk -F '"' '{print $4}')"; echo $url
   - curl -O https://sftp.solace.com/download/SDKPERF_C_LINUX64
   - tar -xvf SDKPERF_C_LINUX64
   - pubSubTools/sdkperf_c -cip=$url -mn=100000 -mr=0 -ptl=t1 -stl=t1 | grep "Total Messages"
