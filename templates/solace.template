@@ -601,6 +601,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     DependsOn:
       - EventBrokerPrimaryStack
+      - EventBrokerBackupStack
     Condition: UsePrivateSubnetsCondition
     Properties:
       Scheme: internet-facing
@@ -609,7 +610,7 @@ Resources:
   Port55555NetworkLoadBalancerTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
-      - EventBrokerPrimaryStack
+      - ELB
     Properties:
       Port: 55555
       Protocol: TCP
@@ -620,12 +621,12 @@ Resources:
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
         Port: 55555
-      - Id: 'EventBrokerBackupStack.Outputs.EC2ID'
+      - Id: !GetAtt 'EventBrokerBackupStack.Outputs.EC2ID'
         Port: 55555
   Port8080NetworkLoadBalancerTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
-      - EventBrokerPrimaryStack
+      - ELB
     Properties:
       Port: 8080
       Protocol: TCP
@@ -636,12 +637,12 @@ Resources:
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
         Port: 8080
-      - Id: 'EventBrokerBackupStack.Outputs.EC2ID'
+      - Id: !GetAtt 'EventBrokerBackupStack.Outputs.EC2ID'
         Port: 8080
   Port55555NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
-      - EventBrokerPrimaryStack
+      - ELB
     Properties:
       DefaultActions:
       - Type: forward
@@ -652,7 +653,7 @@ Resources:
   Port8080NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
-      - EventBrokerPrimaryStack
+      - ELB
     Properties:
       DefaultActions:
       - Type: forward
