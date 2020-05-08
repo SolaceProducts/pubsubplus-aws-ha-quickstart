@@ -33,7 +33,7 @@ Below is the list of AWS resources that will be deployed by the Quick Start. Ple
 
 ## Required IAM roles
 
-Look for `AWS::IAM::Role` in the templates source for the list of required IAM roles to create the stacks.
+Look for `AWS::IAM::Role` in the templates source for the list of required IAM roles to create the stacks. 
 
 # How to Deploy PubSub+ Software Event Broker in an HA Group
 
