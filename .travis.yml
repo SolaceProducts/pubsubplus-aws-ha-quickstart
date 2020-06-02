@@ -58,6 +58,21 @@ script:
     | grep "<oper-status>Up</oper-status>"` ]] ; then echo "config-sync not up!"; exit
     1; fi'
   - pubSubTools/sdkperf_c -cip=$url -mn=100000 -mr=0 -ptl=t1 -stl=t1 | grep "Total Messages"
+  - aws cloudformation delete-stack --stack-name $TESTSTACKNAME
+  - echo "Waiting for stack delete complete"
+  - stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep StackId | awk -F '"' '{print $4}')"
+  - if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
+  - # Now test No Private Subnet
+  - export TESTSTACKNAME="$TESTSTACKNAME-1"
+  - sed -i "s@true@$false@g" ci/solace-aws-ha-3az-prod-travistest.json
+  - aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure DO_NOTHING --capabilities CAPABILITY_IAM
+  - echo "Waiting for stack create complete"
+  - "travis_wait 30 sleep 1800 &"
+  - until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
+  - aws cloudformation describe-stack-events --stack-name $TESTSTACKNAME
+  - aws cloudformation describe-stacks --stack-name $TESTSTACKNAME
+  - # This completes forming No Private Subnet
+
 
 after_success:
   - echo "Test Success - Branch($TRAVIS_BRANCH) Pull Request($TRAVIS_PULL_REQUEST) Tag($TRAVIS_TAG)"
