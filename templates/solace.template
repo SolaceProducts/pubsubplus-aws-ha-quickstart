@@ -611,6 +611,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       Port: 55555
       Protocol: TCP
@@ -627,6 +628,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       Port: 55003
       Protocol: TCP
@@ -643,6 +645,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       Port: 55443
       Protocol: TCP
@@ -659,6 +662,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       Port: 1443
       Protocol: TCP
@@ -675,6 +679,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       Port: 8000
       Protocol: TCP
@@ -691,6 +696,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       Port: 5672
       Protocol: TCP
@@ -707,6 +713,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       Port: 9000
       Protocol: TCP
@@ -723,6 +730,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       Port: 1883
       Protocol: TCP
@@ -739,6 +747,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       Port: 8008
       Protocol: TCP
@@ -755,6 +764,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       Port: 8080
       Protocol: TCP
@@ -771,6 +781,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       Port: 1943
       Protocol: TCP
@@ -787,6 +798,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
       - Type: forward
@@ -798,6 +810,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
       - Type: forward
@@ -809,6 +822,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
       - Type: forward
@@ -820,6 +834,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
       - Type: forward
@@ -831,6 +846,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
       - Type: forward
@@ -842,6 +858,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
       - Type: forward
@@ -853,6 +870,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
       - Type: forward
@@ -864,6 +882,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
       - Type: forward
@@ -875,6 +894,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
       - Type: forward
@@ -886,6 +906,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
       - Type: forward
@@ -897,6 +918,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - ELB
+    Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
       - Type: forward
