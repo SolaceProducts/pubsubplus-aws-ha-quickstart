@@ -236,57 +236,6 @@ Conditions:
     - 'true'
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
-  SolaceVMRRole:
-    Type: AWS::IAM::Role
-    Properties:
-      Policies:
-        - PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Action:
-                  - s3:GetObject
-                Resource: "*"
-                Effect: Allow
-          PolicyName: s3-policy
-        - PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Action:
-                  - cloudformation:DescribeStackResources
-                  - ec2:DescribeInstances
-                  - ec2:CreateTags
-                Resource:
-                  - '*'
-                Effect: Allow
-          PolicyName: ec2-policy
-        - PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                  - logs:DescribeLogStreams
-                Resource:
-                  - arn:aws:logs:*:*:*
-                Effect: Allow
-          PolicyName: cloudwatch-policy
-      Path: /
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action:
-              - sts:AssumeRole
-            Principal:
-              Service:
-                - ec2.amazonaws.com
-            Effect: Allow
-        Version: '2012-10-17'
-  InstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Properties:
-      Path: /
-      Roles:
-        - !Ref 'SolaceVMRRole'
   EventBrokerPrimaryStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -301,7 +250,6 @@ Resources:
         ContainerLoggingFormat: !Ref 'ContainerLoggingFormat'
         BootDiskSize: !Ref 'BootDiskSize'
         ClusterInfoHandle: !Ref 'ClusterInfoHandle'
-        InstanceProfile: !Ref 'InstanceProfile'
         KeyPairName: !Ref 'KeyPairName'
         NodeDesignation: event-broker-primary
         NodeInstanceType: !Ref 'EventBrokerNodeInstanceType'
@@ -336,7 +284,6 @@ Resources:
         ContainerLoggingFormat: !Ref 'ContainerLoggingFormat'
         BootDiskSize: !Ref 'BootDiskSize'
         ClusterInfoHandle: !Ref 'ClusterInfoHandle'
-        InstanceProfile: !Ref 'InstanceProfile'
         KeyPairName: !Ref 'KeyPairName'
         NodeDesignation: event-broker-backup
         NodeInstanceType: !Ref 'EventBrokerNodeInstanceType'
@@ -371,7 +318,6 @@ Resources:
         ContainerLoggingFormat: !Ref 'ContainerLoggingFormat'
         BootDiskSize: !Ref 'BootDiskSize'
         ClusterInfoHandle: !Ref 'ClusterInfoHandle'
-        InstanceProfile: !Ref 'InstanceProfile'
         KeyPairName: !Ref 'KeyPairName'
         NodeDesignation: monitor
         NodeInstanceType: !Ref 'MonitorNodeInstanceType'
@@ -741,8 +687,6 @@ Resources:
         Port: 1943
   Port55555NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - ELB
     Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
@@ -753,8 +697,6 @@ Resources:
       Protocol: TCP
   Port55003NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - ELB
     Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
@@ -765,8 +707,6 @@ Resources:
       Protocol: TCP
   Port55443NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - ELB
     Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
@@ -777,8 +717,6 @@ Resources:
       Protocol: TCP
   Port1443NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - ELB
     Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
@@ -789,8 +727,6 @@ Resources:
       Protocol: TCP
   Port8000NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - ELB
     Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
@@ -801,8 +737,6 @@ Resources:
       Protocol: TCP
   Port5672NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - ELB
     Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
@@ -813,8 +747,6 @@ Resources:
       Protocol: TCP
   Port9000NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - ELB
     Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
@@ -825,8 +757,6 @@ Resources:
       Protocol: TCP
   Port1883NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - ELB
     Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
@@ -837,8 +767,6 @@ Resources:
       Protocol: TCP
   Port8008NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - ELB
     Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
@@ -849,8 +777,6 @@ Resources:
       Protocol: TCP
   Port8080NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - ELB
     Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
@@ -861,8 +787,6 @@ Resources:
       Protocol: TCP
   Port1943NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - ELB
     Condition: UsePrivateSubnetsCondition
     Properties:
       DefaultActions:
