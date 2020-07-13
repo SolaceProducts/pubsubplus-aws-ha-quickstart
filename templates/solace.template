@@ -224,50 +224,6 @@ Parameters:
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
     Type: String
-Mappings:
-  AWSInfoRegionMap:
-    ap-northeast-1:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    ap-northeast-2:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    ap-south-1:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    ap-southeast-1:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    ap-southeast-2:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    ca-central-1:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    eu-central-1:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    eu-west-1:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    eu-west-2:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    sa-east-1:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    us-east-1:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    us-east-2:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    us-west-1:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
-    us-west-2:
-      Partition: aws
-      QuickStartS3URL: https://s3.amazonaws.com
 Conditions:
   EnableWaitConditions: !Equals
     - '1'
@@ -278,9 +234,6 @@ Conditions:
   UsePrivateSubnetsCondition: !Equals
     - !Ref 'UsePrivateSubnets'
     - 'true'
-  GovCloudCondition: !Equals
-    - !Ref 'AWS::Region'
-    - us-gov-west-1
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   SolaceVMRRole:
@@ -350,7 +303,7 @@ Resources:
         ClusterInfoHandle: !Ref 'ClusterInfoHandle'
         InstanceProfile: !Ref 'InstanceProfile'
         KeyPairName: !Ref 'KeyPairName'
-        NodeDesignation: message-router-primary
+        NodeDesignation: event-broker-primary
         NodeInstanceType: !Ref 'EventBrokerNodeInstanceType'
         NodeSecurityGroup: !Join
           - ','
@@ -385,7 +338,7 @@ Resources:
         ClusterInfoHandle: !Ref 'ClusterInfoHandle'
         InstanceProfile: !Ref 'InstanceProfile'
         KeyPairName: !Ref 'KeyPairName'
-        NodeDesignation: message-router-backup
+        NodeDesignation: event-broker-backup
         NodeInstanceType: !Ref 'EventBrokerNodeInstanceType'
         NodeSecurityGroup: !Join
           - ','
@@ -433,14 +386,8 @@ Resources:
         QSS3BucketRegion: !Ref 'QSS3BucketRegion'
         QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
         SubnetID: !Select
-          - !If
-            - Use3AZs
-            - 2
-            - 1
-          - !If
-            - UsePrivateSubnetsCondition
-            - !Ref 'PrivateSubnetIDs'
-            - !Ref 'PublicSubnetIDs'
+          - !If [Use3AZs, 2, 1]
+          - !If [UsePrivateSubnetsCondition, !Ref PrivateSubnetIDs, !Ref PublicSubnetIDs]
   SolaceInternalSecurityGroupMember:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -448,71 +395,69 @@ Resources:
       GroupDescription: All Solace Nodes
   SolaceInternalSecurityGroup:
     Type: AWS::EC2::SecurityGroup
-    DependsOn:
-      - SolaceInternalSecurityGroupMember
     Properties:
       VpcId: !Ref 'VPCID'
       GroupDescription: All Solace Nodes
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: '8741'
-          ToPort: '8741'
+          FromPort: 8741
+          ToPort: 8741
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '8300'
-          ToPort: '8302'
+          FromPort: 8300
+          ToPort: 8302
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: udp
-          FromPort: '8300'
-          ToPort: '8302'
+          FromPort: 8300
+          ToPort: 8302
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '55555'
-          ToPort: '55555'
+          FromPort: 55555
+          ToPort: 55555
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '55003'
-          ToPort: '55003'
+          FromPort: 55003
+          ToPort: 55003
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '55443'
-          ToPort: '55443'
+          FromPort: 55443
+          ToPort: 55443
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '1443'
-          ToPort: '1443'
+          FromPort: 1443
+          ToPort: 1443
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '8000'
-          ToPort: '8000'
+          FromPort: 8000
+          ToPort: 8000
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '5672'
-          ToPort: '5672'
+          FromPort: 5672
+          ToPort: 5672
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '9000'
-          ToPort: '9000'
+          FromPort: 9000
+          ToPort: 9000
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '1883'
-          ToPort: '1883'
+          FromPort: 1883
+          ToPort: 1883
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '8008'
-          ToPort: '8008'
+          FromPort: 8008
+          ToPort: 8008
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '8080'
-          ToPort: '8080'
+          FromPort: 8080
+          ToPort: 8080
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '1943'
-          ToPort: '1943'
+          FromPort: 1943
+          ToPort: 1943
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
         - IpProtocol: tcp
-          FromPort: '5550'
-          ToPort: '5550'
+          FromPort: 5550
+          ToPort: 5550
           SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
   RemoteMgmtSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -523,12 +468,12 @@ Resources:
         - !If
           - UsePrivateSubnetsCondition
           - IpProtocol: tcp
-            FromPort: '22'
-            ToPort: '22'
+            FromPort: 22
+            ToPort: 22
             SourceSecurityGroupId: !Ref 'SSHSecurityGroupID'
           - IpProtocol: tcp
-            FromPort: '22'
-            ToPort: '22'
+            FromPort: 22
+            ToPort: 22
             CidrIp: !Ref 'RemoteAccessCIDR'
   EventBrokerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -537,52 +482,52 @@ Resources:
       GroupDescription: Event Broker Security Group
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: '5550'
-          ToPort: '5550'
+          FromPort: 5550
+          ToPort: 5550
           CidrIp: !Ref 'RemoteAccessCIDR'
         - IpProtocol: tcp
-          FromPort: '55555'
-          ToPort: '55555'
+          FromPort: 55555
+          ToPort: 55555
           CidrIp: !Ref 'RemoteAccessCIDR'
         - IpProtocol: tcp
-          FromPort: '55003'
-          ToPort: '55003'
+          FromPort: 55003
+          ToPort: 55003
           CidrIp: !Ref 'RemoteAccessCIDR'
         - IpProtocol: tcp
-          FromPort: '55443'
-          ToPort: '55443'
+          FromPort: 55443
+          ToPort: 55443
           CidrIp: !Ref 'RemoteAccessCIDR'
         - IpProtocol: tcp
-          FromPort: '1443'
-          ToPort: '1443'
+          FromPort: 1443
+          ToPort: 1443
           CidrIp: !Ref 'RemoteAccessCIDR'
         - IpProtocol: tcp
-          FromPort: '8000'
-          ToPort: '8000'
+          FromPort: 8000
+          ToPort: 8000
           CidrIp: !Ref 'RemoteAccessCIDR'
         - IpProtocol: tcp
-          FromPort: '5672'
-          ToPort: '5672'
+          FromPort: 5672
+          ToPort: 5672
           CidrIp: !Ref 'RemoteAccessCIDR'
         - IpProtocol: tcp
-          FromPort: '9000'
-          ToPort: '9000'
+          FromPort: 9000
+          ToPort: 9000
           CidrIp: !Ref 'RemoteAccessCIDR'
         - IpProtocol: tcp
-          FromPort: '1883'
-          ToPort: '1883'
+          FromPort: 1883
+          ToPort: 1883
           CidrIp: !Ref 'RemoteAccessCIDR'
         - IpProtocol: tcp
-          FromPort: '8008'
-          ToPort: '8008'
+          FromPort: 8008
+          ToPort: 8008
           CidrIp: !Ref 'RemoteAccessCIDR'
         - IpProtocol: tcp
-          FromPort: '8080'
-          ToPort: '8080'
+          FromPort: 8080
+          ToPort: 8080
           CidrIp: !Ref 'RemoteAccessCIDR'
         - IpProtocol: tcp
-          FromPort: '1943'
-          ToPort: '1943'
+          FromPort: 1943
+          ToPort: 1943
           CidrIp: !Ref 'RemoteAccessCIDR'
   ClusterInfoHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
@@ -596,7 +541,7 @@ Resources:
     Properties:
       Handle: !Ref 'ClusterInfoHandle'
       Timeout: '600'
-      Count: '1'
+      Count: 1
   ELB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     DependsOn:
@@ -617,7 +562,7 @@ Resources:
       Protocol: TCP
       VpcId: !Ref 'VPCID'
       HealthCheckPath: '/health-check/guaranteed-active'
-      HealthCheckPort: 5550
+      HealthCheckPort: '5550'
       HealthCheckProtocol: 'HTTP'
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
@@ -634,7 +579,7 @@ Resources:
       Protocol: TCP
       VpcId: !Ref 'VPCID'
       HealthCheckPath: '/health-check/guaranteed-active'
-      HealthCheckPort: 5550
+      HealthCheckPort: '5550'
       HealthCheckProtocol: 'HTTP'
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
@@ -651,7 +596,7 @@ Resources:
       Protocol: TCP
       VpcId: !Ref 'VPCID'
       HealthCheckPath: '/health-check/guaranteed-active'
-      HealthCheckPort: 5550
+      HealthCheckPort: '5550'
       HealthCheckProtocol: 'HTTP'
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
@@ -668,7 +613,7 @@ Resources:
       Protocol: TCP
       VpcId: !Ref 'VPCID'
       HealthCheckPath: '/health-check/guaranteed-active'
-      HealthCheckPort: 5550
+      HealthCheckPort: '5550'
       HealthCheckProtocol: 'HTTP'
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
@@ -685,7 +630,7 @@ Resources:
       Protocol: TCP
       VpcId: !Ref 'VPCID'
       HealthCheckPath: '/health-check/guaranteed-active'
-      HealthCheckPort: 5550
+      HealthCheckPort: '5550'
       HealthCheckProtocol: 'HTTP'
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
@@ -702,7 +647,7 @@ Resources:
       Protocol: TCP
       VpcId: !Ref 'VPCID'
       HealthCheckPath: '/health-check/guaranteed-active'
-      HealthCheckPort: 5550
+      HealthCheckPort: '5550'
       HealthCheckProtocol: 'HTTP'
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
@@ -719,7 +664,7 @@ Resources:
       Protocol: TCP
       VpcId: !Ref 'VPCID'
       HealthCheckPath: '/health-check/guaranteed-active'
-      HealthCheckPort: 5550
+      HealthCheckPort: '5550'
       HealthCheckProtocol: 'HTTP'
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
@@ -736,7 +681,7 @@ Resources:
       Protocol: TCP
       VpcId: !Ref 'VPCID'
       HealthCheckPath: '/health-check/guaranteed-active'
-      HealthCheckPort: 5550
+      HealthCheckPort: '5550'
       HealthCheckProtocol: 'HTTP'
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
@@ -753,7 +698,7 @@ Resources:
       Protocol: TCP
       VpcId: !Ref 'VPCID'
       HealthCheckPath: '/health-check/guaranteed-active'
-      HealthCheckPort: 5550
+      HealthCheckPort: '5550'
       HealthCheckProtocol: 'HTTP'
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
@@ -770,7 +715,7 @@ Resources:
       Protocol: TCP
       VpcId: !Ref 'VPCID'
       HealthCheckPath: '/health-check/guaranteed-active'
-      HealthCheckPort: 5550
+      HealthCheckPort: '5550'
       HealthCheckProtocol: 'HTTP'
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
@@ -787,7 +732,7 @@ Resources:
       Protocol: TCP
       VpcId: !Ref 'VPCID'
       HealthCheckPath: '/health-check/guaranteed-active'
-      HealthCheckPort: 5550
+      HealthCheckPort: '5550'
       HealthCheckProtocol: 'HTTP'
       Targets:
       - Id: !GetAtt 'EventBrokerPrimaryStack.Outputs.EC2ID'
@@ -804,7 +749,7 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref 'Port55555NetworkLoadBalancerTargetGroup'
       LoadBalancerArn: !Ref 'ELB'
-      Port: '55555'
+      Port: 55555
       Protocol: TCP
   Port55003NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -816,7 +761,7 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref 'Port55003NetworkLoadBalancerTargetGroup'
       LoadBalancerArn: !Ref 'ELB'
-      Port: '55003'
+      Port: 55003
       Protocol: TCP
   Port55443NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -828,7 +773,7 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref 'Port55443NetworkLoadBalancerTargetGroup'
       LoadBalancerArn: !Ref 'ELB'
-      Port: '55443'
+      Port: 55443
       Protocol: TCP
   Port1443NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -840,7 +785,7 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref 'Port1443NetworkLoadBalancerTargetGroup'
       LoadBalancerArn: !Ref 'ELB'
-      Port: '1443'
+      Port: 1443
       Protocol: TCP
   Port8000NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -852,7 +797,7 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref 'Port8000NetworkLoadBalancerTargetGroup'
       LoadBalancerArn: !Ref 'ELB'
-      Port: '8000'
+      Port: 8000
       Protocol: TCP
   Port5672NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -864,7 +809,7 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref 'Port5672NetworkLoadBalancerTargetGroup'
       LoadBalancerArn: !Ref 'ELB'
-      Port: '5672'
+      Port: 5672
       Protocol: TCP
   Port9000NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -876,7 +821,7 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref 'Port9000NetworkLoadBalancerTargetGroup'
       LoadBalancerArn: !Ref 'ELB'
-      Port: '9000'
+      Port: 9000
       Protocol: TCP
   Port1883NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -888,7 +833,7 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref 'Port1883NetworkLoadBalancerTargetGroup'
       LoadBalancerArn: !Ref 'ELB'
-      Port: '1883'
+      Port: 1883
       Protocol: TCP
   Port8008NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -900,7 +845,7 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref 'Port8008NetworkLoadBalancerTargetGroup'
       LoadBalancerArn: !Ref 'ELB'
-      Port: '8008'
+      Port: 8008
       Protocol: TCP
   Port8080NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -912,7 +857,7 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref 'Port8080NetworkLoadBalancerTargetGroup'
       LoadBalancerArn: !Ref 'ELB'
-      Port: '8080'
+      Port: 8080
       Protocol: TCP
   Port1943NetworkLoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -924,5 +869,5 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref 'Port1943NetworkLoadBalancerTargetGroup'
       LoadBalancerArn: !Ref 'ELB'
-      Port: '1943'
+      Port: 1943
       Protocol: TCP
