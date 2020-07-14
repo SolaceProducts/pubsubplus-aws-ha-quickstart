@@ -35,12 +35,13 @@ solace_uri="solace/solace-pubsub-standard:latest"   # default to pull latest Pub
 admin_password_file=""
 disk_size=""
 disk_volume=""
+ha_deployment="true"
 is_primary="false"
 logging_format=""
 logging_group=""
 logging_stream=""
 
-while getopts "c:d:p:s:u:v:f:g:r:" opt; do
+while getopts "c:d:p:s:u:v:h:f:g:r:" opt; do
   case "$opt" in
   c)  config_file=$OPTARG
     ;;
@@ -54,6 +55,8 @@ while getopts "c:d:p:s:u:v:f:g:r:" opt; do
     ;;
   v)  disk_volume=$OPTARG
     ;;
+  h)  ha_deployment=$OPTARG
+    ;;
   f)  logging_format=$OPTARG
     ;;
   g)  logging_group=$OPTARG
@@ -66,9 +69,9 @@ done
 shift $((OPTIND-1))
 [ "$1" = "--" ] && shift
 
-echo "config_file=$config_file , solace_directory=$solace_directory , admin_password_file=$admin_password_file , \
-      solace_uri=$solace_uri , disk_size=$disk_size , volume=$disk_volume , logging_format=$logging_format , \
-      logging_group=$logging_group , logging_stream=$logging_stream , Leftovers: $@"
+echo "config_file=$config_file, solace_directory=$solace_directory, admin_password_file=$admin_password_file, \
+      solace_uri=$solace_uri, disk_size=$disk_size, volume=$disk_volume, ha_deployment=$ha_deployment, logging_format=$logging_format, \
+      logging_group=$logging_group, logging_stream=$logging_stream, Leftovers: $@"
 export admin_password=`cat ${admin_password_file}`
 
 # Create working dir if needed
@@ -198,6 +201,55 @@ sudo sysctl -p /etc/sysctl.d/98-solace-sysctl.conf
 
 cd ${solace_directory}
 
+# Setup password file permissions
+chown -R 1000001 $(dirname ${admin_password_file})
+chmod 700 $(dirname ${admin_password_file})
+
+if [[ ${disk_size} == "0" ]]; then
+  echo "`date` Using ephemeral volumes"
+  #Create new volumes that the PubSub+ Message Broker container can use to consume and store data.
+  docker volume create --name=jail
+  docker volume create --name=var
+  docker volume create --name=softAdb
+  docker volume create --name=diagnostics
+  docker volume create --name=internalSpool
+  SPOOL_MOUNT="-v jail:/usr/sw/jail -v var:/usr/sw/var -v softAdb:/usr/sw/internalSpool/softAdb -v diagnostics:/var/lib/solace/diags -v internalSpool:/usr/sw/internalSpool"
+else
+  echo "`date` Using persistent volumes"
+  echo "`date` Create primary partition on new disk"
+  (
+    echo n # Add a new partition
+    echo p # Primary partition
+    echo 1  # Partition number
+    echo   # First sector (Accept default: 1)
+    echo   # Last sector (Accept default: varies)
+    echo w # Write changes
+  ) | sudo fdisk $disk_volume
+
+  mkfs.xfs  ${disk_volume}1 -m crc=0
+  UUID=`blkid -s UUID -o value ${disk_volume}1`
+  echo "UUID=${UUID} /opt/pubsubplus xfs defaults,uid=1000001 0 0" >> /etc/fstab
+  mkdir /opt/pubsubplus
+  mkdir /opt/pubsubplus/jail
+  mkdir /opt/pubsubplus/var
+  mkdir /opt/pubsubplus/softAdb
+  mkdir /opt/pubsubplus/diagnostics
+  mkdir /opt/pubsubplus/internalSpool
+  mount -a
+  chown 1000001 -R /opt/pubsubplus/
+  SPOOL_MOUNT="-v /opt/pubsubplus/jail:/usr/sw/jail -v /opt/pubsubplus/var:/usr/sw/var -v /opt/pubsubplus/softAdb:/usr/sw/internalSpool/softAdb -v /opt/pubsubplus/diagnostics:/var/lib/solace/diags -v /opt/pubsubplus/internalSpool:/usr/sw/internalSpool"
+fi
+
+############# From here execution path is different for nonHA and HA
+if [ ! $ha_deployment == "true" ]; then
+  echo "`date` Continuing single-node setup in a non-HA deployment"
+  exit
+fi
+
+# From here it's all HA setup
+echo "`date` Continuing node setup in an HA deployment"
+
+# Determine components
 host_name=`hostname`
 host_info=`grep ${host_name} ${config_file}`
 local_role=`echo $host_info | grep -o -E 'Monitor|EventBrokerPrimary|EventBrokerBackup'`
@@ -244,88 +296,51 @@ case $local_role in
   ;;
 esac
 
-# Setup password file permissions
-chown -R 1000001 $(dirname ${admin_password_file})
-chmod 700 $(dirname ${admin_password_file})
-
-if [[ ${disk_size} == "0" ]]; then
-  #Create new volumes that the PubSub+ Message Broker container can use to consume and store data.
-  docker volume create --name=jail
-  docker volume create --name=var
-  docker volume create --name=softAdb
-  docker volume create --name=diagnostics
-  docker volume create --name=internalSpool
-  SPOOL_MOUNT="-v jail:/usr/sw/jail -v var:/usr/sw/var -v softAdb:/usr/sw/internalSpool/softAdb -v diagnostics:/var/lib/solace/diags -v internalSpool:/usr/sw/internalSpool"
-else
-  echo "`date` Create primary partition on new disk"
-  (
-    echo n # Add a new partition
-    echo p # Primary partition
-    echo 1  # Partition number
-    echo   # First sector (Accept default: 1)
-    echo   # Last sector (Accept default: varies)
-    echo w # Write changes
-  ) | sudo fdisk $disk_volume
-
-  mkfs.xfs  ${disk_volume}1 -m crc=0
-  UUID=`blkid -s UUID -o value ${disk_volume}1`
-  echo "UUID=${UUID} /opt/pubsubplus xfs defaults,uid=1000001 0 0" >> /etc/fstab
-  mkdir /opt/pubsubplus
-  mkdir /opt/pubsubplus/jail
-  mkdir /opt/pubsubplus/var
-  mkdir /opt/pubsubplus/softAdb
-  mkdir /opt/pubsubplus/diagnostics
-  mkdir /opt/pubsubplus/internalSpool
-  mount -a
-  chown 1000001 -R /opt/pubsubplus/
-  SPOOL_MOUNT="-v /opt/pubsubplus/jail:/usr/sw/jail -v /opt/pubsubplus/var:/usr/sw/var -v /opt/pubsubplus/softAdb:/usr/sw/internalSpool/softAdb -v /opt/pubsubplus/diagnostics:/var/lib/solace/diags -v /opt/pubsubplus/internalSpool:/usr/sw/internalSpool"
-fi
-
 #Define a create script
 tee ~/docker-create <<-EOF
 #!/bin/bash
 docker create \
- --uts=host \
- --shm-size=${shmsize} \
- --ulimit core=-1 \
- --ulimit memlock=-1 \
- --ulimit nofile=${ulimit_nofile} \
- --net=host \
- --restart=always \
- -v /mnt/pubsubplus/secrets:/run/secrets \
- ${SPOOL_MOUNT} \
- --log-driver awslogs \
- --log-opt awslogs-group=${logging_group} \
- --log-opt awslogs-stream=${logging_stream} \
- --env "system_scaling_maxconnectioncount=${maxconnectioncount}" \
- --env "logging_debug_output=all" \
- --env "logging_debug_format=${logging_format}" \
- --env "logging_command_output=all" \
- --env "logging_command_format=${logging_format}" \
- --env "logging_system_output=all" \
- --env "logging_system_format=${logging_format}" \
- --env "logging_event_output=all" \
- --env "logging_event_format=${logging_format}" \
- --env "logging_kernel_output=all" \
- --env "logging_kernel_format=${logging_format}" \
- --env "nodetype=${NODE_TYPE}" \
- --env "routername=${ROUTER_NAME}" \
- --env "username_admin_globalaccesslevel=admin" \
- --env "username_admin_passwordfilepath=$(basename ${admin_password_file})" \
- --env "service_ssh_port=2222" \
- --env "service_webtransport_port=8008" \
- --env "service_webtransport_tlsport=1443" \
- --env "service_semp_tlsport=1943" \
- ${REDUNDANCY_CFG} \
- --env "redundancy_authentication_presharedkey_key=`cat ${admin_password_file} | awk '{x=$0;for(i=length;i<51;i++)x=x "0";}END{print x}' | base64`" \
- --env "redundancy_enable=yes" \
+  --uts=host \
+  --shm-size=${shmsize} \
+  --ulimit core=-1 \
+  --ulimit memlock=-1 \
+  --ulimit nofile=${ulimit_nofile} \
+  --net=host \
+  --restart=always \
+  -v /mnt/pubsubplus/secrets:/run/secrets \
+  ${SPOOL_MOUNT} \
+  --log-driver awslogs \
+  --log-opt awslogs-group=${logging_group} \
+  --log-opt awslogs-stream=${logging_stream} \
+  --env "system_scaling_maxconnectioncount=${maxconnectioncount}" \
+  --env "logging_debug_output=all" \
+  --env "logging_debug_format=${logging_format}" \
+  --env "logging_command_output=all" \
+  --env "logging_command_format=${logging_format}" \
+  --env "logging_system_output=all" \
+  --env "logging_system_format=${logging_format}" \
+  --env "logging_event_output=all" \
+  --env "logging_event_format=${logging_format}" \
+  --env "logging_kernel_output=all" \
+  --env "logging_kernel_format=${logging_format}" \
+  --env "nodetype=${NODE_TYPE}" \
+  --env "routername=${ROUTER_NAME}" \
+  --env "username_admin_globalaccesslevel=admin" \
+  --env "username_admin_passwordfilepath=$(basename ${admin_password_file})" \
+  --env "service_ssh_port=2222" \
+  --env "service_webtransport_port=8008" \
+  --env "service_webtransport_tlsport=1443" \
+  --env "service_semp_tlsport=1943" \
+  ${REDUNDANCY_CFG} \
+  --env "redundancy_authentication_presharedkey_key=`cat ${admin_password_file} | awk '{x=$0;for(i=length;i<51;i++)x=x "0";}END{print x}' | base64`" \
+  --env "redundancy_enable=yes" \
   --env "redundancy_group_node_primary${primary_stack}_nodetype=message_routing" \
   --env "redundancy_group_node_primary${primary_stack}_connectvia=${PRIMARY_IP}" \
   --env "redundancy_group_node_backup${backup_stack}_nodetype=message_routing" \
   --env "redundancy_group_node_backup${backup_stack}_connectvia=${BACKUP_IP}" \
   --env "redundancy_group_node_monitor${monitor_stack}_nodetype=monitoring" \
   --env "redundancy_group_node_monitor${monitor_stack}_connectvia=${MONITOR_IP}" \
- --name=solace ${SOLACE_IMAGE_ID}
+  --name=solace ${SOLACE_IMAGE_ID}
 EOF
 
 #Make the file executable

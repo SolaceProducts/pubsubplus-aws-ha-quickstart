@@ -38,8 +38,8 @@ Parameters:
       will launch with this key pair
     Type: AWS::EC2::KeyPair::KeyName
   NodeDesignation:
-    Default: unspecified
-    Description: Tag for deployed instances
+    Default: 'event-broker-singlenode'
+    Description: Purpose of the deployed instance. Will create a single-node non-HA deployment if set to default "event-broker-singlenode".
     Type: String
   NodeInstanceType:
     ConstraintDescription: Must be a valid EC2 instance type.
@@ -500,6 +500,7 @@ Resources:
                   - "cd /tmp\n"
                   - "# Install PubSub+\n"
                   - $AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/solace
+                  - '  -h false' # specifying non-HA deployment
                   - '  -u '
                   - !Ref 'SolaceDockerImage'
                   - '  -p /mnt/pubsubplus/secrets/solOSpasswd'
@@ -562,6 +563,7 @@ Resources:
                   - "cd /tmp\n"
                   - "# Install PubSub+\n"
                   - $AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/solace
+                  - '  -h true' # specifying HA deployment
                   - '  -u '
                   - !Ref 'SolaceDockerImage'
                   - '  -p /mnt/pubsubplus/secrets/solOSpasswd'
