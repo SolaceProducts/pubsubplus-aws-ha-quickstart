@@ -241,12 +241,69 @@ else
 fi
 
 ############# From here execution path is different for nonHA and HA
-if [ ! $ha_deployment == "true" ]; then
+
+if [[ $ha_deployment != "true" ]]; then
+
   echo "`date` Continuing single-node setup in a non-HA deployment"
+  #Define a create script
+  tee ~/docker-create <<- EOF
+  #!/bin/bash
+  docker create \
+    --uts=host \
+    --shm-size ${shmsize} \
+    --ulimit core=-1 \
+    --ulimit memlock=-1 \
+    --ulimit nofile=${ulimit_nofile} \
+    --net=host \
+    --restart=always \
+    -v /mnt/pubsubplus/secrets:/run/secrets \
+    ${SPOOL_MOUNT} \
+    --env "username_admin_globalaccesslevel=admin" \
+    --env "username_admin_passwordfilepath=$(basename ${admin_password_file})" \
+    --env "service_ssh_port=2222" \
+    --env "service_webtransport_port=8008" \
+    --env "service_webtransport_tlsport=1443" \
+    --env "service_semp_tlsport=1943" \
+    --name=solace ${SOLACE_IMAGE_ID}
+EOF
+
+  #Make the file executable
+  chmod +x ~/docker-create
+
+  echo "`date` INFO: Creating the broker container"
+  ~/docker-create
+
+  # Start the solace service and enable it at system start up.
+  chkconfig --add solace-pubsubplus
+  echo "`date` INFO: Starting Solace service"
+  service solace-pubsubplus start
+
+  # Poll the broker Message-Spool
+  loop_guard=30
+  pause=10
+  count=0
+  echo "`date` INFO: Wait for the broker message-spool service to be guaranteed-active"
+  while [ ${count} -lt ${loop_guard} ]; do
+    health_result=`curl -s -o /dev/null -w "%{http_code}"  http://localhost:5550/health-check/guaranteed-active`
+    run_time=$((${count} * ${pause}))
+    if [ "${health_result}" = "200" ]; then
+        echo "`date` INFO: broker message-spool is guaranteed-active, after ${run_time} seconds"
+        break
+    fi
+    ((count++))
+    echo "`date` INFO: Waited ${run_time} seconds, broker message-spool not yet guaranteed-active. State: ${health_result}"
+    sleep ${pause}
+  done
+  if [ ${count} -eq ${loop_guard} ]; then
+    echo "`date` ERROR: broker message-spool never came guaranteed-active" | tee /dev/stderr
+    exit 1
+  fi
+
+  echo "`date` INFO: PubSub+ non-HA node bringup complete"
   exit
 fi
 
-# From here it's all HA setup
+############# From here it's all HA setup
 echo "`date` Continuing node setup in an HA deployment"
 
 # Determine components
@@ -297,7 +354,7 @@ case $local_role in
 esac
 
 #Define a create script
-tee ~/docker-create <<-EOF
+tee ~/docker-create <<- EOF
 #!/bin/bash
 docker create \
   --uts=host \
@@ -346,7 +403,7 @@ EOF
 #Make the file executable
 chmod +x ~/docker-create
 
-echo "`date` INFO: Creating the Solace container"
+echo "`date` INFO: Creating the broker container"
 ~/docker-create
 
 # Start the solace service and enable it at system start up.
@@ -361,7 +418,7 @@ count=0
 echo "`date` INFO: Wait for the Solace SEMP service to be enabled"
 while [ ${count} -lt ${loop_guard} ]; do
   online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-    -q "<rpc semp-version='soltr/8_7VMR'><show><service/></show></rpc>" \
+    -q "<rpc><show><service/></show></rpc>" \
     -v "/rpc-reply/rpc/show/service/services/service[name='SEMP']/enabled[text()]"`
 
   is_messagebroker_up=`echo ${online_results} | jq '.valueSearchResult' -`
@@ -390,7 +447,7 @@ if [ "${is_primary}" = "true" ]; then
   echo "`date` INFO: Wait for Primary to be 'Local Active' or 'Mate Active'"
   while [ ${count} -lt ${loop_guard} ]; do
     online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc semp-version='soltr/8_7VMR'><show><redundancy><detail/></redundancy></show></rpc>" \
+         -q "<rpc><show><redundancy><detail/></redundancy></show></rpc>" \
          -v "/rpc-reply/rpc/show/redundancy/virtual-routers/primary/status/activity[text()]"`
 
     local_activity=`echo ${online_results} | jq '.valueSearchResult' -`
@@ -425,7 +482,7 @@ if [ "${is_primary}" = "true" ]; then
   echo "`date` INFO: Wait for Backup to be 'Active' or 'Standby'"
   while [ ${count} -lt ${loop_guard} ]; do
     online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc semp-version='soltr/8_7VMR'><show><redundancy><detail/></redundancy></show></rpc>" \
+         -q "<rpc><show><redundancy><detail/></redundancy></show></rpc>" \
          -v "/rpc-reply/rpc/show/redundancy/virtual-routers/primary/status/detail/priority-reported-by-mate/summary[text()]"`
 
     mate_activity=`echo ${online_results} | jq '.valueSearchResult' -`
@@ -455,13 +512,13 @@ if [ "${is_primary}" = "true" ]; then
   fi
 
   /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-    -q "<rpc semp-version='soltr/8_7VMR'><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
+    -q "<rpc><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
   /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-    -q "<rpc semp-version='soltr/8_7VMR'><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
+    -q "<rpc><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
 fi
 
 if [ ${count} -eq ${loop_guard} ]; then
   echo "`date` ERROR: Solace bringup failed" | tee /dev/stderr
   exit 1
 fi
-echo "`date` INFO: Solace bringup complete"
+echo "`date` INFO: PubSub+ HA-node bringup complete"
