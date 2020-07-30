@@ -31,8 +31,9 @@ Parameters:
     MinValue: '8'
     Type: Number
   ClusterInfoHandle:
-    Description: ''
+    Description: Leave this blank for non-HA deployment
     Type: String
+    Default: ''
   KeyPairName:
     Description: Name of an existing EC2 key pair within the AWS region; all instances
       will launch with this key pair
@@ -58,8 +59,9 @@ Parameters:
       as the subnets
     Type: List<AWS::EC2::SecurityGroup::Id>
   ParentStackName:
-    Description: Wrapper stack for this deployment
+    Description: Leave this blank for non-HA deployemnt. For HA, the wrapper stack for this deployment.
     Type: String
+    Default: ''
   PersistentStorage:
     ConstraintDescription: No more than 1024 GB per device (4 TB per node).
     Default: '0'
@@ -93,7 +95,7 @@ Parameters:
   QSS3KeyPrefix:
     AllowedPattern: ^[0-9a-zA-Z-/]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
-      uppercase letters, hyphens (-), and forward slash (/).
+      uppercase letters, hyphens (-), and forward slash (/). Must end with a /
     Default: pubsubplus-aws-ha-quickstart/latest/
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
@@ -388,14 +390,6 @@ Resources:
             /tmp/wait-for-child-resource.sh:
               source: !Sub
                 - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/wait-for-child-resource.sh
-                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-              mode: '000755'
-              owner: root
-              group: root
-            /tmp/wait-for-resource.sh:
-              source: !Sub
-                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/wait-for-resource.sh
                 - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
                   S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
               mode: '000755'

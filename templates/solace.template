@@ -62,7 +62,7 @@ Metadata:
       RemoteAccessCIDR:
         default: Allowed External Access CIDR
       SSHSecurityGroupID:
-        default: Security group allowed to access console SSH
+        default: Security group allowed to access console SSH. Ignored if not using private subnets.
       UsePrivateSubnets:
         default: Use private subnets
       VPCID:
@@ -162,10 +162,10 @@ Parameters:
       will launch with this key pair
     Type: AWS::EC2::KeyPair::KeyName
   NumberOfAZs:
-    ConstraintDescription: 3 means each node in own az, 2 puts monitor and backup
-      in one az
+    ConstraintDescription: Valid numbers are 3 or 2
     Default: '3'
-    Description: Number of availability zones to use
+    Description: Number of availability zones, based on availability in the target region, valid numbers are 3 or 2. 3 means each node in own AZ, 2 puts monitor and backup
+      in one AZ.
     AllowedValues:
       - '2'
       - '3'
@@ -338,12 +338,12 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref 'VPCID'
-      GroupDescription: All Solace Nodes
+      GroupDescription: Internal group, includes broker node members only
   SolaceInternalSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref 'VPCID'
-      GroupDescription: All Solace Nodes
+      GroupDescription: Controls internal traffic between broker member nodes
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 8741
