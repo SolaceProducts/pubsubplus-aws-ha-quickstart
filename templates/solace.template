@@ -257,7 +257,7 @@ Resources:
           - ','
           - - !Ref 'EventBrokerSecurityGroup'
             - !Ref 'SolaceInternalSecurityGroup'
-            - !Ref 'SolaceInternalSecurityGroupMember'
+            - !Ref 'BrokerMemberNodesSecurityGroup'
             - !Ref 'RemoteMgmtSecurityGroup'
         ParentStackName: !Ref 'AWS::StackName'
         PersistentStorage: !Ref 'EventBrokerNodeStorage'
@@ -291,7 +291,7 @@ Resources:
           - ','
           - - !Ref 'EventBrokerSecurityGroup'
             - !Ref 'SolaceInternalSecurityGroup'
-            - !Ref 'SolaceInternalSecurityGroupMember'
+            - !Ref 'BrokerMemberNodesSecurityGroup'
             - !Ref 'RemoteMgmtSecurityGroup'
         ParentStackName: !Ref 'AWS::StackName'
         PersistentStorage: !Ref 'EventBrokerNodeStorage'
@@ -324,7 +324,7 @@ Resources:
         NodeSecurityGroup: !Join
           - ','
           - - !Ref 'SolaceInternalSecurityGroup'
-            - !Ref 'SolaceInternalSecurityGroupMember'
+            - !Ref 'BrokerMemberNodesSecurityGroup'
             - !Ref 'RemoteMgmtSecurityGroup'
         ParentStackName: !Ref 'AWS::StackName'
         PersistentStorage: '0'
@@ -334,7 +334,7 @@ Resources:
         SubnetID: !Select
           - !If [Use3AZs, 2, 1]
           - !If [UsePrivateSubnetsCondition, !Ref PrivateSubnetIDs, !Ref PublicSubnetIDs]
-  SolaceInternalSecurityGroupMember:
+  BrokerMemberNodesSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref 'VPCID'
@@ -348,63 +348,63 @@ Resources:
         - IpProtocol: tcp
           FromPort: 8741
           ToPort: 8741
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 8300
           ToPort: 8302
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: udp
           FromPort: 8300
           ToPort: 8302
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 55555
           ToPort: 55555
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 55003
           ToPort: 55003
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 55443
           ToPort: 55443
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 1443
           ToPort: 1443
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 8000
           ToPort: 8000
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 5672
           ToPort: 5672
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 9000
           ToPort: 9000
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 1883
           ToPort: 1883
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 8008
           ToPort: 8008
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 8080
           ToPort: 8080
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 1943
           ToPort: 1943
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
         - IpProtocol: tcp
           FromPort: 5550
           ToPort: 5550
-          SourceSecurityGroupId: !Ref 'SolaceInternalSecurityGroupMember'
+          SourceSecurityGroupId: !Ref 'BrokerMemberNodesSecurityGroup'
   RemoteMgmtSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -795,3 +795,14 @@ Resources:
       LoadBalancerArn: !Ref 'ELB'
       Port: 1943
       Protocol: TCP
+Outputs:
+  BrokerMemberNodesSecurityGroup:
+    Value: !Ref BrokerMemberNodesSecurityGroup 
+    Description: Internal closed Security Group with only broker nodes as members
+    Export:
+      Name: !Sub '${AWS::StackName}-BrokerMemberNodesSecurityGroup'
+  LoadBalancerDNS:
+    Value: !If [UsePrivateSubnetsCondition, !GetAtt ELB.DNSName, 'No LB available, access EC2s through public addresses']
+    Description: The DNS name for the load balancer for external access 
+    Export:
+      Name: !Sub '${AWS::StackName}-LoadBalancerDNS'
