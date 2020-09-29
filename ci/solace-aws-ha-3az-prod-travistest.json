@@ -28,11 +28,11 @@
         "ParameterValue": "24"
     },
     {
-        "ParameterKey": "EventBrokerNodeInstanceType",
+        "ParameterKey": "WorkerNodeInstanceType",
         "ParameterValue": "EventBrokerNodeInstanceTypeParameterValue"
     },
     {
-        "ParameterKey": "EventBrokerNodeStorage",
+        "ParameterKey": "WorkerNodeStorage",
         "ParameterValue": "20"
     },
     {

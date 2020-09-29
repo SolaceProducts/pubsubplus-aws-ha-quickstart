@@ -32,7 +32,7 @@ Metadata:
           - MaxClientConnections
           - MaxQueueMessages
           - WorkerNodeInstanceType
-          - EventBrokerNodeStorage
+          - WorkerNodeStorage
           - MonitorNodeInstanceType
       - Label:
           default: AWS Quick Start Configuration
@@ -59,7 +59,7 @@ Metadata:
         default: Maximum Number of Queue Messages
       WorkerNodeInstanceType:
         default: Message Routing Node Instance Type
-      EventBrokerNodeStorage:
+      WorkerNodeStorage:
         default: Persistent Storage
       MonitorNodeInstanceType:
         default: Monitor Node Instance Type
@@ -162,7 +162,7 @@ Parameters:
       are available to support the selected system scaling parameters. For requirements check https://docs.solace.com/. 
       Also make sure that your region supports the selected instance type before continuing.'
     Type: String
-  EventBrokerNodeStorage:
+  WorkerNodeStorage:
     ConstraintDescription: No more than 640 GiB per device.
     Default: '0'
     Description: Allocated EBS storage for each block device (in GiB); 0 indicates
@@ -300,7 +300,7 @@ Resources:
         MaxClientConnections: !Ref 'MaxClientConnections'
         MaxQueueMessages: !Ref 'MaxQueueMessages'
         WorkerNodeInstanceType: !Ref 'WorkerNodeInstanceType'
-        EventBrokerNodeStorage: !Ref 'EventBrokerNodeStorage'
+        WorkerNodeStorage: !Ref 'WorkerNodeStorage'
         MonitorNodeInstanceType: !Ref 'MonitorNodeInstanceType'
         KeyPairName: !Ref 'KeyPairName'
         QSS3BucketName: !Ref 'QSS3BucketName'
