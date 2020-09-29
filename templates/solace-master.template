@@ -8,10 +8,15 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: PubSub+ Broker Configuration
+          default: PubSub+ Event Broker Configuration
         Parameters:
           - SolaceDockerImage
           - AdminPassword
+          - MaxClientConnections
+          - MaxQueueMessages
+          - WorkerNodeInstanceType
+          - WorkerNodeStorage
+          - MonitorNodeInstanceType
           - ContainerLoggingFormat
       - Label:
           default: Network Configuration
@@ -26,14 +31,6 @@ Metadata:
         Parameters:
           - KeyPairName
           - BootDiskSize
-      - Label:
-          default: Event Broker System Scaling
-        Parameters:
-          - MaxClientConnections
-          - MaxQueueMessages
-          - WorkerNodeInstanceType
-          - WorkerNodeStorage
-          - MonitorNodeInstanceType
       - Label:
           default: AWS Quick Start Configuration
         Parameters:
@@ -82,7 +79,7 @@ Parameters:
     Description: >-
       Solace PubSub+ event broker Docker image reference: a Docker registry name
       with optional tag or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/
-      or it can be a url to a remotely hosted load version
+      or it can be a url to an image in a registry or a url to a tar.gz image on a web server
     Default: solace/solace-pubsub-standard:latest
     Type: String
   AdminPassword:
@@ -106,10 +103,10 @@ Parameters:
       to ''Number of Availability Zones'' previously specified'
     Type: List<AWS::EC2::AvailabilityZone::Name>
   NumberOfAZs:
-    ConstraintDescription: 3 means each node in own az, 2 puts monitor and backup
-      in one az
+    ConstraintDescription: Valid numbers are 3 or 2
     Default: '3'
-    Description: Number of availability zones to use
+    Description: Number of availability zones, based on availability in the target region, valid numbers are 3 or 2. 3 means each node in own AZ, 2 puts monitor and backup
+      in one AZ.
     AllowedValues:
       - '2'
       - '3'

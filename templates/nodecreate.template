@@ -5,8 +5,9 @@ Parameters:
   SolaceDockerImage:
     Description: >-
       Solace PubSub+ event broker docker image reference: a docker registry name
+      Solace PubSub+ event broker Docker image reference: a Docker registry name
       with optional tag or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/
-      or it can be a url to a remotely hosted load version
+      or it can be a url to an image in a registry or a url to a tar.gz image on a web server
     Default: solace/solace-pubsub-standard:latest
     Type: String
   AdminPassword:
