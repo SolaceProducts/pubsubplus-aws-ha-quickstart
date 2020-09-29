@@ -40,8 +40,10 @@ is_primary="false"
 logging_format=""
 logging_group=""
 logging_stream=""
+max_connections="100"
+max_queue_messages="100"
 
-while getopts "c:d:p:s:u:v:h:f:g:r:" opt; do
+while getopts "c:d:p:s:u:v:h:f:g:r:n:q:" opt; do
   case "$opt" in
   c)  config_file=$OPTARG
     ;;
@@ -63,6 +65,10 @@ while getopts "c:d:p:s:u:v:h:f:g:r:" opt; do
     ;;
   r)  logging_stream=$OPTARG
     ;;
+  n)  max_connections=$OPTARG
+    ;;
+  q)  max_queue_messages=$OPTARG
+    ;;
   esac
 done
 
@@ -71,7 +77,7 @@ shift $((OPTIND-1))
 
 echo "config_file=$config_file, solace_directory=$solace_directory, admin_password_file=$admin_password_file, \
       solace_uri=$solace_uri, disk_size=$disk_size, volume=$disk_volume, ha_deployment=$ha_deployment, logging_format=$logging_format, \
-      logging_group=$logging_group, logging_stream=$logging_stream, Leftovers: $@"
+      logging_group=$logging_group, logging_stream=$logging_stream, max_connections=$max_connections, max_queue_messages=$max_queue_messages, Leftovers: $@"
 export admin_password=`cat ${admin_password_file}`
 
 # Create working dir if needed
@@ -146,41 +152,13 @@ fi
 echo "`date` INFO: Successfully loaded ${solace_uri} to local docker repo"
 echo "`date` INFO: Solace message broker image and tag: `docker images | grep solace | awk '{print $1,":",$2}'`"
 
-# Decide which scaling tier applies based on system memory
-# and set maxconnectioncount, ulimit, devshm and swap accordingly
-MEM_SIZE=`cat /proc/meminfo | grep MemTotal | tr -dc '0-9'`
-if [ ${MEM_SIZE} -lt 6600000 ]; then
-  # 100 if mem<6,325MiB
-  maxconnectioncount="100"
-  shmsize="1g"
-  ulimit_nofile="2448:6592"
-  SWAP_SIZE="1024"
-elif [ ${MEM_SIZE} -lt 14500000 ]; then
-  # 1000 if 6,325MiB<=mem<13,916MiB
-  maxconnectioncount="1000"
-  shmsize="2g"
-  ulimit_nofile="2448:10192"
-  SWAP_SIZE="2048"
-elif [ ${MEM_SIZE} -lt 30600000 ]; then
-  # 10000 if 13,916MiB<=mem<29,215MiB
-  maxconnectioncount="10000"
-  shmsize="2g"
-  ulimit_nofile="2448:42192"
-  SWAP_SIZE="2048"
-elif [ ${MEM_SIZE} -lt 57500000 ]; then
-  # 100000 if 29,215MiB<=mem<54,840MiB
-  maxconnectioncount="100000"
-  shmsize="3380m"
-  ulimit_nofile="2448:222192"
-  SWAP_SIZE="2048"
-else
-  # 200000 if 54,840MiB<=mem
-  maxconnectioncount="200000"
-  shmsize="3380m"
-  ulimit_nofile="2448:422192"
-  SWAP_SIZE="2048"
-fi
-echo "`date` INFO: Based on memory size of ${MEM_SIZE}KiB, determined maxconnectioncount: ${maxconnectioncount}, shmsize: ${shmsize}, ulimit_nofile: ${ulimit_nofile}, SWAP_SIZE: ${SWAP_SIZE}"
+
+# Common for all scalings
+shmsize="1g"
+ulimit_nofile="2448:422192"
+SWAP_SIZE="2048"
+
+echo "`date` INFO: Using shmsize: ${shmsize}, ulimit_nofile: ${ulimit_nofile}, SWAP_SIZE: ${SWAP_SIZE}"
 
 echo "`date` INFO: Creating Swap space"
 mkdir /var/lib/solace
@@ -243,7 +221,7 @@ fi
 ############# From here execution path is different for nonHA and HA
 
 if [[ $ha_deployment != "true" ]]; then
-
+############# non-HA setup begins
   echo "`date` Continuing single-node setup in a non-HA deployment"
   #Define a create script
   tee ~/docker-create <<- EOF
@@ -254,6 +232,8 @@ if [[ $ha_deployment != "true" ]]; then
     --ulimit core=-1 \
     --ulimit memlock=-1 \
     --ulimit nofile=${ulimit_nofile} \
+    --env "system_scaling_maxconnectioncount=${max_connections}" \
+    --env "system_scaling_maxqueuemessagecount=${max_queue_messages}" \
     --net=host \
     --restart=always \
     -v /mnt/pubsubplus/secrets:/run/secrets \
@@ -301,6 +281,7 @@ EOF
 
   echo "`date` INFO: PubSub+ non-HA node bringup complete"
   exit
+############# non-HA setup ends
 fi
 
 ############# From here it's all HA setup
@@ -369,7 +350,8 @@ docker create \
   --log-driver awslogs \
   --log-opt awslogs-group=${logging_group} \
   --log-opt awslogs-stream=${logging_stream} \
-  --env "system_scaling_maxconnectioncount=${maxconnectioncount}" \
+  --env "system_scaling_maxconnectioncount=${max_connections}" \
+  --env "system_scaling_maxqueuemessagecount=${max_queue_messages}" \
   --env "logging_debug_output=all" \
   --env "logging_debug_format=${logging_format}" \
   --env "logging_command_output=all" \
