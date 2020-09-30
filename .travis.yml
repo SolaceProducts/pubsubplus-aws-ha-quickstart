@@ -51,8 +51,6 @@ script:
   - echo "Pausing to get the ELB ready"; sleep 10
   - export url="$(aws elbv2 describe-load-balancers | grep DNSName | grep `echo $TESTSTACKPREFIX | head -c4` | awk -F '"' '{print $4}')"; echo $url
   - until curl http://$url:8080; do sleep 10; done
-  - exit
-  - #########################
   - curl -O https://sftp.solace.com/download/SDKPERF_C_LINUX64
   - tar -xvf SDKPERF_C_LINUX64
   - sleep 30
