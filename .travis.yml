@@ -38,7 +38,8 @@ script:
   - sed -i "s@EventBrokerNodeInstanceTypeParameterValue@${MESSAGEBROKERNODEINSTANCETYPE}@g" ci/solace-aws-ha-3az-prod-travistest.json
   - aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"
   - export BUCKETREGION=`aws s3api get-bucket-location --bucket solace-cf-quickstart-travistest | grep LocationConstraint | awk -F' ' '{print $NF}' | tr -d '"'`
-  - sed -i "s@SolaceStackRegionNAME@${BUCKETREGION}@g" ci/solace-aws-ha-3az-prod-travistest.json
+  - sed -i "s@SolaceStackRegionNAME@${AWS_DEFAULT_REGION}@g" ci/solace-aws-ha-3az-prod-travistest.json
+  - sed -i "s@SolaceBucketRegionNAME@${BUCKETREGION}@g" ci/solace-aws-ha-3az-prod-travistest.json
   - aws s3 sync . s3://solace-cf-quickstart-travistest/solace/eventbroker/latest --acl public-read
   - export TESTSTACKPREFIX=T`echo "$(date +%s)" | rev`; export TESTSTACKNAME="$TESTSTACKPREFIX-sol-aws-travistest";
   - aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure DO_NOTHING --capabilities CAPABILITY_IAM
