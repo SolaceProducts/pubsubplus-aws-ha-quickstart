@@ -208,13 +208,15 @@ else
   UUID=`blkid -s UUID -o value ${disk_volume}1`
   echo "UUID=${UUID} /opt/pubsubplus xfs defaults 0 0" >> /etc/fstab
   mkdir /opt/pubsubplus
+  mount -a
   mkdir /opt/pubsubplus/jail
   mkdir /opt/pubsubplus/var
   mkdir /opt/pubsubplus/softAdb
   mkdir /opt/pubsubplus/diagnostics
   mkdir /opt/pubsubplus/internalSpool
-  mount -a
   chown 1000001 -R /opt/pubsubplus/
+  chmod -R 777 /opt/pubsubplus
+  
   SPOOL_MOUNT="-v /opt/pubsubplus/jail:/usr/sw/jail -v /opt/pubsubplus/var:/usr/sw/var -v /opt/pubsubplus/softAdb:/usr/sw/internalSpool/softAdb -v /opt/pubsubplus/diagnostics:/var/lib/solace/diags -v /opt/pubsubplus/internalSpool:/usr/sw/internalSpool"
 fi
 
@@ -391,12 +393,6 @@ echo "`date` INFO: Creating the broker container"
 # Start the solace service and enable it at system start up.
 chkconfig --add solace-pubsubplus
 echo "`date` INFO: Starting Solace service"
-
-
-###############
-exit
-###############
-
 service solace-pubsubplus start
 
 # Poll the message broker SEMP port until it is Up

@@ -6,7 +6,7 @@ git:
 
 env:
   global:
-  - AWS_DEFAULT_REGION=eu-west-2
+  - AWS_DEFAULT_REGION=eu-west-1
   - MESSAGEBROKERNODEINSTANCETYPE=t2.small
   
 before_install:
