@@ -36,8 +36,8 @@ script:
   - sed -i "s@SolaceDockerImageParameterValue@${SOLACE_DOCKER_URL_PARAMETER_VALUE}@g" ci/solace-aws-ha-3az-prod-travistest.json
   - #sed -i "s@SolaceDockerImageParameterValue@solace/solace-pubsub-standard:latest@g" ci/solace-aws-ha-3az-prod-travistest.json
   - sed -i "s@EventBrokerNodeInstanceTypeParameterValue@${MESSAGEBROKERNODEINSTANCETYPE}@g" ci/solace-aws-ha-3az-prod-travistest.json
-  - BUCKETREGION=$AWS_DEFAULT_REGION
-  - aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"; BUCKETREGION=`aws s3api get-bucket-location --bucket solace-cf-quickstart-travistest | grep LocationConstraint | awk -F': ' '{print $NF}' | tr -d '"'`
+  - aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"
+  - BUCKETREGION=`aws s3api get-bucket-location --bucket solace-cf-quickstart-travistest | grep LocationConstraint | awk -F': ' '{print $NF}' | tr -d '"'`
   - sed -i "s@SolaceStackRegionNAME@${BUCKETREGION}@g" ci/solace-aws-ha-3az-prod-travistest.json
   - aws s3 sync . s3://solace-cf-quickstart-travistest/solace/eventbroker/latest --acl public-read
   - export TESTSTACKPREFIX=T`echo "$(date +%s)" | rev`; export TESTSTACKNAME="$TESTSTACKPREFIX-sol-aws-travistest";
