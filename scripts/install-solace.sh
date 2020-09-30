@@ -215,7 +215,7 @@ else
   mkdir /opt/pubsubplus/diagnostics
   mkdir /opt/pubsubplus/internalSpool
   chown 1000001 -R /opt/pubsubplus/
-  chmod -R 777 /opt/pubsubplus
+  #chmod -R 777 /opt/pubsubplus
   
   SPOOL_MOUNT="-v /opt/pubsubplus/jail:/usr/sw/jail -v /opt/pubsubplus/var:/usr/sw/var -v /opt/pubsubplus/softAdb:/usr/sw/internalSpool/softAdb -v /opt/pubsubplus/diagnostics:/var/lib/solace/diags -v /opt/pubsubplus/internalSpool:/usr/sw/internalSpool"
 fi
