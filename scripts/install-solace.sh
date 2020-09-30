@@ -391,6 +391,12 @@ echo "`date` INFO: Creating the broker container"
 # Start the solace service and enable it at system start up.
 chkconfig --add solace-pubsubplus
 echo "`date` INFO: Starting Solace service"
+
+
+###############
+exit
+###############
+
 service solace-pubsubplus start
 
 # Poll the message broker SEMP port until it is Up
