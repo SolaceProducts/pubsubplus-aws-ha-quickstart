@@ -215,6 +215,7 @@ Resources:
   NodeRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Join ["", [!Ref AWS::Region, !Ref ParentStackName, !Ref NodeDesignation, "Role"]]
       Policies:
       - PolicyName: aws-quick-start-s3-policy
         PolicyDocument:
