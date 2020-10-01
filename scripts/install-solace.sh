@@ -510,7 +510,7 @@ if [ "${is_primary}" = "true" ]; then
   count=0
   echo "`date` INFO: Waiting for config-sync connected"
   while [ ${count} -lt ${loop_guard} ]; do
-    online_results=`/tmp/semp_query.sh -n admin -p ${password} -u http://localhost:8080/SEMP \
+    online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
             -q "<rpc><show><config-sync></config-sync></show></rpc>" \
             -v "/rpc-reply/rpc/show/config-sync/status/oper-status"`
     
