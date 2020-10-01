@@ -262,6 +262,10 @@ EOF
   echo "`date` INFO: Starting Solace service"
   service solace-pubsubplus start
 
+  # Remove all message broker Secrets from the host; at this point, the message broker should have come up
+  # and it won't be needing those files anymore
+  rm ${admin_password_file}
+
   # Poll the broker Message-Spool
   loop_guard=30
   pause=10
@@ -501,10 +505,54 @@ if [ "${is_primary}" = "true" ]; then
     -q "<rpc><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
   /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
     -q "<rpc><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
+
+  # Wait for config-sync results
+  count=0
+  echo "`date` INFO: Waiting for config-sync connected"
+  while [ ${count} -lt ${loop_guard} ]; do
+    online_results=`/mnt/disks/solace/semp_query.sh -n admin -p ${password} -u http://localhost:8080/SEMP \
+            -q "<rpc><show><config-sync></config-sync></show></rpc>" \
+            -v "/rpc-reply/rpc/show/config-sync/status/oper-status"`
+    
+    confsyncstatus_results=`echo ${online_results} | jq '.valueSearchResult' -`
+    echo "`date` INFO: Config-sync is: ${confsyncstatus_results}"
+
+    run_time=$((${count} * ${pause}))
+    case "${confsyncstatus_results}" in
+      "Up")
+        echo "`date` INFO: Config-sync is Up, after ${run_time} seconds"
+        break
+        ;;
+    esac
+    ((count++))
+    echo "`date` INFO: Waited ${run_time} seconds, Config-sync is not yet Up"
+    sleep ${pause}
+  done
+
+  if [ ${count} -eq ${loop_guard} ]; then
+    echo "`date` ERROR: Config-sync never reached state \"Up\" - exiting." | tee /dev/stderr
+    exit 1
+  fi
+
+  # Poll the broker Message-Spool
+  count=0
+  echo "`date` INFO: Wait for the broker message-spool service to be guaranteed-active"
+  while [ ${count} -lt ${loop_guard} ]; do
+    health_result=`curl -s -o /dev/null -w "%{http_code}"  http://localhost:5550/health-check/guaranteed-active`
+    run_time=$((${count} * ${pause}))
+    if [ "${health_result}" = "200" ]; then
+        echo "`date` INFO: broker message-spool is guaranteed-active, after ${run_time} seconds"
+        break
+    fi
+    ((count++))
+    echo "`date` INFO: Waited ${run_time} seconds, broker message-spool not yet guaranteed-active. State: ${health_result}"
+    sleep ${pause}
+  done
+  if [ ${count} -eq ${loop_guard} ]; then
+    echo "`date` ERROR: broker message-spool never came guaranteed-active" | tee /dev/stderr
+    exit 1
+  fi
+
 fi
 
-if [ ${count} -eq ${loop_guard} ]; then
-  echo "`date` ERROR: Solace bringup failed" | tee /dev/stderr
-  exit 1
-fi
 echo "`date` INFO: PubSub+ HA-node bringup complete"
