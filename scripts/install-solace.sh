@@ -501,8 +501,10 @@ if [ "${is_primary}" = "true" ]; then
     exit 1
   fi
 
+  echo "`date` INFO: Initiating config-sync for router"
   /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
     -q "<rpc><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
+  echo "`date` INFO: Initiating config-sync for default vpn"
   /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
     -q "<rpc><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
 
