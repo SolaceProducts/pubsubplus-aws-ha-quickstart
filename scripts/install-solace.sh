@@ -521,7 +521,7 @@ if [ "${is_primary}" = "true" ]; then
 
     run_time=$((${count} * ${pause}))
     case "${confsyncstatus_results}" in
-      "Up")
+      "\"Up\"")
         echo "`date` INFO: Config-sync is Up, after ${run_time} seconds"
         break
         ;;
