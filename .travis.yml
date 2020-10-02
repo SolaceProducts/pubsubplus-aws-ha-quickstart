@@ -6,7 +6,7 @@ git:
 
 env:
   global:
-  - AWS_DEFAULT_REGION=eu-west-1
+  - AWS_DEFAULT_REGION=eu-west-2
   - MESSAGEBROKERNODEINSTANCETYPE=t2.small
   
 before_install:
@@ -61,7 +61,7 @@ script:
     1; fi'
   - pubSubTools/sdkperf_c -cip=$url -mn=100000 -mr=0 -ptl=t1 -stl=t1 | grep "Total Messages"
   - ##########################################
-  - exit
+  - # exit
   - ##########################################
   - aws cloudformation delete-stack --stack-name $TESTSTACKNAME
   - echo "Waiting for stack delete complete"
