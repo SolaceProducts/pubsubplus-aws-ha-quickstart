@@ -52,7 +52,7 @@ Parameters:
       - '200000'
     ConstraintDescription: Must be a valid value from the list.
     Default: '100'
-    Description: 'The maximum supported number of client connections system scaling parameter'
+    Description: 'Broker system scaling: the maximum supported number of client connections'
     Type: String
   MaxQueueMessages:
     AllowedValues:
@@ -61,7 +61,7 @@ Parameters:
       - '3000'
     ConstraintDescription: Must be a valid EC2 instance type.
     Default: '100'
-    Description: 'The maximum number of queue messages system scaling parameter, in millions of messages'
+    Description: 'Broker system scaling: the maximum number of queue messages, in millions'
     Type: String
   NodeInstanceType:
     ConstraintDescription: Must be a valid EC2 instance type.
