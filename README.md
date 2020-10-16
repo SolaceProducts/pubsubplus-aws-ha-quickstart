@@ -2,6 +2,10 @@
 
 # Install and Configure Solace PubSub+ Software Event Broker in an HA Tuple using AWS Cloud Formation
 
+This document provides a quick getting started guide to install a Solace PubSub+ software event broker deployment in Amazon Web Services cloud computing platform.
+
+The supported event broker version is 9.7 or later. For earlier broker releases use [this GitHub version of the QuickStart](https://github.com/SolaceProducts/pubsubplus-aws-ha-quickstart/tree/v2.0.1).
+
 ![alt text](/images/Solace-AWS-HA-Prod-3AZ.png "Production Environment for Solace PubSub+")
 
 This Quick Start template installs Solace PubSub+ Software Event Broker in fault tolerant high-availability (HA) redundancy groups. HA redundancy provides 1:1 event broker redundancy to increase overall service availability. If one of the event brokers fails, or is taken out of service, the other one automatically takes over and provides service to the clients that were previously served by the now out-of-service event broker.  To increase availability, the event brokers are deployed across 3 availability zones.
