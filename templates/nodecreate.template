@@ -5,8 +5,9 @@ Parameters:
   SolaceDockerImage:
     Description: >-
       Solace PubSub+ event broker docker image reference: a docker registry name
+      Solace PubSub+ event broker Docker image reference: a Docker registry name
       with optional tag or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/
-      or it can be a url to a remotely hosted load version
+      or it can be a url to an image in a registry or a url to a tar.gz image on a web server
     Default: solace/solace-pubsub-standard:latest
     Type: String
   AdminPassword:
@@ -31,32 +32,57 @@ Parameters:
     MinValue: '8'
     Type: Number
   ClusterInfoHandle:
-    Description: ''
+    Description: Leave this blank for non-HA deployment
     Type: String
-  InstanceProfile:
-    Description: IAM Profile for the deployment
-    Type: String
+    Default: ''
   KeyPairName:
     Description: Name of an existing EC2 key pair within the AWS region; all instances
       will launch with this key pair
     Type: AWS::EC2::KeyPair::KeyName
   NodeDesignation:
-    Default: unspecified
-    Description: Tag for deployed instances
+    Default: 'event-broker-singlenode'
+    Description: Purpose of the deployed instance. Will create a single-node non-HA deployment if set to default "event-broker-singlenode".
+    Type: String
+  MaxClientConnections:
+    AllowedValues:
+      - '100'
+      - '1000'
+      - '10000'
+      - '100000'
+      - '200000'
+    ConstraintDescription: Must be a valid value from the list.
+    Default: '100'
+    Description: 'Broker system scaling: the maximum supported number of client connections'
+    Type: String
+  MaxQueueMessages:
+    AllowedValues:
+      - '100'
+      - '240'
+      - '3000'
+    ConstraintDescription: Must be a valid EC2 instance type.
+    Default: '100'
+    Description: 'Broker system scaling: the maximum number of queue messages, in millions'
     Type: String
   NodeInstanceType:
     ConstraintDescription: Must be a valid EC2 instance type.
     Default: m4.large
     Description: Instance Type for Solace PubSub+ event broker nodes
     Type: String
+  SubnetID:
+    Description: >-
+      Comma separated list of VPC subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8);
+      VPC must exist with proper configuration for Solacet cluster access (internal
+      and external) and the subnets must be in the same VPC as the security groups
+    Type: AWS::EC2::Subnet::Id
   NodeSecurityGroup:
     Description: Comma separated list of security groups for the members of the cluster
       (e.g. sg-7f16e910,sg-4be93ca2); The security groups must be in the same VPC
       as the subnets
     Type: List<AWS::EC2::SecurityGroup::Id>
   ParentStackName:
-    Description: Wrapper stack for this deployment
+    Description: Leave this blank for non-HA deployemnt. For HA, the wrapper stack for this deployment.
     Type: String
+    Default: ''
   PersistentStorage:
     ConstraintDescription: No more than 1024 GB per device (4 TB per node).
     Default: '0'
@@ -90,18 +116,12 @@ Parameters:
   QSS3KeyPrefix:
     AllowedPattern: ^[0-9a-zA-Z-/]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
-      uppercase letters, hyphens (-), and forward slash (/).
+      uppercase letters, hyphens (-), and forward slash (/). Must end with a /
     Default: pubsubplus-aws-ha-quickstart/latest/
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
     Type: String
-  SubnetID:
-    Description: >-
-      Comma separated list of VPC subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8);
-      VPC must exist with proper configuration for Solacet cluster access (internal
-      and external) and the subnets must be in the same VPC as the security groups
-    Type: AWS::EC2::Subnet::Id
 Mappings:
   AWSAMIRegionMap:
     AMI:
@@ -164,10 +184,8 @@ Conditions:
   EphemeralStorage: !Equals
     - !Ref 'PersistentStorage'
     - '0'
-  GovCloudCondition: !Equals
-    - !Ref 'AWS::Region'
-    - us-gov-west-1
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+  NonHA: !Equals [!Ref NodeDesignation, 'event-broker-singlenode']
 Resources:
   CloudFormationLogs:
     Type: AWS::Logs::LogGroup
@@ -181,10 +199,10 @@ Resources:
       Namespace: AWS/EC2
       MetricName: StatusCheckFailed_System
       Statistic: Minimum
-      Period: '60'
-      EvaluationPeriods: '3'
+      Period: 60
+      EvaluationPeriods: 3
       ComparisonOperator: GreaterThanThreshold
-      Threshold: '0'
+      Threshold: 0
       AlarmActions:
         - !Join
           - ''
@@ -193,7 +211,7 @@ Resources:
             - :ec2:recover
       Dimensions:
         - Name: InstanceId
-          Value: !Ref 'NodeLaunchConfig'
+          Value: !Ref 'BrokerNodeInstance'
   NodeRole:
     Type: AWS::IAM::Role
     Properties:
@@ -244,7 +262,7 @@ Resources:
       Roles:
       - !Ref NodeRole
       Path: /
-  NodeLaunchConfig:
+  BrokerNodeInstance:
     Type: AWS::EC2::Instance
     Metadata:
       AWS::CloudFormation::Authentication:
@@ -398,14 +416,6 @@ Resources:
               mode: '000755'
               owner: root
               group: root
-            /tmp/wait-for-resource.sh:
-              source: !Sub
-                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/wait-for-resource.sh
-                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-              mode: '000755'
-              owner: root
-              group: root
             /etc/init.d/solace-pubsubplus:
               source: !Sub
                 - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/init.d/solace-pubsubplus
@@ -477,83 +487,137 @@ Resources:
         - Key: Name
           Value: !Join
             - '-'
-            - - !Ref 'ParentStackName'
+            - - !If [NonHA, !Ref 'AWS::StackName', !Ref ParentStackName]
               - !Ref 'NodeDesignation'
         - Key: ParentStack
-          Value: !Ref 'ParentStackName'
+          Value: !If [NonHA, !Ref 'AWS::StackName', !Ref ParentStackName]
         - Key: HARole
-          Value: !Ref 'NodeDesignation'
-      UserData: !Base64
-        Fn::Join:
-          - ''
-          - - "#!/bin/bash -xe\n"
-            - "AMI_SBIN=/tmp\n"
-            - "yum install -y aws-cfn-bootstrap\n"
-            - "\n"
-            - "## Retrieve scripts to deploy PubSub+ on the instances \n"
-            - '/opt/aws/bin/cfn-init -v '
-            - '    --stack '
-            - !Ref 'AWS::StackName'
-            - '    --resource NodeLaunchConfig '
-            - '    --configsets install_all '
-            - '    --region '
-            - !Ref 'AWS::Region'
-            - "\n"
-            - "## Wait for all nodes to come on-line\n"
-            - '$AMI_SBIN/wait-for-child-resource.sh '
-            - !Ref 'ParentStackName'
-            - " MonitorStack NodeLaunchConfig\n"
-            - "\n"
-            - '$AMI_SBIN/wait-for-child-resource.sh '
-            - !Ref 'ParentStackName'
-            - " EventBrokerPrimaryStack NodeLaunchConfig\n"
-            - "\n"
-            - '$AMI_SBIN/wait-for-child-resource.sh '
-            - !Ref 'ParentStackName'
-            - " EventBrokerBackupStack NodeLaunchConfig\n"
-            - "\n"
-            - "## Now find the private IP addresses of all deployed nodes\n"
-            - "##   (generating /tmp/solacehosts and /tmp/<role> files)\n"
-            - '$AMI_SBIN/gen-cluster-hosts.sh '
-            - !Ref 'ParentStackName'
-            - "\n"
-            - "## Tag the instance (now that we're sure of launch index)\n"
-            - "instance_id=$(curl -f http://169.254.169.254/latest/meta-data/instance-id)\n"
-            - instance_tag=
-            - !Ref 'ParentStackName'
-            - '-'
-            - !Ref 'NodeDesignation'
-            - "\n"
-            - " \n"
-            - aws ec2 create-tags
-            - '    --region '
-            - !Ref 'AWS::Region'
-            - "    --resources $instance_id --tags Key=Name,Value=$instance_tag\n"
-            - "\n"
-            - "cd /tmp\n"
-            - "# Install PubSub+\n"
-            - $AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/solace
-            - '  -u '
-            - !Ref 'SolaceDockerImage'
-            - '  -p /mnt/pubsubplus/secrets/solOSpasswd'
-            - '  -s '
-            - !Ref 'PersistentStorage'
-            - '  -v /dev/xvdb'
-            - '  -f '
-            - !Ref 'ContainerLoggingFormat'
-            - '  -g '
-            - !Ref 'CloudFormationLogs'
-            - '  -r ${instance_id}/solace.log'
-            - " \n"
-            - "## Signal back information for outputs (now that all nodes are up)\
-              \ \n"
-            - /opt/aws/bin/cfn-signal -e 0 -r 'PubSub+ HA deployment complete' '
-            - !Ref 'ClusterInfoHandle'
-            - "'\n"
-            - "\n"
+          Value: !If [NonHA, 'non-ha', !Ref NodeDesignation]
+      UserData:
+        !If
+          - NonHA
+          - !Base64 # Simplified setup for non-HA deployment
+              Fn::Join:
+                - ''
+                - - "#!/bin/bash -xe\n"
+                  - "AMI_SBIN=/tmp\n"
+                  - "yum install -y aws-cfn-bootstrap\n"
+                  - "\n"
+                  - "## Retrieve scripts to deploy PubSub+ on the instances \n"
+                  - '/opt/aws/bin/cfn-init -v '
+                  - '    --stack '
+                  - !Ref 'AWS::StackName'
+                  - '    --resource BrokerNodeInstance '
+                  - '    --configsets install_all '
+                  - '    --region '
+                  - !Ref 'AWS::Region'
+                  - "\n"
+                  - "cd /tmp\n"
+                  - "# Install PubSub+\n"
+                  - $AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/solace
+                  - '  -h false' # specifying non-HA deployment
+                  - '  -u '
+                  - !Ref 'SolaceDockerImage'
+                  - '  -p /mnt/pubsubplus/secrets/solOSpasswd'
+                  - '  -s '
+                  - !Ref 'PersistentStorage'
+                  - '  -v /dev/xvdb'
+                  - '  -f '
+                  - !Ref 'ContainerLoggingFormat'
+                  - '  -g '
+                  - !Ref 'CloudFormationLogs'
+                  - '  -r ${instance_id}/solace.log'
+                  - '  -n '
+                  - !Ref 'MaxClientConnections'
+                  - '  -q '
+                  - !Ref 'MaxQueueMessages'
+                  - "\n"
+          - !Base64 # Full setup for HA deployment
+              Fn::Join:
+                - ''
+                - - "#!/bin/bash -xe\n"
+                  - "AMI_SBIN=/tmp\n"
+                  - "yum install -y aws-cfn-bootstrap\n"
+                  - "\n"
+                  - "## Retrieve scripts to deploy PubSub+ on the instances \n"
+                  - '/opt/aws/bin/cfn-init -v '
+                  - '    --stack '
+                  - !Ref 'AWS::StackName'
+                  - '    --resource BrokerNodeInstance '
+                  - '    --configsets install_all '
+                  - '    --region '
+                  - !Ref 'AWS::Region'
+                  - "\n"
+                  - "## Wait for all nodes to come on-line\n"
+                  - '$AMI_SBIN/wait-for-child-resource.sh '
+                  - !Ref 'ParentStackName'
+                  - " MonitorStack BrokerNodeInstance\n"
+                  - "\n"
+                  - '$AMI_SBIN/wait-for-child-resource.sh '
+                  - !Ref 'ParentStackName'
+                  - " EventBrokerPrimaryStack BrokerNodeInstance\n"
+                  - "\n"
+                  - '$AMI_SBIN/wait-for-child-resource.sh '
+                  - !Ref 'ParentStackName'
+                  - " EventBrokerBackupStack BrokerNodeInstance\n"
+                  - "\n"
+                  - "## Now find the private IP addresses of all deployed nodes\n"
+                  - "##   (generating /tmp/solacehosts and /tmp/<role> files)\n"
+                  - '$AMI_SBIN/gen-cluster-hosts.sh '
+                  - !Ref 'ParentStackName'
+                  - "\n"
+                  - "## Tag the instance (now that we're sure of launch index)\n"
+                  - "instance_id=$(curl -f http://169.254.169.254/latest/meta-data/instance-id)\n"
+                  - instance_tag=
+                  - !Ref 'ParentStackName'
+                  - '-'
+                  - !Ref 'NodeDesignation'
+                  - "\n"
+                  - " \n"
+                  - aws ec2 create-tags
+                  - '    --region '
+                  - !Ref 'AWS::Region'
+                  - "    --resources $instance_id --tags Key=Name,Value=$instance_tag\n"
+                  - "\n"
+                  - "cd /tmp\n"
+                  - "# Install PubSub+\n"
+                  - $AMI_SBIN/install-solace.sh -c /tmp/solacehosts -d /tmp/solace
+                  - '  -h true' # specifying HA deployment
+                  - '  -u '
+                  - !Ref 'SolaceDockerImage'
+                  - '  -p /mnt/pubsubplus/secrets/solOSpasswd'
+                  - '  -s '
+                  - !Ref 'PersistentStorage'
+                  - '  -v /dev/xvdb'
+                  - '  -f '
+                  - !Ref 'ContainerLoggingFormat'
+                  - '  -g '
+                  - !Ref 'CloudFormationLogs'
+                  - '  -r ${instance_id}/solace.log'
+                  - '  -n '
+                  - !Ref 'MaxClientConnections'
+                  - '  -q '
+                  - !Ref 'MaxQueueMessages'
+                  - " \n"
+                  - "## Signal back information for outputs (now that all nodes are up)\
+                    \ \n"
+                  - /opt/aws/bin/cfn-signal -e 0 -r 'PubSub+ HA deployment complete' '
+                  - !Ref 'ClusterInfoHandle'
+                  - "'\n"
+                  - "\n"
 Outputs:
   EC2ID:
     Description: Reference to created ec2 instance
-    Value: !Ref 'NodeLaunchConfig'
+    Value: !Ref BrokerNodeInstance
     Export:
       Name: !Sub '${AWS::StackName}-EC2ID'
+  PrivateDnsName:
+    Description: Private DNS name of the created ec2 instance
+    Value: !GetAtt BrokerNodeInstance.PrivateDnsName
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateDnsName'
+  PublicDNSName:
+    Description: Public DNS name of the created ec2 instance
+    Value: !GetAtt BrokerNodeInstance.PublicDnsName
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicDNSName'

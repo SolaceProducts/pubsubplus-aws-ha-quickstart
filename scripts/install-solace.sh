@@ -35,12 +35,15 @@ solace_uri="solace/solace-pubsub-standard:latest"   # default to pull latest Pub
 admin_password_file=""
 disk_size=""
 disk_volume=""
+ha_deployment="true"
 is_primary="false"
 logging_format=""
 logging_group=""
 logging_stream=""
+max_connections="100"
+max_queue_messages="100"
 
-while getopts "c:d:p:s:u:v:f:g:r:" opt; do
+while getopts "c:d:p:s:u:v:h:f:g:r:n:q:" opt; do
   case "$opt" in
   c)  config_file=$OPTARG
     ;;
@@ -54,11 +57,17 @@ while getopts "c:d:p:s:u:v:f:g:r:" opt; do
     ;;
   v)  disk_volume=$OPTARG
     ;;
+  h)  ha_deployment=$OPTARG
+    ;;
   f)  logging_format=$OPTARG
     ;;
   g)  logging_group=$OPTARG
     ;;
   r)  logging_stream=$OPTARG
+    ;;
+  n)  max_connections=$OPTARG
+    ;;
+  q)  max_queue_messages=$OPTARG
     ;;
   esac
 done
@@ -66,9 +75,9 @@ done
 shift $((OPTIND-1))
 [ "$1" = "--" ] && shift
 
-echo "config_file=$config_file , solace_directory=$solace_directory , admin_password_file=$admin_password_file , \
-      solace_uri=$solace_uri , disk_size=$disk_size , volume=$disk_volume , logging_format=$logging_format , \
-      logging_group=$logging_group , logging_stream=$logging_stream , Leftovers: $@"
+echo "config_file=$config_file, solace_directory=$solace_directory, admin_password_file=$admin_password_file, \
+      solace_uri=$solace_uri, disk_size=$disk_size, volume=$disk_volume, ha_deployment=$ha_deployment, logging_format=$logging_format, \
+      logging_group=$logging_group, logging_stream=$logging_stream, max_connections=$max_connections, max_queue_messages=$max_queue_messages, Leftovers: $@"
 export admin_password=`cat ${admin_password_file}`
 
 # Create working dir if needed
@@ -143,41 +152,13 @@ fi
 echo "`date` INFO: Successfully loaded ${solace_uri} to local docker repo"
 echo "`date` INFO: Solace message broker image and tag: `docker images | grep solace | awk '{print $1,":",$2}'`"
 
-# Decide which scaling tier applies based on system memory
-# and set maxconnectioncount, ulimit, devshm and swap accordingly
-MEM_SIZE=`cat /proc/meminfo | grep MemTotal | tr -dc '0-9'`
-if [ ${MEM_SIZE} -lt 6600000 ]; then
-  # 100 if mem<6,325MiB
-  maxconnectioncount="100"
-  shmsize="1g"
-  ulimit_nofile="2448:6592"
-  SWAP_SIZE="1024"
-elif [ ${MEM_SIZE} -lt 14500000 ]; then
-  # 1000 if 6,325MiB<=mem<13,916MiB
-  maxconnectioncount="1000"
-  shmsize="2g"
-  ulimit_nofile="2448:10192"
-  SWAP_SIZE="2048"
-elif [ ${MEM_SIZE} -lt 30600000 ]; then
-  # 10000 if 13,916MiB<=mem<29,215MiB
-  maxconnectioncount="10000"
-  shmsize="2g"
-  ulimit_nofile="2448:42192"
-  SWAP_SIZE="2048"
-elif [ ${MEM_SIZE} -lt 57500000 ]; then
-  # 100000 if 29,215MiB<=mem<54,840MiB
-  maxconnectioncount="100000"
-  shmsize="3380m"
-  ulimit_nofile="2448:222192"
-  SWAP_SIZE="2048"
-else
-  # 200000 if 54,840MiB<=mem
-  maxconnectioncount="200000"
-  shmsize="3380m"
-  ulimit_nofile="2448:422192"
-  SWAP_SIZE="2048"
-fi
-echo "`date` INFO: Based on memory size of ${MEM_SIZE}KiB, determined maxconnectioncount: ${maxconnectioncount}, shmsize: ${shmsize}, ulimit_nofile: ${ulimit_nofile}, SWAP_SIZE: ${SWAP_SIZE}"
+
+# Common for all scalings
+shmsize="1g"
+ulimit_nofile="2448:422192"
+SWAP_SIZE="2048"
+
+echo "`date` INFO: Using shmsize: ${shmsize}, ulimit_nofile: ${ulimit_nofile}, SWAP_SIZE: ${SWAP_SIZE}"
 
 echo "`date` INFO: Creating Swap space"
 mkdir /var/lib/solace
@@ -187,7 +168,7 @@ chmod 0600 /var/lib/solace/swap
 swapon -f /var/lib/solace/swap
 grep -q 'solace\/swap' /etc/fstab || sudo sh -c 'echo "/var/lib/solace/swap none swap sw 0 0" >> /etc/fstab'
 
-echo "`date` INFO: Applying TCP for WAN optimizations" &>> ${LOG_FILE}
+echo "`date` INFO: Applying TCP for WAN optimizations"
 echo '
   net.core.rmem_max = 134217728
   net.core.wmem_max = 134217728
@@ -198,6 +179,123 @@ sudo sysctl -p /etc/sysctl.d/98-solace-sysctl.conf
 
 cd ${solace_directory}
 
+# Setup password file permissions
+chown -R 1000001 $(dirname ${admin_password_file})
+chmod 700 $(dirname ${admin_password_file})
+
+if [[ ${disk_size} == "0" ]]; then
+  echo "`date` Using ephemeral volumes"
+  #Create new volumes that the PubSub+ Message Broker container can use to consume and store data.
+  docker volume create --name=jail
+  docker volume create --name=var
+  docker volume create --name=adb
+  docker volume create --name=softAdb
+  docker volume create --name=diagnostics
+  docker volume create --name=internalSpool
+  SPOOL_MOUNT="-v jail:/usr/sw/jail -v var:/usr/sw/var -v softAdb:/usr/sw/internalSpool/softAdb -v adb:/usr/sw/adb -v diagnostics:/var/lib/solace/diags -v internalSpool:/usr/sw/internalSpool"
+else
+  echo "`date` Using persistent volumes"
+  echo "`date` Create primary partition on new disk"
+  (
+    echo n # Add a new partition
+    echo p # Primary partition
+    echo 1  # Partition number
+    echo   # First sector (Accept default: 1)
+    echo   # Last sector (Accept default: varies)
+    echo w # Write changes
+  ) | sudo fdisk $disk_volume
+
+  mkfs.xfs  ${disk_volume}1 -m crc=0
+  UUID=`blkid -s UUID -o value ${disk_volume}1`
+  echo "UUID=${UUID} /opt/pubsubplus xfs defaults 0 0" >> /etc/fstab
+  mkdir /opt/pubsubplus
+  mount -a
+  mkdir /opt/pubsubplus/jail
+  mkdir /opt/pubsubplus/var
+  mkdir /opt/pubsubplus/adb
+  mkdir /opt/pubsubplus/softAdb
+  mkdir /opt/pubsubplus/diagnostics
+  mkdir /opt/pubsubplus/internalSpool
+  chown 1000001 -R /opt/pubsubplus/
+  #chmod -R 777 /opt/pubsubplus
+  
+  SPOOL_MOUNT="-v /opt/pubsubplus/jail:/usr/sw/jail -v /opt/pubsubplus/var:/usr/sw/var -v /opt/pubsubplus/adb:/usr/sw/adb -v /opt/pubsubplus/softAdb:/usr/sw/internalSpool/softAdb -v /opt/pubsubplus/diagnostics:/var/lib/solace/diags -v /opt/pubsubplus/internalSpool:/usr/sw/internalSpool"
+fi
+
+############# From here execution path is different for nonHA and HA
+
+if [[ $ha_deployment != "true" ]]; then
+############# non-HA setup begins
+  echo "`date` Continuing single-node setup in a non-HA deployment"
+  #Define a create script
+  tee ~/docker-create <<- EOF
+  #!/bin/bash
+  docker create \
+    --uts=host \
+    --shm-size ${shmsize} \
+    --ulimit core=-1 \
+    --ulimit memlock=-1 \
+    --ulimit nofile=${ulimit_nofile} \
+    --env "system_scaling_maxconnectioncount=${max_connections}" \
+    --env "system_scaling_maxqueuemessagecount=${max_queue_messages}" \
+    --net=host \
+    --restart=always \
+    -v /mnt/pubsubplus/secrets:/run/secrets \
+    ${SPOOL_MOUNT} \
+    --env "username_admin_globalaccesslevel=admin" \
+    --env "username_admin_passwordfilepath=$(basename ${admin_password_file})" \
+    --env "service_ssh_port=2222" \
+    --env "service_webtransport_port=8008" \
+    --env "service_webtransport_tlsport=1443" \
+    --env "service_semp_tlsport=1943" \
+    --name=solace ${SOLACE_IMAGE_ID}
+EOF
+
+  #Make the file executable
+  chmod +x ~/docker-create
+
+  echo "`date` INFO: Creating the broker container"
+  ~/docker-create
+
+  # Start the solace service and enable it at system start up.
+  chkconfig --add solace-pubsubplus
+  echo "`date` INFO: Starting Solace service"
+  service solace-pubsubplus start
+
+  # Remove all message broker Secrets from the host; at this point, the message broker should have come up
+  # and it won't be needing those files anymore
+  rm ${admin_password_file}
+
+  # Poll the broker Message-Spool
+  loop_guard=30
+  pause=10
+  count=0
+  echo "`date` INFO: Wait for the broker message-spool service to be guaranteed-active"
+  while [ ${count} -lt ${loop_guard} ]; do
+    health_result=`curl -s -o /dev/null -w "%{http_code}"  http://localhost:5550/health-check/guaranteed-active`
+    run_time=$((${count} * ${pause}))
+    if [ "${health_result}" = "200" ]; then
+        echo "`date` INFO: broker message-spool is guaranteed-active, after ${run_time} seconds"
+        break
+    fi
+    ((count++))
+    echo "`date` INFO: Waited ${run_time} seconds, broker message-spool not yet guaranteed-active. State: ${health_result}"
+    sleep ${pause}
+  done
+  if [ ${count} -eq ${loop_guard} ]; then
+    echo "`date` ERROR: broker message-spool never came guaranteed-active" | tee /dev/stderr
+    exit 1
+  fi
+
+  echo "`date` INFO: PubSub+ non-HA node bringup complete"
+  exit
+############# non-HA setup ends
+fi
+
+############# From here it's all HA setup
+echo "`date` Continuing node setup in an HA deployment"
+
+# Determine components
 host_name=`hostname`
 host_info=`grep ${host_name} ${config_file}`
 local_role=`echo $host_info | grep -o -E 'Monitor|EventBrokerPrimary|EventBrokerBackup'`
@@ -244,94 +342,58 @@ case $local_role in
   ;;
 esac
 
-# Setup password file permissions
-chown -R 1000001 $(dirname ${admin_password_file})
-chmod 700 $(dirname ${admin_password_file})
-
-if [[ ${disk_size} == "0" ]]; then
-  #Create new volumes that the PubSub+ Message Broker container can use to consume and store data.
-  docker volume create --name=jail
-  docker volume create --name=var
-  docker volume create --name=softAdb
-  docker volume create --name=diagnostics
-  docker volume create --name=internalSpool
-  SPOOL_MOUNT="-v jail:/usr/sw/jail -v var:/usr/sw/var -v softAdb:/usr/sw/internalSpool/softAdb -v diagnostics:/var/lib/solace/diags -v internalSpool:/usr/sw/internalSpool"
-else
-  echo "`date` Create primary partition on new disk"
-  (
-    echo n # Add a new partition
-    echo p # Primary partition
-    echo 1  # Partition number
-    echo   # First sector (Accept default: 1)
-    echo   # Last sector (Accept default: varies)
-    echo w # Write changes
-  ) | sudo fdisk $disk_volume
-
-  mkfs.xfs  ${disk_volume}1 -m crc=0
-  UUID=`blkid -s UUID -o value ${disk_volume}1`
-  echo "UUID=${UUID} /opt/pubsubplus xfs defaults,uid=1000001 0 0" >> /etc/fstab
-  mkdir /opt/pubsubplus
-  mkdir /opt/pubsubplus/jail
-  mkdir /opt/pubsubplus/var
-  mkdir /opt/pubsubplus/softAdb
-  mkdir /opt/pubsubplus/diagnostics
-  mkdir /opt/pubsubplus/internalSpool
-  mount -a
-  chown 1000001 -R /opt/pubsubplus/
-  SPOOL_MOUNT="-v /opt/pubsubplus/jail:/usr/sw/jail -v /opt/pubsubplus/var:/usr/sw/var -v /opt/pubsubplus/softAdb:/usr/sw/internalSpool/softAdb -v /opt/pubsubplus/diagnostics:/var/lib/solace/diags -v /opt/pubsubplus/internalSpool:/usr/sw/internalSpool"
-fi
-
 #Define a create script
-tee ~/docker-create <<-EOF
+tee ~/docker-create <<- EOF
 #!/bin/bash
 docker create \
- --uts=host \
- --shm-size=${shmsize} \
- --ulimit core=-1 \
- --ulimit memlock=-1 \
- --ulimit nofile=${ulimit_nofile} \
- --net=host \
- --restart=always \
- -v /mnt/pubsubplus/secrets:/run/secrets \
- ${SPOOL_MOUNT} \
- --log-driver awslogs \
- --log-opt awslogs-group=${logging_group} \
- --log-opt awslogs-stream=${logging_stream} \
- --env "system_scaling_maxconnectioncount=${maxconnectioncount}" \
- --env "logging_debug_output=all" \
- --env "logging_debug_format=${logging_format}" \
- --env "logging_command_output=all" \
- --env "logging_command_format=${logging_format}" \
- --env "logging_system_output=all" \
- --env "logging_system_format=${logging_format}" \
- --env "logging_event_output=all" \
- --env "logging_event_format=${logging_format}" \
- --env "logging_kernel_output=all" \
- --env "logging_kernel_format=${logging_format}" \
- --env "nodetype=${NODE_TYPE}" \
- --env "routername=${ROUTER_NAME}" \
- --env "username_admin_globalaccesslevel=admin" \
- --env "username_admin_passwordfilepath=$(basename ${admin_password_file})" \
- --env "service_ssh_port=2222" \
- --env "service_webtransport_port=8008" \
- --env "service_webtransport_tlsport=1443" \
- --env "service_semp_tlsport=1943" \
- ${REDUNDANCY_CFG} \
- --env "redundancy_authentication_presharedkey_key=`cat ${admin_password_file} | awk '{x=$0;for(i=length;i<51;i++)x=x "0";}END{print x}' | base64`" \
- --env "redundancy_enable=yes" \
+  --uts=host \
+  --shm-size=${shmsize} \
+  --ulimit core=-1 \
+  --ulimit memlock=-1 \
+  --ulimit nofile=${ulimit_nofile} \
+  --net=host \
+  --restart=always \
+  -v /mnt/pubsubplus/secrets:/run/secrets \
+  ${SPOOL_MOUNT} \
+  --log-driver awslogs \
+  --log-opt awslogs-group=${logging_group} \
+  --log-opt awslogs-stream=${logging_stream} \
+  --env "system_scaling_maxconnectioncount=${max_connections}" \
+  --env "system_scaling_maxqueuemessagecount=${max_queue_messages}" \
+  --env "logging_debug_output=all" \
+  --env "logging_debug_format=${logging_format}" \
+  --env "logging_command_output=all" \
+  --env "logging_command_format=${logging_format}" \
+  --env "logging_system_output=all" \
+  --env "logging_system_format=${logging_format}" \
+  --env "logging_event_output=all" \
+  --env "logging_event_format=${logging_format}" \
+  --env "logging_kernel_output=all" \
+  --env "logging_kernel_format=${logging_format}" \
+  --env "nodetype=${NODE_TYPE}" \
+  --env "routername=${ROUTER_NAME}" \
+  --env "username_admin_globalaccesslevel=admin" \
+  --env "username_admin_passwordfilepath=$(basename ${admin_password_file})" \
+  --env "service_ssh_port=2222" \
+  --env "service_webtransport_port=8008" \
+  --env "service_webtransport_tlsport=1443" \
+  --env "service_semp_tlsport=1943" \
+  ${REDUNDANCY_CFG} \
+  --env "redundancy_authentication_presharedkey_key=`cat ${admin_password_file} | awk '{x=$0;for(i=length;i<51;i++)x=x "0";}END{print x}' | base64`" \
+  --env "redundancy_enable=yes" \
   --env "redundancy_group_node_primary${primary_stack}_nodetype=message_routing" \
   --env "redundancy_group_node_primary${primary_stack}_connectvia=${PRIMARY_IP}" \
   --env "redundancy_group_node_backup${backup_stack}_nodetype=message_routing" \
   --env "redundancy_group_node_backup${backup_stack}_connectvia=${BACKUP_IP}" \
   --env "redundancy_group_node_monitor${monitor_stack}_nodetype=monitoring" \
   --env "redundancy_group_node_monitor${monitor_stack}_connectvia=${MONITOR_IP}" \
- --name=solace ${SOLACE_IMAGE_ID}
+  --name=solace ${SOLACE_IMAGE_ID}
 EOF
 
 #Make the file executable
 chmod +x ~/docker-create
 
-echo "`date` INFO: Creating the Solace container"
+echo "`date` INFO: Creating the broker container"
 ~/docker-create
 
 # Start the solace service and enable it at system start up.
@@ -346,7 +408,7 @@ count=0
 echo "`date` INFO: Wait for the Solace SEMP service to be enabled"
 while [ ${count} -lt ${loop_guard} ]; do
   online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-    -q "<rpc semp-version='soltr/8_7VMR'><show><service/></show></rpc>" \
+    -q "<rpc><show><service/></show></rpc>" \
     -v "/rpc-reply/rpc/show/service/services/service[name='SEMP']/enabled[text()]"`
 
   is_messagebroker_up=`echo ${online_results} | jq '.valueSearchResult' -`
@@ -375,7 +437,7 @@ if [ "${is_primary}" = "true" ]; then
   echo "`date` INFO: Wait for Primary to be 'Local Active' or 'Mate Active'"
   while [ ${count} -lt ${loop_guard} ]; do
     online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc semp-version='soltr/8_7VMR'><show><redundancy><detail/></redundancy></show></rpc>" \
+         -q "<rpc><show><redundancy><detail/></redundancy></show></rpc>" \
          -v "/rpc-reply/rpc/show/redundancy/virtual-routers/primary/status/activity[text()]"`
 
     local_activity=`echo ${online_results} | jq '.valueSearchResult' -`
@@ -410,7 +472,7 @@ if [ "${is_primary}" = "true" ]; then
   echo "`date` INFO: Wait for Backup to be 'Active' or 'Standby'"
   while [ ${count} -lt ${loop_guard} ]; do
     online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-         -q "<rpc semp-version='soltr/8_7VMR'><show><redundancy><detail/></redundancy></show></rpc>" \
+         -q "<rpc><show><redundancy><detail/></redundancy></show></rpc>" \
          -v "/rpc-reply/rpc/show/redundancy/virtual-routers/primary/status/detail/priority-reported-by-mate/summary[text()]"`
 
     mate_activity=`echo ${online_results} | jq '.valueSearchResult' -`
@@ -439,14 +501,60 @@ if [ "${is_primary}" = "true" ]; then
     exit 1
   fi
 
+  echo "`date` INFO: Initiating config-sync for router"
   /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-    -q "<rpc semp-version='soltr/8_7VMR'><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
+    -q "<rpc><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
+  echo "`date` INFO: Initiating config-sync for default vpn"
   /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-    -q "<rpc semp-version='soltr/8_7VMR'><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
+    -q "<rpc><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
+
+  # Wait for config-sync results
+  count=0
+  echo "`date` INFO: Waiting for config-sync connected"
+  while [ ${count} -lt ${loop_guard} ]; do
+    online_results=`/tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
+            -q "<rpc><show><config-sync></config-sync></show></rpc>" \
+            -v "/rpc-reply/rpc/show/config-sync/status/oper-status"`
+    
+    confsyncstatus_results=`echo ${online_results} | jq '.valueSearchResult' -`
+    echo "`date` INFO: Config-sync is: ${confsyncstatus_results}"
+
+    run_time=$((${count} * ${pause}))
+    case "${confsyncstatus_results}" in
+      "\"Up\"")
+        echo "`date` INFO: Config-sync is Up, after ${run_time} seconds"
+        break
+        ;;
+    esac
+    ((count++))
+    echo "`date` INFO: Waited ${run_time} seconds, Config-sync is not yet Up"
+    sleep ${pause}
+  done
+
+  if [ ${count} -eq ${loop_guard} ]; then
+    echo "`date` ERROR: Config-sync never reached state \"Up\" - exiting." | tee /dev/stderr
+    exit 1
+  fi
+
+  # Poll the broker Message-Spool
+  count=0
+  echo "`date` INFO: Wait for the broker message-spool service to be guaranteed-active"
+  while [ ${count} -lt ${loop_guard} ]; do
+    health_result=`curl -s -o /dev/null -w "%{http_code}"  http://localhost:5550/health-check/guaranteed-active`
+    run_time=$((${count} * ${pause}))
+    if [ "${health_result}" = "200" ]; then
+        echo "`date` INFO: broker message-spool is guaranteed-active, after ${run_time} seconds"
+        break
+    fi
+    ((count++))
+    echo "`date` INFO: Waited ${run_time} seconds, broker message-spool not yet guaranteed-active. State: ${health_result}"
+    sleep ${pause}
+  done
+  if [ ${count} -eq ${loop_guard} ]; then
+    echo "`date` ERROR: broker message-spool never came guaranteed-active" | tee /dev/stderr
+    exit 1
+  fi
+
 fi
 
-if [ ${count} -eq ${loop_guard} ]; then
-  echo "`date` ERROR: Solace bringup failed" | tee /dev/stderr
-  exit 1
-fi
-echo "`date` INFO: Solace bringup complete"
+echo "`date` INFO: PubSub+ HA-node bringup complete"

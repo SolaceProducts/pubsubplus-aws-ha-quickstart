@@ -8,10 +8,15 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: PubSub+ Configuration
+          default: PubSub+ Event Broker Configuration
         Parameters:
           - SolaceDockerImage
           - AdminPassword
+          - MaxClientConnections
+          - MaxQueueMessages
+          - WorkerNodeInstanceType
+          - WorkerNodeStorage
+          - MonitorNodeInstanceType
           - ContainerLoggingFormat
       - Label:
           default: Network Configuration
@@ -26,15 +31,6 @@ Metadata:
         Parameters:
           - KeyPairName
           - BootDiskSize
-      - Label:
-          default: Event Broker Instance Configuration
-        Parameters:
-          - EventBrokerNodeInstanceType
-          - EventBrokerNodeStorage
-      - Label:
-          default: Monitor Instance Configuration
-        Parameters:
-          - MonitorNodeInstanceType
       - Label:
           default: AWS Quick Start Configuration
         Parameters:
@@ -54,12 +50,16 @@ Metadata:
         default: Number of Availability Zones
       BootDiskSize:
         default: Boot Disk Capacity (GiB)
-      EventBrokerNodeInstanceType:
-        default: Instance Type
-      EventBrokerNodeStorage:
+      MaxClientConnections:
+        default: Maximum Number of Client Connections
+      MaxQueueMessages:
+        default: Maximum Number of Queue Messages
+      WorkerNodeInstanceType:
+        default: Message Routing Node Instance Type
+      WorkerNodeStorage:
         default: Persistent Storage
       MonitorNodeInstanceType:
-        default: Instance Type
+        default: Monitor Node Instance Type
       KeyPairName:
         default: Key Pair Name
       SSHAccessCIDR:
@@ -67,7 +67,7 @@ Metadata:
       RemoteAccessCIDR:
         default: Allowed External Access CIDR
       CreatePrivateSubnets:
-        default: Create production ready enviroment
+        default: Create production ready environment
       QSS3BucketName:
         default: Quick Start S3 Bucket Name
       QSS3BucketRegion:
@@ -79,7 +79,7 @@ Parameters:
     Description: >-
       Solace PubSub+ event broker Docker image reference: a Docker registry name
       with optional tag or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/
-      or it can be a url to a remotely hosted load version
+      or it can be a url to an image in a registry or a url to a tar.gz image on a web server
     Default: solace/solace-pubsub-standard:latest
     Type: String
   AdminPassword:
@@ -103,10 +103,10 @@ Parameters:
       to ''Number of Availability Zones'' previously specified'
     Type: List<AWS::EC2::AvailabilityZone::Name>
   NumberOfAZs:
-    ConstraintDescription: 3 means each node in own az, 2 puts monitor and backup
-      in one az
+    ConstraintDescription: Valid numbers are 3 or 2
     Default: '3'
-    Description: Number of availability zones to use
+    Description: Number of availability zones, based on availability in the target region, valid numbers are 3 or 2. 3 means each node in own AZ, 2 puts monitor and backup
+      in one AZ.
     AllowedValues:
       - '2'
       - '3'
@@ -118,15 +118,33 @@ Parameters:
     MaxValue: '128'
     MinValue: '8'
     Type: Number
-  EventBrokerNodeInstanceType:
+  MaxClientConnections:
+    AllowedValues:
+      - '100'
+      - '1000'
+      - '10000'
+      - '100000'
+      - '200000'
+    ConstraintDescription: Must be a valid value from the list.
+    Default: '100'
+    Description: 'Broker system scaling: the maximum supported number of client connections'
+    Type: String
+  MaxQueueMessages:
+    AllowedValues:
+      - '100'
+      - '240'
+      - '3000'
+    ConstraintDescription: Must be a valid EC2 instance type.
+    Default: '100'
+    Description: 'Broker system scaling: the maximum number of queue messages, in millions'
+    Type: String
+  WorkerNodeInstanceType:
     AllowedValues:
       - t2.small
       - t2.medium
       - t2.large
       - t2.xlarge
       - t2.2xlarge
-      - m3.large
-      - m3.xlarge
       - m4.large
       - m4.xlarge
       - m4.2xlarge
@@ -137,10 +155,11 @@ Parameters:
       - m5.4xlarge
     ConstraintDescription: Must be a valid EC2 instance type.
     Default: m4.large
-    Description: 'Instance Type for PubSub+ event broker message routing nodes. Note:
-      Make sure that your region supports the selected instance type before continuing'
+    Description: 'Instance Type for PubSub+ event broker message routing nodes. Important: ensure adequate CPU and Memory resources
+      are available to support the selected system scaling parameters. For requirements check https://docs.solace.com/. 
+      Also make sure that your region supports the selected instance type before continuing.'
     Type: String
-  EventBrokerNodeStorage:
+  WorkerNodeStorage:
     ConstraintDescription: No more than 640 GiB per device.
     Default: '0'
     Description: Allocated EBS storage for each block device (in GiB); 0 indicates
@@ -178,16 +197,13 @@ Parameters:
     Type: String
   MonitorNodeInstanceType:
     AllowedValues:
-      - t2.micro
       - t2.small
       - t2.medium
-      - t2.large
-      - t2.xlarge
       - m4.large
       - m5.large
     ConstraintDescription: Must be a valid EC2 instance type.
-    Default: t2.micro
-    Description: 'Instance Type for PubSub+ event broker monitoring node. Note: Make
+    Default: t2.medium
+    Description: 'Instance Type for PubSub+ event broker monitoring node. For requirements check https://docs.solace.com/. Note: Make
       sure that your region supports the selected instance type before continuing'
     Type: String
   QSS3BucketName:
@@ -221,9 +237,6 @@ Conditions:
   UsePrivateSubnets: !Equals
     - !Ref 'CreatePrivateSubnets'
     - 'true'
-  GovCloudCondition: !Equals
-    - !Ref 'AWS::Region'
-    - us-gov-west-1
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   VPCStack:
@@ -244,8 +257,6 @@ Resources:
   BastionStack:
     Type: AWS::CloudFormation::Stack
     Condition: UsePrivateSubnets
-    DependsOn:
-      - VPCStack
     Properties:
       TemplateURL:
         !Sub
@@ -283,8 +294,10 @@ Resources:
         ContainerLoggingFormat: !Ref 'ContainerLoggingFormat'
         NumberOfAZs: !Ref 'NumberOfAZs'
         BootDiskSize: !Ref 'BootDiskSize'
-        EventBrokerNodeInstanceType: !Ref 'EventBrokerNodeInstanceType'
-        EventBrokerNodeStorage: !Ref 'EventBrokerNodeStorage'
+        MaxClientConnections: !Ref 'MaxClientConnections'
+        MaxQueueMessages: !Ref 'MaxQueueMessages'
+        WorkerNodeInstanceType: !Ref 'WorkerNodeInstanceType'
+        WorkerNodeStorage: !Ref 'WorkerNodeStorage'
         MonitorNodeInstanceType: !Ref 'MonitorNodeInstanceType'
         KeyPairName: !Ref 'KeyPairName'
         QSS3BucketName: !Ref 'QSS3BucketName'

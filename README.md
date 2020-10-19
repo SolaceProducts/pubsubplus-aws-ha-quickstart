@@ -2,6 +2,10 @@
 
 # Install and Configure Solace PubSub+ Software Event Broker in an HA Tuple using AWS Cloud Formation
 
+This document provides a quick getting started guide to install a Solace PubSub+ software event broker deployment in Amazon Web Services cloud computing platform.
+
+The supported event broker version is 9.7 or later. For earlier broker releases use [this GitHub version of the QuickStart](https://github.com/SolaceProducts/pubsubplus-aws-ha-quickstart/tree/v2.0.1).
+
 ![alt text](/images/Solace-AWS-HA-Prod-3AZ.png "Production Environment for Solace PubSub+")
 
 This Quick Start template installs Solace PubSub+ Software Event Broker in fault tolerant high-availability (HA) redundancy groups. HA redundancy provides 1:1 event broker redundancy to increase overall service availability. If one of the event brokers fails, or is taken out of service, the other one automatically takes over and provides service to the clients that were previously served by the now out-of-service event broker.  To increase availability, the event brokers are deployed across 3 availability zones.
@@ -98,9 +102,14 @@ The next screen will allow you to fill in the details for the selected launch op
 | Parameter label (name)     | Default   | Description                                                        |
 |----------------------------|-----------|--------------------------------------------------------------------|
 | Stack name                 | Solace-HA | Any globally unique name                                           |
-| **PubSub+ Configuration**      |           |                                                                    |
+| **PubSub+ Event Broker Configuration**      |           |                                                                    |
 | PubSub+ Docker image reference (SolaceDockerImage) | solace/solace-pubsub-standard:latest | A reference to the Solace PubSub+ event broker Docker image, from step 1. Either the image name with optional tag in an accessible Docker registry or a download URL. The download URL can be obtained from http://dev.solace.com/downloads/ or it can be a URL to a remotely hosted image version, e.g. on S3 |
 | Password to access PubSub+ admin console and SEMP (AdminPassword) | _Requires_ _input_ | Password to allow PubSub+ admin access to configure the event broker instances |
+| Maximum Number of Client Connections (MaxClientConnections)| 100   | Broker system scaling: the maximum supported number of client connections |
+| Maximum Number of Queue Messages (MaxQueueMessages)     | 100   | Broker system scaling: the maximum number of queue messages, in millions |
+| Instance Type (WorkerNodeInstanceType) | m4.large | The EC2 instance type for the PubSub+ event broker primary and backup instances in Availability Zones 1 and 2. The m series are recommended for production use. <br/> Ensure adequate CPU and Memory resources are available to support the selected broker system scaling parameters. For requirements, check the [Solace documentation](//docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/System-Scaling-Parameters.htm). |
+| Persistent Storage (WorkerNodeStorage) | 0 | Amazon event broker storage allocated for each block device, in GiBs. The Quick Start supports up to 640 GiB per device. For sizing requirements, check the [Solace documentation](//docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/System-Scaling-Parameters.htm). The default value of 0 (zero) indicates ephemeral storage only. A non-zero value will cause a new Provisioned IOPS SSD (io1) disk to be created for message-spool. This disk will not be deleted on stack termination. |
+| Instance Type (MonitorNodeInstanceType) | t2.small | The EC2 instance type for the PubSub+ event broker monitor instance in Availability Zone 3 (or Availability Zone 2, if you’re using only two zones). |
 | Container logging format (ContainerLoggingFormat) | graylog | The format of the logs sent by the event broker to the CloudWatch service (see [documentation](https://docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/Docker-Tasks/Configuring-VMR-Container-Logging.htm?Highlight=logging#Config-Out-Form ) for details) |
 | **Network Configuration**  |           |                                                                    |
 | Number of Availability Zones (NumberOfAZs) | 3 | The number of Availability Zones (2 may be used for Proof-of-Concept testing or 3 for Production) you want to use in your deployment. This count must match the number of selections in the Availability Zones parameter; otherwise, your deployment will fail with an AWS CloudFormation template validation error. (Note that some regions provide only one or two Availability Zones.) |
@@ -111,11 +120,6 @@ The next screen will allow you to fill in the details for the selected launch op
 | **Common Amazon EC2 Configuration** | |                                                                     |
 | Key Pair Name (KeyPairName) | _Requires_ _input_ | A new or an existing public/private key pair within the AWS Region, which allows you to connect securely to your instances after launch. |
 | Boot Disk Capacity (BootDiskSize) | 24 | Amazon event broker storage allocated for the boot disk, in GiBs. The Quick Start supports 8-128 GiB. |
-| **Event Broker Instance Configuration** | |                                                                     |
-| Instance Type (EventBrokerNodeInstanceType) | m4.large | The EC2 instance type for the PubSub+ event broker primary and backup instances in Availability Zones 1 and 2. The m series are recommended for production use. <br/> The available CPU and memory of the selected machine type will limit the maximum connection scaling tier for the PubSub+ event broker. For requirements, refer to the [Solace documentation](https://docs.solace.com/Solace-SW-Broker-Set-Up/SW-Broker-Rel-Compat.htm#Connecti) |
-| Persistent Storage (EventBrokerNodeStorage) | 0 | Amazon event broker storage allocated for each block device, in GiBs. The Quick Start supports up to 640 GiB per device. The default value of 0 (zero) indicates ephemeral storage only. A non-zero value will cause a new Provisioned IOPS SSD (io1) disk to be created for message-spool. This disk will not be deleted on stack termination. |
-| **Monitor Instance Configuration** | |                                                                     |
-| Instance Type (MonitorNodeInstanceType) | t2.micro | The EC2 instance type for the PubSub+ event broker monitor instance in Availability Zone 3 (or Availability Zone 2, if you’re using only two zones). |
 | **AWS Quick Start Configuration** | |                                                                     |
 | Quick Start S3 Bucket Name (QSS3BucketName) | solace-products | S3 bucket where the Quick Start templates and scripts are installed. Change this parameter to specify the S3 bucket name you’ve created for your copy of Quick Start assets, if you decide to customize or extend the Quick Start for your own use. |
 | Quick Start S3 bucket region (QSS3BucketRegion) | us-east-1 | The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value. |

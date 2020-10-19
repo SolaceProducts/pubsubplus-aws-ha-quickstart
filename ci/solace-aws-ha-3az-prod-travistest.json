@@ -28,16 +28,16 @@
         "ParameterValue": "24"
     },
     {
-        "ParameterKey": "EventBrokerNodeInstanceType",
+        "ParameterKey": "WorkerNodeInstanceType",
         "ParameterValue": "EventBrokerNodeInstanceTypeParameterValue"
     },
     {
-        "ParameterKey": "EventBrokerNodeStorage",
+        "ParameterKey": "WorkerNodeStorage",
         "ParameterValue": "20"
     },
     {
         "ParameterKey": "MonitorNodeInstanceType",
-        "ParameterValue": "t2.micro"
+        "ParameterValue": "t2.small"
     },
     {
         "ParameterKey": "KeyPairName",
@@ -57,7 +57,7 @@
     },
     {
         "ParameterKey": "QSS3BucketRegion",
-        "ParameterValue": "SolaceStackRegionNAME"
+        "ParameterValue": "SolaceBucketRegionNAME"
     },
     {
         "ParameterKey": "QSS3KeyPrefix",
