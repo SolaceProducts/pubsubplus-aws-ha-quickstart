@@ -1,0 +1,141 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  This template creates a new VPC infrastructure for PubSub+ high availability architecture.
+  **WARNING** This template creates Amazon EC2 instance and related resources. You
+  will be billed for the AWS resources used if you create a stack from this template.
+  (qs-1nju7g5qq)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - NumberOfAZs
+          - AvailabilityZones
+          - CreatePrivateSubnets
+          - SSHAccessCIDR
+      - Label:
+          default: AWS Quick Start Configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3BucketRegion
+          - QSS3KeyPrefix
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+      NumberOfAZs:
+        default: Number of Availability Zones
+      KeyPairName:
+        default: Key Pair Name
+      SSHAccessCIDR:
+        default: Permitted IP range for console SSH access
+      CreatePrivateSubnets:
+        default: Create production ready environment
+      QSS3BucketName:
+        default: Quick Start S3 Bucket Name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
+      QSS3KeyPrefix:
+        default: Quick Start S3 Key Prefix
+Parameters:
+  AvailabilityZones:
+    Description: 'List of Availability Zones to use for the subnets in the VPC. Note:
+      The logical order is preserved. The number of zones to choose must be equal
+      to ''Number of Availability Zones'' previously specified'
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+  NumberOfAZs:
+    ConstraintDescription: Valid numbers are 3 or 2
+    Default: '3'
+    Description: Number of availability zones, based on availability in the target region, valid numbers are 3 or 2. 3 means each node in own AZ, 2 puts monitor and backup
+      in one AZ.
+    AllowedValues:
+      - '2'
+      - '3'
+    Type: Number
+  KeyPairName:
+    Description: Name of an existing EC2 key pair within the AWS region; all instances
+      will launch with this key pair
+    Type: AWS::EC2::KeyPair::KeyName
+  CreatePrivateSubnets:
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'true'
+    Description: Whether to create and use Private Subnets with a fronting ELB
+    Type: String
+  SSHAccessCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
+    Description: Allowed CIDR block for external access to cluster nodes for mgmt
+    Type: String
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: solace-products
+    Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
+      can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slash (/).
+    Default: pubsubplus-aws-ha-quickstart/latest/
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+Mappings: {}
+Conditions:
+  UsePrivateSubnets: !Equals
+    - !Ref 'CreatePrivateSubnets'
+    - 'true'
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        AvailabilityZones: !Join
+          - ','
+          - !Ref 'AvailabilityZones'
+        CreatePrivateSubnets: !Ref 'CreatePrivateSubnets'
+        KeyPairName: !Ref 'KeyPairName'
+        NumberOfAZs: !Ref 'NumberOfAZs'
+  BastionStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: UsePrivateSubnets
+    Properties:
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        BastionInstanceType: t2.micro
+        BastionAMIOS: Amazon-Linux-HVM
+        EnableBanner: 'true'
+        BastionBanner: !Sub
+          - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/solace-banner.txt
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        NumBastionHosts: '2'
+        KeyPairName: !Ref 'KeyPairName'
+        PublicSubnet1ID: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
+        PublicSubnet2ID: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Sub ${QSS3KeyPrefix}submodules/quickstart-linux-bastion/
+        RemoteAccessCIDR: !Ref 'SSHAccessCIDR'
+        VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
