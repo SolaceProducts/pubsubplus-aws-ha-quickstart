@@ -16,6 +16,14 @@ jobs:
       TESTSTACKNAME: $TESTSTACKPREFIX-sol-aws-ghactionstest
 
     steps:
+    - name: Set env
+      run: |
+        echo "AWS_DEFAULT_REGION=eu-west-2" >> $GITHUB_ENV
+        echo "TEST_S3_BUCKET=solace-cf-quickstart-ghactionstest" >> $GITHUB_ENV
+        TESTSTACKPREFIX=T$(echo $(date +%s) | rev)
+        echo "TESTSTACKPREFIX=$TESTSTACKPREFIX" >> $GITHUB_ENV
+        echo "TESTSTACKNAME=$TESTSTACKPREFIX-sol-aws-ghactionstest" >> $GITHUB_ENV
+
     - name: Checkout
       uses: actions/checkout@v2
       with:
