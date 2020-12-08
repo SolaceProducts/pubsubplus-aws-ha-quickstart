@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AWS_DEFAULT_REGION: eu-west-2
+      TEST_S3_BUCKET: solace-cf-quickstart-ghactionstest
 
     steps:
     - name: Checkout
@@ -31,15 +32,15 @@ jobs:
         aws cloudformation validate-template --template-body file://templates/solace-master.template
         aws cloudformation validate-template --template-body file://templates/solace.template
         aws cloudformation validate-template --template-body file://templates/nodecreate.template
-        aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"
+        aws s3 mb s3://${{ env.TEST_S3_BUCKET }} || echo "s3 bucket already existed"
 
     - name: Copy test artifacts to test S3 bucket
       run: |
         MESSAGEBROKERNODEINSTANCETYPE=t2.small
         sed -i "s@SolaceDockerImageParameterValue@${SOLACE_DOCKER_URL_PARAMETER_VALUE}@g" ci/solace-aws-ha-3az-prod-travistest.json
         sed -i "s@EventBrokerNodeInstanceTypeParameterValue@${MESSAGEBROKERNODEINSTANCETYPE}@g" ci/solace-aws-ha-3az-prod-travistest.json
-        aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"
-        export BUCKETREGION=`aws s3api get-bucket-location --bucket solace-cf-quickstart-travistest | grep LocationConstraint | awk -F' ' '{print $NF}' | tr -d '"'`
+        aws s3 mb s3://${{ env.TEST_S3_BUCKET }} || echo "s3 bucket already existed"
+        export BUCKETREGION=`aws s3api get-bucket-location --bucket ${{ env.TEST_S3_BUCKET }} | grep LocationConstraint | awk -F' ' '{print $NF}' | tr -d '"'`
         sed -i "s@SolaceStackRegionNAME@${AWS_DEFAULT_REGION}@g" ci/solace-aws-ha-3az-prod-travistest.json
         sed -i "s@SolaceBucketRegionNAME@${BUCKETREGION}@g" ci/solace-aws-ha-3az-prod-travistest.json
-        aws s3 sync . s3://solace-cf-quickstart-travistest/solace/eventbroker/latest --acl public-read
+        aws s3 sync . s3://${{ env.TEST_S3_BUCKET }}/solace/eventbroker/latest --acl public-read
