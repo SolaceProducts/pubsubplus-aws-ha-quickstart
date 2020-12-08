@@ -1,0 +1,45 @@
+name: build
+
+# Controls when the action will run. 
+on:
+  pull_request:
+  push:
+
+jobs:
+  build:
+    name: AWS CI test
+    runs-on: ubuntu-latest
+    env:
+      AWS_DEFAULT_REGION: eu-west-2
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Configure AWS credentials from Test account
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: $AWS_DEFAULT_REGION
+
+    - name: Lint yaml templates
+      run: |
+        sudo apt-get update -y; sudo apt-get install -y yamllint
+        aws cloudformation validate-template --template-body file://templates/solace-master.template
+        aws cloudformation validate-template --template-body file://templates/solace.template
+        aws cloudformation validate-template --template-body file://templates/nodecreate.template
+        aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"
+
+    - name: Copy test artifacts to test S3 bucket
+      run: |
+        MESSAGEBROKERNODEINSTANCETYPE=t2.small
+        sed -i "s@SolaceDockerImageParameterValue@${SOLACE_DOCKER_URL_PARAMETER_VALUE}@g" ci/solace-aws-ha-3az-prod-travistest.json
+        sed -i "s@EventBrokerNodeInstanceTypeParameterValue@${MESSAGEBROKERNODEINSTANCETYPE}@g" ci/solace-aws-ha-3az-prod-travistest.json
+        aws s3 mb s3://solace-cf-quickstart-travistest || echo "s3 bucket already existed"
+        export BUCKETREGION=`aws s3api get-bucket-location --bucket solace-cf-quickstart-travistest | grep LocationConstraint | awk -F' ' '{print $NF}' | tr -d '"'`
+        sed -i "s@SolaceStackRegionNAME@${AWS_DEFAULT_REGION}@g" ci/solace-aws-ha-3az-prod-travistest.json
+        sed -i "s@SolaceBucketRegionNAME@${BUCKETREGION}@g" ci/solace-aws-ha-3az-prod-travistest.json
+        aws s3 sync . s3://solace-cf-quickstart-travistest/solace/eventbroker/latest --acl public-read
