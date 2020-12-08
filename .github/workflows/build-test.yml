@@ -12,6 +12,8 @@ jobs:
     env:
       AWS_DEFAULT_REGION: eu-west-2
       TEST_S3_BUCKET: solace-cf-quickstart-ghactionstest
+      TESTSTACKPREFIX: T`echo "$(date +%s)" | rev`
+      TESTSTACKNAME: $TESTSTACKPREFIX-sol-aws-ghactionstest
 
     steps:
     - name: Checkout
