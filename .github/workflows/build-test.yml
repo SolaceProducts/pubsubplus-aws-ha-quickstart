@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 30
 
     steps:
     - name: Set env
@@ -52,7 +52,7 @@ jobs:
 
     - name: Test with production deployment option (create public subnet)
       run: |
-        aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure ROLLBACK --capabilities CAPABILITY_NAMED_IAM
+        aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure DO_NOTHING --capabilities CAPABILITY_NAMED_IAM
         echo "Waiting for stack create complete"
         until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
         aws cloudformation describe-stack-events --stack-name $TESTSTACKNAME
