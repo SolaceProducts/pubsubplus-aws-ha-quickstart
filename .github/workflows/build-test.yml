@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Set env
       run: |
-        echo "AWS_DEFAULT_REGION=eu-west-2" >> $GITHUB_ENV
+        echo "AWS_DEFAULT_REGION=eu-west-1" >> $GITHUB_ENV
         echo "TEST_S3_BUCKET=solace-cf-quickstart-ghtest" >> $GITHUB_ENV
         TESTSTACKPREFIX=T$(echo $(date +%s) | rev)
         echo "TESTSTACKPREFIX=$TESTSTACKPREFIX" >> $GITHUB_ENV
@@ -42,7 +42,7 @@ jobs:
     - name: Copy test artifacts to test S3 bucket
       run: |
         MESSAGEBROKERNODEINSTANCETYPE=t2.small
-        sed -i "s@SolaceDockerImageParameterValue@${SOLACE_DOCKER_URL_PARAMETER_VALUE}@g" ci/solace-aws-ha-3az-prod-travistest.json
+        sed -i "s@SolaceDockerImageParameterValue@${{ secrets.BROKER_DOCKER_IMAGE_REF }}@g" ci/solace-aws-ha-3az-prod-travistest.json
         sed -i "s@EventBrokerNodeInstanceTypeParameterValue@${MESSAGEBROKERNODEINSTANCETYPE}@g" ci/solace-aws-ha-3az-prod-travistest.json
         aws s3 mb s3://${{ env.TEST_S3_BUCKET }} || echo "s3 bucket already existed"
         export BUCKETREGION=`aws s3api get-bucket-location --bucket ${{ env.TEST_S3_BUCKET }} | grep LocationConstraint | awk -F' ' '{print $NF}' | tr -d '"'`
