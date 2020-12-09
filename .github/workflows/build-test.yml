@@ -54,6 +54,7 @@ jobs:
       run: |
         aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure DO_NOTHING --capabilities CAPABILITY_NAMED_IAM
         echo "Waiting for stack create complete"
+        sleep 30; aws cloudformation describe-stacks --stack-name $TESTSTACKNAME
         until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
         aws cloudformation describe-stack-events --stack-name $TESTSTACKNAME
         aws cloudformation describe-stacks --stack-name $TESTSTACKNAME
@@ -65,8 +66,12 @@ jobs:
         sleep 30
         curl -sS -u admin:admin http://$url:8080/SEMP -d "<rpc><show><redundancy></redundancy></show></rpc>"
         curl -sS -u admin:admin http://$url:8080/SEMP -d "<rpc><show><config-sync></config-sync></show></rpc>"
-        if [[ -z `curl -sS -u admin:admin http://$url:8080/SEMP -d "<rpc><show><config-sync></config-sync></show></rpc>" | grep "<oper-status>Up</oper-status>"` ]] ; then echo "config-sync not up!"; exit; fi
+        if [[ -z `curl -sS -u admin:admin http://$url:8080/SEMP -d "<rpc><show><config-sync></config-sync></show></rpc>" | grep "<oper-status>Up</oper-status>"` ]] ; then echo "config-sync not up!"; exit 1; fi
         pubSubTools/sdkperf_c -cip=$url -mn=100000 -mr=0 -ptl=t1 -stl=t1 | grep "Total Messages"
+
+    - name: Delete test deployment (Cleanup)
+      if: ${{ always() }}
+      run: |
         aws cloudformation delete-stack --stack-name $TESTSTACKNAME
         echo "Waiting for stack delete complete"
         stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep StackId | awk -F '"' '{print $4}')"
