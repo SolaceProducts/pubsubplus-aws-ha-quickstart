@@ -55,7 +55,11 @@ jobs:
         aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure ROLLBACK --capabilities CAPABILITY_NAMED_IAM
         echo "Waiting for stack create complete"
         sleep 30; aws cloudformation describe-stacks --stack-name $TESTSTACKNAME
-        until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
+        until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep -m 1 -E 'CREATE_COMPLETE'; do
+          sleep 10
+          if aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep -m 1 -E 'DELETE_IN_PROGRESS'; then exit 1; fi
+          sleep 10
+          done
         aws cloudformation describe-stack-events --stack-name $TESTSTACKNAME
         aws cloudformation describe-stacks --stack-name $TESTSTACKNAME
         echo "Pausing to get the ELB ready"; sleep 10
