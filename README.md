@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/SolaceProducts/pubsubplus-aws-ha-quickstart.svg?branch=master)](https://travis-ci.org/SolaceProducts/pubsubplus-aws-ha-quickstart)
+[![Actions Status](https://github.com/SolaceProducts/pubsubplus-aws-ha-quickstart/workflows/build/badge.svg?branch=master)](https://github.com/SolaceProducts/pubsubplus-aws-ha-quickstart/actions?query=workflow%3Abuild+branch%3Amaster)
 
 # Install and Configure Solace PubSub+ Software Event Broker in an HA Tuple using AWS Cloud Formation
 
