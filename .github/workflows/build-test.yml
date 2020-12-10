@@ -3,6 +3,7 @@ name: build
 # Controls when the action will run. 
 on:
   pull_request:
+
   push:
 
 jobs:
@@ -13,7 +14,7 @@ jobs:
     steps:
     - name: Set env
       run: |
-        echo "AWS_DEFAULT_REGION=eu-west-1" >> $GITHUB_ENV
+        echo "AWS_DEFAULT_REGION=eu-west-2" >> $GITHUB_ENV
         echo "TEST_S3_BUCKET=solace-cf-quickstart-ghtest" >> $GITHUB_ENV
         TESTSTACKPREFIX=T$(echo $(date +%s) | rev)
         echo "TESTSTACKPREFIX=$TESTSTACKPREFIX" >> $GITHUB_ENV
@@ -81,7 +82,7 @@ jobs:
     - name: Delete test deployment (Cleanup)
       if: ${{ always() }}
       run: |
-        aws cloudformation delete-stack --stack-name $TESTSTACKNAME || echo Couldn't delete stack $TESTSTACKNAME
+        aws cloudformation delete-stack --stack-name $TESTSTACKNAME || echo "Couldn't delete stack $TESTSTACKNAME"
         echo "Waiting for stack delete complete"
         stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep StackId | awk -F '"' '{print $4}')"
         if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
@@ -100,7 +101,7 @@ jobs:
     - name: Delete No Private Subnet test deployment (Cleanup)
       if: ${{ always() }}
       run: |
-        aws cloudformation delete-stack --stack-name $TESTSTACKNAME2 || echo Couldn't delete stack $TESTSTACKNAME2
+        aws cloudformation delete-stack --stack-name $TESTSTACKNAME2 || echo "Couldn't delete stack $TESTSTACKNAME2"
         echo "Waiting for stack delete complete"
         stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME2 | grep StackId | awk -F '"' '{print $4}')"
         if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
