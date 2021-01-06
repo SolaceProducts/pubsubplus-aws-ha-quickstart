@@ -292,7 +292,6 @@ Resources:
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         BastionInstanceType: t2.micro
-        BastionAMIOS: Amazon-Linux-HVM
         EnableBanner: 'true'
         BastionBanner: !Sub
           - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/solace-banner.txt
