@@ -48,17 +48,17 @@ jobs:
     - name: Copy test artifacts to test S3 bucket
       run: |
         MESSAGEBROKERNODEINSTANCETYPE=t2.small
-        sed -i "s@SolaceDockerImageParameterValue@${{ secrets.BROKER_DOCKER_IMAGE_REF }}@g" ci/solace-aws-ha-3az-prod-travistest.json
-        sed -i "s@EventBrokerNodeInstanceTypeParameterValue@${MESSAGEBROKERNODEINSTANCETYPE}@g" ci/solace-aws-ha-3az-prod-travistest.json
+        sed -i "s@SolaceDockerImageParameterValue@${{ secrets.BROKER_DOCKER_IMAGE_REF }}@g" ci/solace-aws-ha-3az-prod-test.json
+        sed -i "s@EventBrokerNodeInstanceTypeParameterValue@${MESSAGEBROKERNODEINSTANCETYPE}@g" ci/solace-aws-ha-3az-prod-test.json
         aws s3 mb s3://${{ env.TEST_S3_BUCKET }} || echo "s3 bucket already existed"
         export BUCKETREGION=`aws s3api get-bucket-location --bucket ${{ env.TEST_S3_BUCKET }} | grep LocationConstraint | awk -F' ' '{print $NF}' | tr -d '"'`
-        sed -i "s@SolaceStackRegionNAME@${AWS_DEFAULT_REGION}@g" ci/solace-aws-ha-3az-prod-travistest.json
-        sed -i "s@SolaceBucketRegionNAME@${BUCKETREGION}@g" ci/solace-aws-ha-3az-prod-travistest.json
+        sed -i "s@SolaceStackRegionNAME@${AWS_DEFAULT_REGION}@g" ci/solace-aws-ha-3az-prod-test.json
+        sed -i "s@SolaceBucketRegionNAME@${BUCKETREGION}@g" ci/solace-aws-ha-3az-prod-test.json
         aws s3 sync . s3://${{ env.TEST_S3_BUCKET }}/solace/eventbroker/latest --acl public-read
 
     - name: Test with production deployment option (create public subnet)
       run: |
-        aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure ROLLBACK --capabilities CAPABILITY_NAMED_IAM
+        aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-test.json --on-failure ROLLBACK --capabilities CAPABILITY_NAMED_IAM
         echo "Waiting for stack create complete"
         sleep 30; aws cloudformation describe-stacks --stack-name $TESTSTACKNAME
         until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep -m 1 -E 'CREATE_COMPLETE'; do
@@ -95,8 +95,8 @@ jobs:
       run: |
         export TESTSTACKNAME2="$TESTSTACKNAME-1"
         echo "TESTSTACKNAME2=$TESTSTACKNAME2" >> $GITHUB_ENV
-        sed -i "s@true@false@g" ci/solace-aws-ha-3az-prod-travistest.json
-        aws cloudformation create-stack --stack-name $TESTSTACKNAME2 --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-travistest.json --on-failure ROLLBACK --capabilities CAPABILITY_NAMED_IAM
+        sed -i "s@true@false@g" ci/solace-aws-ha-3az-prod-test.json
+        aws cloudformation create-stack --stack-name $TESTSTACKNAME2 --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-test.json --on-failure ROLLBACK --capabilities CAPABILITY_NAMED_IAM
         echo "Waiting for stack create complete"
         until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME2 | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
         aws cloudformation describe-stack-events --stack-name $TESTSTACKNAME2

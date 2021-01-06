@@ -53,7 +53,7 @@
     },
     {
         "ParameterKey": "QSS3BucketName",
-        "ParameterValue": "solace-cf-quickstart-travistest"
+        "ParameterValue": "solace-cf-quickstart-ghtest"
     },
     {
         "ParameterKey": "QSS3BucketRegion",
