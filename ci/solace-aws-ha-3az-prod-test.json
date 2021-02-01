@@ -37,7 +37,7 @@
     },
     {
         "ParameterKey": "MonitorNodeInstanceType",
-        "ParameterValue": "t2.small"
+        "ParameterValue": "t2.medium"
     },
     {
         "ParameterKey": "KeyPairName",
