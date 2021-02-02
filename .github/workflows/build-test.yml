@@ -14,7 +14,7 @@ jobs:
     steps:
     - name: Set env
       run: |
-        echo "AWS_DEFAULT_REGION=ap-northeast-2" >> $GITHUB_ENV
+        echo "AWS_DEFAULT_REGION=eu-west-2" >> $GITHUB_ENV
         echo "TEST_S3_BUCKET=solace-cf-quickstart-ghtest" >> $GITHUB_ENV
         TESTSTACKPREFIX=T$(echo $(date +%s) | rev)
         echo "TESTSTACKPREFIX=$TESTSTACKPREFIX" >> $GITHUB_ENV
@@ -58,7 +58,7 @@ jobs:
 
     - name: Test with production deployment option (create public subnet)
       run: |
-        aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-test.json --on-failure DO_NOTHING --capabilities CAPABILITY_NAMED_IAM
+        aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-test.json --on-failure ROLLBACK --capabilities CAPABILITY_NAMED_IAM
         echo "Waiting for stack create complete"
         sleep 30; aws cloudformation describe-stacks --stack-name $TESTSTACKNAME
         until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep -m 1 -E 'CREATE_COMPLETE'; do
