@@ -528,6 +528,15 @@ if [ "${is_primary}" = "true" ]; then
     esac
     ((count++))
     echo "`date` INFO: Waited ${run_time} seconds, Config-sync is not yet Up"
+
+    if (( $count % 18 == 0 )) ; then
+      echo "`date` INFO: Re-trying initiate config-sync for router"
+      /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
+              -q "<rpc><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
+      /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
+              -q "<rpc><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
+    fi
+
     sleep ${pause}
   done
 
@@ -556,5 +565,11 @@ if [ "${is_primary}" = "true" ]; then
   fi
 
 fi
+
+if [ ${count} -eq ${loop_guard} ]; then
+  echo "`date` ERROR: Solace bringup failed" | tee /dev/stderr
+  exit 1
+fi
+echo "`date` INFO: Solace bringup complete"
 
 echo "`date` INFO: PubSub+ HA-node bringup complete"
