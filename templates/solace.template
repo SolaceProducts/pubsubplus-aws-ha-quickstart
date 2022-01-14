@@ -464,6 +464,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 5550
           ToPort: 5550
+          CidrIp: '0.0.0.0/0'
         - IpProtocol: tcp
           FromPort: 55555
           ToPort: 55555
