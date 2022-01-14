@@ -506,7 +506,7 @@ if [ "${is_primary}" = "true" ]; then
     -q "<rpc semp-version=\"soltr/9_8VMR\"><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
   echo "`date` INFO: Initiating config-sync for default vpn"
   /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-    -q "<rpc semp-version=\"soltr/9_8VMR\"><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
+    -q "<rpc semp-version=\"soltr/9_8VMR\"><admin><config-sync><assert-master><vpn-name>*</vpn-name></assert-master></config-sync></admin></rpc>"
 
   # Wait for config-sync results
   count=0
@@ -534,7 +534,7 @@ if [ "${is_primary}" = "true" ]; then
       /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
               -q "<rpc semp-version=\"soltr/9_8VMR\"><admin><config-sync><assert-master><router/></assert-master></config-sync></admin></rpc>"
       /tmp/semp_query.sh -n admin -p ${admin_password} -u http://localhost:8080/SEMP \
-              -q "<rpc semp-version=\"soltr/9_8VMR\"><admin><config-sync><assert-master><vpn-name>default</vpn-name></assert-master></config-sync></admin></rpc>"
+              -q "<rpc semp-version=\"soltr/9_8VMR\"><admin><config-sync><assert-master><vpn-name>*</vpn-name></assert-master></config-sync></admin></rpc>"
     fi
 
     sleep ${pause}
