@@ -58,7 +58,7 @@ jobs:
 
     - name: Test with production deployment option (create public subnet)
       run: |
-        aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-test.json --on-failure ROLLBACK --capabilities CAPABILITY_NAMED_IAM
+        aws cloudformation create-stack --stack-name $TESTSTACKNAME --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-test.json --on-failure DO_NOTHING --capabilities CAPABILITY_NAMED_IAM
         echo "Waiting for stack create complete"
         sleep 30; aws cloudformation describe-stacks --stack-name $TESTSTACKNAME
         until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep -m 1 -E 'CREATE_COMPLETE'; do
@@ -83,36 +83,36 @@ jobs:
         if [[ -z `curl -sS -u admin:admin http://$url:8080/SEMP -d "<rpc><show><config-sync></config-sync></show></rpc>" | grep "<oper-status>Up</oper-status>"` ]] ; then echo "config-sync not up!"; exit 1; fi
         pubSubTools/sdkperf_c -cip=$url -mn=100000 -mr=0 -ptl=t1 -stl=t1 | grep "Total Messages"
 
-    - name: Delete test deployment (Cleanup)
-      if: ${{ always() }}
-      run: |
-        aws cloudformation delete-stack --stack-name $TESTSTACKNAME || echo "Couldn't delete stack $TESTSTACKNAME"
-        echo "Waiting for stack delete complete"
-        stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep StackId | awk -F '"' '{print $4}')"
-        if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
-
-    - name: Testing with No Private Subnet
-      run: |
-        export TESTSTACKNAME2="$TESTSTACKNAME-1"
-        echo "TESTSTACKNAME2=$TESTSTACKNAME2" >> $GITHUB_ENV
-        sed -i "s@true@false@g" ci/solace-aws-ha-3az-prod-test.json
-        aws cloudformation create-stack --stack-name $TESTSTACKNAME2 --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-test.json --on-failure ROLLBACK --capabilities CAPABILITY_NAMED_IAM
-        echo "Waiting for stack create complete"
-        until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME2 | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
-        aws cloudformation describe-stack-events --stack-name $TESTSTACKNAME2
-        aws cloudformation describe-stacks --stack-name $TESTSTACKNAME2
-
-    - name: Delete No Private Subnet test deployment (Cleanup)
-      if: ${{ always() }}
-      run: |
-        aws cloudformation delete-stack --stack-name $TESTSTACKNAME2 || echo "Couldn't delete stack $TESTSTACKNAME2"
-        echo "Waiting for stack delete complete"
-        stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME2 | grep StackId | awk -F '"' '{print $4}')"
-        if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
-
-    - name: Update QuickStart S3 on success for SolaceProducts
-      if: ${{ success() }} && github.event_name == 'push'
-      run: |
-        if [ ${{ github.ref }} == 'refs/heads/master' ] && [ ${{ github.repository_owner }} == 'SolaceProducts' ] ; then
-          aws s3 sync . s3://solace-products/pubsubplus-aws-ha-quickstart/latest --acl public-read
-        fi
+#    - name: Delete test deployment (Cleanup)
+#      if: ${{ always() }}
+#      run: |
+#        aws cloudformation delete-stack --stack-name $TESTSTACKNAME || echo "Couldn't delete stack $TESTSTACKNAME"
+#        echo "Waiting for stack delete complete"
+#        stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME | grep StackId | awk -F '"' '{print $4}')"
+#        if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
+#
+#    - name: Testing with No Private Subnet
+#      run: |
+#        export TESTSTACKNAME2="$TESTSTACKNAME-1"
+#        echo "TESTSTACKNAME2=$TESTSTACKNAME2" >> $GITHUB_ENV
+#        sed -i "s@true@false@g" ci/solace-aws-ha-3az-prod-test.json
+#        aws cloudformation create-stack --stack-name $TESTSTACKNAME2 --template-body file://templates/solace-master.template --parameters file://ci/solace-aws-ha-3az-prod-test.json --on-failure ROLLBACK --capabilities CAPABILITY_NAMED_IAM
+#        echo "Waiting for stack create complete"
+#        until aws cloudformation describe-stacks --stack-name $TESTSTACKNAME2 | grep -m 1 -E 'CREATE_COMPLETE|DELETE_IN_PROGRESS'; do sleep 10; done
+#        aws cloudformation describe-stack-events --stack-name $TESTSTACKNAME2
+#        aws cloudformation describe-stacks --stack-name $TESTSTACKNAME2
+#
+#    - name: Delete No Private Subnet test deployment (Cleanup)
+#      if: ${{ always() }}
+#      run: |
+#        aws cloudformation delete-stack --stack-name $TESTSTACKNAME2 || echo "Couldn't delete stack $TESTSTACKNAME2"
+#        echo "Waiting for stack delete complete"
+#        stackid="$(aws cloudformation describe-stacks --stack-name $TESTSTACKNAME2 | grep StackId | awk -F '"' '{print $4}')"
+#        if [ -n "$stackid" ]; then until aws cloudformation describe-stacks --stack-name $stackid | grep -m 1 "DELETE_COMPLETE"; do sleep 10; done; fi
+#
+#    - name: Update QuickStart S3 on success for SolaceProducts
+#      if: ${{ success() }} && github.event_name == 'push'
+#      run: |
+#        if [ ${{ github.ref }} == 'refs/heads/master' ] && [ ${{ github.repository_owner }} == 'SolaceProducts' ] ; then
+#          aws s3 sync . s3://solace-products/pubsubplus-aws-ha-quickstart/latest --acl public-read
+#        fi
