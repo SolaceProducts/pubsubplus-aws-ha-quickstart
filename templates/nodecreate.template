@@ -192,6 +192,9 @@ Conditions:
   EphemeralStorage: !Equals
     - !Ref 'PersistentStorage'
     - '0'
+  IOStorageType: !Equals
+    - !Ref 'PersistentStorageType'
+    - 'io1'
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   NonHA: !Equals [!Ref NodeDesignation, 'event-broker-singlenode']
 Resources:
@@ -473,10 +476,13 @@ Resources:
               VolumeSize: !Ref 'PersistentStorage'
               DeleteOnTermination: 'False'
               VolumeType: !Ref 'PersistentStorageType'
-              Iops: !FindInMap
-                - IOPsMap
-                - !Ref 'PersistentStorage'
-                - IOPs
+              Iops: !If
+                - IOStorageType
+                - !FindInMap
+                    - IOPsMap
+                    - !Ref 'PersistentStorage'
+                    - IOPs
+                - !Ref 'AWS::NoValue'
       ImageId: !FindInMap
         - AWSAMIRegionMap
         - !Ref 'AWS::Region'
