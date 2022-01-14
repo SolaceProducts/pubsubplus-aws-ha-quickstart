@@ -99,6 +99,14 @@ Parameters:
       - '320'
       - '640'
     Type: Number
+  PersistentStorageType:
+    Default: 'gp2'
+    Description: Storage volume type provided by Amazon EBS. "io1" is recommended for Production environments (better performance, more expensive)
+      and is required for large storage size.
+    AllowedValues:
+      - 'gp2'
+      - 'io1'
+    Type: String
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase
@@ -464,7 +472,7 @@ Resources:
             Ebs:
               VolumeSize: !Ref 'PersistentStorage'
               DeleteOnTermination: 'False'
-              VolumeType: io1
+              VolumeType: !Ref 'PersistentStorageType'
               Iops: !FindInMap
                 - IOPsMap
                 - !Ref 'PersistentStorage'

@@ -13,6 +13,7 @@ Metadata:
           - MaxQueueMessages
           - WorkerNodeInstanceType
           - WorkerNodeStorage
+          - WorkerNodeStorageType
           - MonitorNodeInstanceType
           - ContainerLoggingFormat
       - Label:
@@ -55,6 +56,8 @@ Metadata:
         default: Message Routing Node Instance Type
       WorkerNodeStorage:
         default: Persistent Storage
+      WorkerNodeStorageType:
+        default: Persistent Storage Type
       MonitorNodeInstanceType:
         default: Monitor Node Instance Type
       KeyPairName:
@@ -172,6 +175,14 @@ Parameters:
       - '320'
       - '640'
     Type: Number
+  WorkerNodeStorageType:
+    Default: 'gp2'
+    Description: Storage volume type provided by Amazon EBS. "io1" is recommended for Production environments (better performance, more expensive)
+      and is required for large storage size.
+    AllowedValues:
+      - 'gp2'
+      - 'io1'
+    Type: String
   KeyPairName:
     Description: Name of an existing EC2 key pair within the AWS region; all instances
       will launch with this key pair
@@ -280,6 +291,7 @@ Resources:
             - !Ref 'RemoteMgmtSecurityGroup'
         ParentStackName: !Ref 'AWS::StackName'
         PersistentStorage: !Ref 'WorkerNodeStorage'
+        PersistentStorageType: !Ref 'WorkerNodeStorageType'
         QSS3BucketName: !Ref 'QSS3BucketName'
         QSS3BucketRegion: !Ref 'QSS3BucketRegion'
         QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
@@ -316,6 +328,7 @@ Resources:
             - !Ref 'RemoteMgmtSecurityGroup'
         ParentStackName: !Ref 'AWS::StackName'
         PersistentStorage: !Ref 'WorkerNodeStorage'
+        PersistentStorageType: !Ref 'WorkerNodeStorageType'
         QSS3BucketName: !Ref 'QSS3BucketName'
         QSS3BucketRegion: !Ref 'QSS3BucketRegion'
         QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
