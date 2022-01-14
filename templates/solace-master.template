@@ -255,7 +255,6 @@ Resources:
         NumberOfAZs: !Ref 'NumberOfAZs'
   BastionHostRole:
     Type: 'AWS::IAM::Role'
-    Condition: UsePrivateSubnets
     Properties:
       Path: /
       AssumeRolePolicyDocument:
