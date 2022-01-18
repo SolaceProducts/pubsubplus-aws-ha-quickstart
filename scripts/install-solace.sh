@@ -545,25 +545,6 @@ if [ "${is_primary}" = "true" ]; then
     exit 1
   fi
 
-  # Poll the broker Message-Spool
-  count=0
-  echo "`date` INFO: Wait for the broker message-spool service to be guaranteed-active"
-  while [ ${count} -lt ${loop_guard} ]; do
-    health_result=`curl -s -o /dev/null -w "%{http_code}"  http://localhost:5550/health-check/guaranteed-active`
-    run_time=$((${count} * ${pause}))
-    if [ "${health_result}" = "200" ]; then
-        echo "`date` INFO: broker message-spool is guaranteed-active, after ${run_time} seconds"
-        break
-    fi
-    ((count++))
-    echo "`date` INFO: Waited ${run_time} seconds, broker message-spool not yet guaranteed-active. State: ${health_result}"
-    sleep ${pause}
-  done
-  if [ ${count} -eq ${loop_guard} ]; then
-    echo "`date` ERROR: broker message-spool never came guaranteed-active" | tee /dev/stderr
-    exit 1
-  fi
-
 fi
 
 if [ ${count} -eq ${loop_guard} ]; then
