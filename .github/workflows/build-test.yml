@@ -14,7 +14,7 @@ jobs:
     steps:
     - name: Set env
       run: |
-        echo "AWS_DEFAULT_REGION=eu-north-1" >> $GITHUB_ENV
+        echo "AWS_DEFAULT_REGION=eu-west-2" >> $GITHUB_ENV
         echo "TEST_S3_BUCKET=solace-cf-quickstart-ghtest" >> $GITHUB_ENV
         TESTSTACKPREFIX=T$(echo $(date +%s) | rev)
         echo "TESTSTACKPREFIX=$TESTSTACKPREFIX" >> $GITHUB_ENV
