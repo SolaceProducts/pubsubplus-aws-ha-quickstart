@@ -116,3 +116,8 @@ jobs:
         if [ ${{ github.ref }} == 'refs/heads/master' ] && [ ${{ github.repository_owner }} == 'SolaceProducts' ] ; then
           aws s3 sync . s3://solace-products/pubsubplus-aws-ha-quickstart/latest --acl public-read
         fi
+
+    - name: Delete all unattached volumes (Cleanup)
+      if: ${{ always() }}
+      run: |
+        for volume in `aws ec2 describe-volumes --filter "Name=status,Values=available" --query "Volumes[*].{ID:VolumeId}" --region $AWS_DEFAULT_REGION | grep ID | awk -F '"' '{print $4}'`; do aws ec2 delete-volume --volume-id $volume --region $AWS_DEFAULT_REGION; done
