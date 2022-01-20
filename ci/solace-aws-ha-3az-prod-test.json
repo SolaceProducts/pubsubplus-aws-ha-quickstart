@@ -36,6 +36,10 @@
         "ParameterValue": "20"
     },
     {
+      "ParameterKey": "WorkerNodeStorageType",
+      "ParameterValue": "io1"
+    },
+    {
         "ParameterKey": "MonitorNodeInstanceType",
         "ParameterValue": "t2.small"
     },
