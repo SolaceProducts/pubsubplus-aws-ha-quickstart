@@ -1,7 +1,7 @@
 [
     {   
         "ParameterKey": "SolaceDockerImage",
-        "ParameterValue": "byetman/public_standard_only:solace_9.13.0.14"
+        "ParameterValue": "SolaceDockerImageParameterValue"
     },
     {
         "ParameterKey": "AdminPassword",
@@ -29,11 +29,11 @@
     },
     {
         "ParameterKey": "WorkerNodeInstanceType",
-        "ParameterValue": "m4.large"
+        "ParameterValue": "EventBrokerNodeInstanceTypeParameterValue"
     },
     {
         "ParameterKey": "WorkerNodeStorage",
-        "ParameterValue": "0"
+        "ParameterValue": "20"
     },
     {
         "ParameterKey": "MonitorNodeInstanceType",
