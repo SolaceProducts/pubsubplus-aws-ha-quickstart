@@ -2,7 +2,7 @@
 
 # Install and Configure Solace PubSub+ Software Event Broker in an HA Tuple using AWS Cloud Formation
 
-This project is a best practice template intended for development and demo purposes. The tested and recommended Solace PubSub+ Software Event Broker version is 9.10.
+This project is a best practice template intended for development and demo purposes. The tested and recommended Solace PubSub+ Software Event Broker version is 9.12.
 
 This document provides a quick getting started guide to install a Solace PubSub+ software event broker deployment in Amazon Web Services cloud computing platform.
 
@@ -108,7 +108,8 @@ The next screen will allow you to fill in the details for the selected launch op
 | Maximum Number of Client Connections (MaxClientConnections)| 100   | Broker system scaling: the maximum supported number of client connections |
 | Maximum Number of Queue Messages (MaxQueueMessages)     | 100   | Broker system scaling: the maximum number of queue messages, in millions |
 | Instance Type (WorkerNodeInstanceType) | m4.large | The EC2 instance type for the PubSub+ event broker primary and backup instances in Availability Zones 1 and 2. The m series are recommended for production use. <br/> Ensure adequate CPU and Memory resources are available to support the selected broker system scaling parameters. For requirements, check the [Solace documentation](//docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/System-Scaling-Parameters.htm). |
-| Persistent Storage (WorkerNodeStorage) | 0 | Amazon event broker storage allocated for each block device, in GiBs. The Quick Start supports up to 640 GiB per device. For sizing requirements, check the [Solace documentation](//docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/System-Scaling-Parameters.htm). The default value of 0 (zero) indicates ephemeral storage only. A non-zero value will cause a new Provisioned IOPS SSD (io1) disk to be created for message-spool. This disk will not be deleted on stack termination. |
+| Persistent Storage (WorkerNodeStorage) | 0 | Amazon event broker storage allocated for each block device, in GiBs. The Quick Start supports up to 640 GiB per device. For sizing requirements, check the [Solace documentation](//docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/System-Scaling-Parameters.htm). The default value of 0 (zero) indicates ephemeral storage only. A non-zero value will cause a new disk to be created for message-spool. This disk will not be deleted on stack termination. |
+| Persistent Storage Type (WorkerNodeStorageType) | gp2 | Storage volume type provided by Amazon EBS if non-zero Persistent Storage has been specified. "io1" is recommended for Production environments (better performance, more expensive) and is required for large storage size |
 | Instance Type (MonitorNodeInstanceType) | t2.small | The EC2 instance type for the PubSub+ event broker monitor instance in Availability Zone 3 (or Availability Zone 2, if you’re using only two zones). |
 | Container logging format (ContainerLoggingFormat) | graylog | The format of the logs sent by the event broker to the CloudWatch service (see [documentation](https://docs.solace.com/Configuring-and-Managing/SW-Broker-Specific-Config/Docker-Tasks/Configuring-VMR-Container-Logging.htm?Highlight=logging#Config-Out-Form ) for details) |
 | **Network Configuration**  |           |                                                                    |

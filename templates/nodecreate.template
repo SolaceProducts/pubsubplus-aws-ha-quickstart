@@ -99,6 +99,14 @@ Parameters:
       - '320'
       - '640'
     Type: Number
+  PersistentStorageType:
+    Default: 'gp2'
+    Description: Storage volume type provided by Amazon EBS. "io1" is recommended for Production environments (better performance, more expensive)
+      and is required for large storage size.
+    AllowedValues:
+      - 'gp2'
+      - 'io1'
+    Type: String
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase
@@ -184,6 +192,9 @@ Conditions:
   EphemeralStorage: !Equals
     - !Ref 'PersistentStorage'
     - '0'
+  IOStorageType: !Equals
+    - !Ref 'PersistentStorageType'
+    - 'io1'
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   NonHA: !Equals [!Ref NodeDesignation, 'event-broker-singlenode']
 Resources:
@@ -464,11 +475,14 @@ Resources:
             Ebs:
               VolumeSize: !Ref 'PersistentStorage'
               DeleteOnTermination: 'False'
-              VolumeType: io1
-              Iops: !FindInMap
-                - IOPsMap
-                - !Ref 'PersistentStorage'
-                - IOPs
+              VolumeType: !Ref 'PersistentStorageType'
+              Iops: !If
+                - IOStorageType
+                - !FindInMap
+                    - IOPsMap
+                    - !Ref 'PersistentStorage'
+                    - IOPs
+                - !Ref 'AWS::NoValue'
       ImageId: !FindInMap
         - AWSAMIRegionMap
         - !Ref 'AWS::Region'
