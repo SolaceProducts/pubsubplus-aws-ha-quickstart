@@ -154,6 +154,8 @@ Mappings:
       AMZNLINUXHVM: ami-050b8344d77081f4b
     eu-west-3:
       AMZNLINUXHVM: ami-053418e626d0549fc
+    eu-north-1:
+      AMZNLINUXHVM: ami-8c169ef2
     sa-east-1:
       AMZNLINUXHVM: ami-05b7dbc290217250d
     us-east-1:
