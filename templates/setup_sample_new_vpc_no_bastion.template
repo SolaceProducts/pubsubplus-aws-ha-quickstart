@@ -96,7 +96,7 @@ Resources:
     Properties:
       TemplateURL:
         !Sub
-          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template'
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml'
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
@@ -104,5 +104,40 @@ Resources:
           - ','
           - !Ref 'AvailabilityZones'
         CreatePrivateSubnets: !Ref 'CreatePrivateSubnets'
-        KeyPairName: !Ref 'KeyPairName'
         NumberOfAZs: !Ref 'NumberOfAZs'
+  VPCSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !GetAtt 'VPCStack.Outputs.VPCID'
+      GroupDescription: Security Group
+      SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: '0.0.0.0/0'
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: '0.0.0.0/0'
+Outputs:
+  VPCID:
+    Description: VPC ID
+    Value: !GetAtt 'VPCStack.Outputs.VPCID'
+  PrivateSubnet1ID:
+    Description: Private VPC Subnet 1
+    Value: !GetAtt 'VPCStack.Outputs.PrivateSubnet1AID'
+  PrivateSubnet2ID:
+    Description: Private VPC Subnet 2
+    Value: !GetAtt 'VPCStack.Outputs.PrivateSubnet2AID'
+  PrivateSubnet3ID:
+    Description: Private VPC Subnet 3
+    Value: !GetAtt 'VPCStack.Outputs.PrivateSubnet3AID'
+  PublicSubnet1ID:
+    Description: Public VPC Subnet 1
+    Value: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
+  PublicSubnet2ID:
+    Description: Public VPC Subnet 2
+    Value: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
+  VPCSecurityGroupID:
+    Description: VPC Security Group
+    Value: !GetAtt 'VPCSecurityGroup.GroupId'

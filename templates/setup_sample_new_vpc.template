@@ -165,3 +165,42 @@ Resources:
         QSS3KeyPrefix: !Sub ${QSS3KeyPrefix}submodules/quickstart-linux-bastion/
         RemoteAccessCIDR: !Ref 'SSHAccessCIDR'
         VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
+  VPCSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !GetAtt 'VPCStack.Outputs.VPCID'
+      GroupDescription: Security Group
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: '0.0.0.0/0'
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: '0.0.0.0/0'
+Outputs:
+  VPCID:
+    Description: VPC ID
+    Value: !GetAtt 'VPCStack.Outputs.VPCID'
+  PrivateSubnet1ID:
+    Description: Private VPC Subnet 1
+    Value: !GetAtt 'VPCStack.Outputs.PrivateSubnet1AID'
+  PrivateSubnet2ID:
+    Description: Private VPC Subnet 2
+    Value: !GetAtt 'VPCStack.Outputs.PrivateSubnet2AID'
+  PrivateSubnet3ID:
+    Description: Private VPC Subnet 3
+    Value: !GetAtt 'VPCStack.Outputs.PrivateSubnet3AID'
+  PublicSubnet1ID:
+    Description: Public VPC Subnet 1
+    Value: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
+  PublicSubnet2ID:
+    Description: Public VPC Subnet 2
+    Value: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
+  VPCSecurityGroupID:
+    Description: VPC Security Group
+    Value: !GetAtt 'VPCSecurityGroup.GroupId'
+  EIP1:
+    Description: Bastion Host EIP
+    Value: !GetAtt 'BastionStack.Outputs.EIP2'

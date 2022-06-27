@@ -1,0 +1,78 @@
+[
+    {
+        "ParameterKey": "SolaceDockerImage",
+        "ParameterValue": "SolaceDockerImageParameterValue"
+    },
+    {
+        "ParameterKey": "AdminPassword",
+        "ParameterValue": "admin"
+    },
+    {
+        "ParameterKey": "ContainerLoggingFormat",
+        "ParameterValue": "graylog"
+    },
+    {
+        "ParameterKey": "NumberOfAZs",
+        "ParameterValue": "3"
+    },
+    {
+        "ParameterKey": "VPCID",
+        "ParameterValue": "VPCIDParam"
+    },
+    {
+        "ParameterKey": "VPCAccessOnly",
+        "ParameterValue": "true"
+    },
+    {
+        "ParameterKey": "UsePrivateSubnets",
+        "ParameterValue": "true"
+    },
+    {
+        "ParameterKey": "PublicSubnetIDs",
+        "ParameterValue": "SolaceStackPublicSubnetID1A"
+    },
+    {
+        "ParameterKey": "PrivateSubnetIDs",
+        "ParameterValue": "SolaceStackPrivateSubnetID1A,SolaceStackPrivateSubnetID2B,SolaceStackPrivateSubnetID3C"
+    },
+    {
+        "ParameterKey": "SSHSecurityGroupID",
+        "ParameterValue": "VPCSecurityGroupIDParam"
+    },
+    {
+        "ParameterKey": "BootDiskSize",
+        "ParameterValue": "24"
+    },
+    {
+        "ParameterKey": "WorkerNodeInstanceType",
+        "ParameterValue": "EventBrokerNodeInstanceTypeParameterValue"
+    },
+    {
+        "ParameterKey": "WorkerNodeStorage",
+        "ParameterValue": "20"
+    },
+    {
+        "ParameterKey": "MonitorNodeInstanceType",
+        "ParameterValue": "t2.small"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "cikey"
+    },
+    {
+        "ParameterKey": "RemoteAccessCIDR",
+        "ParameterValue": "0.0.0.0/0"
+    },
+    {
+        "ParameterKey": "QSS3BucketName",
+        "ParameterValue": "solace-cf-quickstart-ghtest"
+    },
+    {
+        "ParameterKey": "QSS3BucketRegion",
+        "ParameterValue": "SolaceBucketRegionNAME"
+    },
+    {
+        "ParameterKey": "QSS3KeyPrefix",
+        "ParameterValue": "solace/eventbroker/SolaceBranchNAME/"
+    }
+]
