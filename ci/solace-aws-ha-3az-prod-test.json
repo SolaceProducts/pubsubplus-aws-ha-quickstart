@@ -61,6 +61,6 @@
     },
     {
         "ParameterKey": "QSS3KeyPrefix",
-        "ParameterValue": "solace/eventbroker/latest/"
+        "ParameterValue": "solace/eventbroker/SolaceBranchNAME/"
     }
 ]

@@ -20,6 +20,7 @@ Metadata:
           default: Network Configuration
         Parameters:
           - VPCID
+          - VPCAccessOnly
           - NumberOfAZs
           - UsePrivateSubnets
           - PublicSubnetIDs
@@ -68,6 +69,8 @@ Metadata:
         default: Security group allowed to access console SSH. Ignored if not using private subnets.
       UsePrivateSubnets:
         default: Use private subnets
+      VPCAccessOnly:
+        default: VPC internal access only
       VPCID:
         default: VPC ID
       PrivateSubnetIDs:
@@ -192,12 +195,19 @@ Parameters:
       - 'true'
       - 'false'
     Default: 'true'
-    Description: Whether to use Private Subnets with fronting Bastion Servers
+    Description: Whether to deploy broker nodes into Private Subnets.
+    Type: String
+  VPCAccessOnly:
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
+    Description: Whether broker nodes and services are only exposed internally to the VPC. Only applicable if private subnets used.
     Type: String
   RemoteAccessCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
-    Description: Allowed CIDR block for external access to cluster nodes
+    Description: Allowed CIDR block for external access to broker cluster nodes
     Type: String
   MonitorNodeInstanceType:
     AllowedValues:
@@ -224,7 +234,8 @@ Parameters:
   PublicSubnetIDs:
     Description: Comma separated list of VPC public subnet IDs for the cluster deployment
       (e.g. subnet-4b8d329f,subnet-bd73afc8); VPC must exist with proper configuration
-      for Solace cluster access
+      for Solace cluster access.
+      IGNORED if 'VPC access only' AND  'use private subnets' both true but even in this case must provide at least one item
     Type: List<AWS::EC2::Subnet::Id>
   VPCID:
     Description: ID of the VPC (e.g. vpc-0343606e)
@@ -262,6 +273,9 @@ Conditions:
   UsePrivateSubnetsCondition: !Equals
     - !Ref 'UsePrivateSubnets'
     - 'true'
+  VPCAccessOnlyCondition: !Equals
+    - !Ref 'VPCAccessOnly'
+    - 'true'
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   EventBrokerPrimaryStack:
@@ -295,6 +309,7 @@ Resources:
         QSS3BucketName: !Ref 'QSS3BucketName'
         QSS3BucketRegion: !Ref 'QSS3BucketRegion'
         QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
+        AssociatePublicIP:  !If [VPCAccessOnlyCondition, 'false', 'true']
         SubnetID: !Select
           - 0
           - !If
@@ -332,6 +347,7 @@ Resources:
         QSS3BucketName: !Ref 'QSS3BucketName'
         QSS3BucketRegion: !Ref 'QSS3BucketRegion'
         QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
+        AssociatePublicIP:  !If [VPCAccessOnlyCondition, 'false', 'true']
         SubnetID: !Select
           - 1
           - !If
@@ -365,6 +381,7 @@ Resources:
         QSS3BucketName: !Ref 'QSS3BucketName'
         QSS3BucketRegion: !Ref 'QSS3BucketRegion'
         QSS3KeyPrefix: !Ref 'QSS3KeyPrefix'
+        AssociatePublicIP:  !If [VPCAccessOnlyCondition, 'false', 'true']
         SubnetID: !Select
           - !If [Use3AZs, 2, 1]
           - !If [UsePrivateSubnetsCondition, !Ref PrivateSubnetIDs, !Ref PublicSubnetIDs]
@@ -529,8 +546,8 @@ Resources:
       - EventBrokerBackupStack
     Condition: UsePrivateSubnetsCondition
     Properties:
-      Scheme: internet-facing
-      Subnets: !Ref 'PublicSubnetIDs'
+      Scheme: !If [VPCAccessOnlyCondition, 'internal', 'internet-facing']
+      Subnets: !If [VPCAccessOnlyCondition, !Ref 'PrivateSubnetIDs', !Ref 'PublicSubnetIDs']
       Type: network
   Port55555NetworkLoadBalancerTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -837,6 +854,6 @@ Outputs:
       Name: !Sub '${AWS::StackName}-BrokerMemberNodesSecurityGroup'
   LoadBalancerDNS:
     Value: !If [UsePrivateSubnetsCondition, !GetAtt ELB.DNSName, 'No LB available, access EC2s through public addresses']
-    Description: The DNS name for the load balancer for external access 
+    Description: The DNS name for the load balancer to access broker services
     Export:
       Name: !Sub '${AWS::StackName}-LoadBalancerDNS'

@@ -71,9 +71,16 @@ Parameters:
   SubnetID:
     Description: >-
       Comma separated list of VPC subnet IDs for the cluster deployment (e.g. subnet-4b8d329f,subnet-bd73afc8);
-      VPC must exist with proper configuration for Solacet cluster access (internal
+      VPC must exist with proper configuration for Solace cluster access (internal
       and external) and the subnets must be in the same VPC as the security groups
     Type: AWS::EC2::Subnet::Id
+  AssociatePublicIP:
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'true'
+    Description: Whether to associate a public IP address to this instance
+    Type: String
   NodeSecurityGroup:
     Description: Comma separated list of security groups for the members of the cluster
       (e.g. sg-7f16e910,sg-4be93ca2); The security groups must be in the same VPC
@@ -154,6 +161,8 @@ Mappings:
       AMZNLINUXHVM: ami-050b8344d77081f4b
     eu-west-3:
       AMZNLINUXHVM: ami-053418e626d0549fc
+    eu-north-1:
+      AMZNLINUXHVM: ami-8c169ef2
     sa-east-1:
       AMZNLINUXHVM: ami-05b7dbc290217250d
     us-east-1:
@@ -197,6 +206,9 @@ Conditions:
     - 'io1'
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   NonHA: !Equals [!Ref NodeDesignation, 'event-broker-singlenode']
+  AssociatePublicIPCondition: !Equals
+    - !Ref 'AssociatePublicIP'
+    - 'true'
 Resources:
   CloudFormationLogs:
     Type: AWS::Logs::LogGroup
@@ -632,6 +644,6 @@ Outputs:
       Name: !Sub '${AWS::StackName}-PrivateDnsName'
   PublicDNSName:
     Description: Public DNS name of the created ec2 instance
-    Value: !GetAtt BrokerNodeInstance.PublicDnsName
+    Value: !If [AssociatePublicIPCondition, !GetAtt BrokerNodeInstance.PublicDnsName, 'Public DNS name not available']
     Export:
       Name: !Sub '${AWS::StackName}-PublicDNSName'

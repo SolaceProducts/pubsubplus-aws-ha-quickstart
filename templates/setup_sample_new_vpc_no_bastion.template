@@ -13,7 +13,7 @@ Metadata:
           - NumberOfAZs
           - AvailabilityZones
           - CreatePrivateSubnets
-          - SSHAccessCIDR
+          - KeyPairName
       - Label:
           default: AWS Quick Start Configuration
         Parameters:
@@ -27,8 +27,6 @@ Metadata:
         default: Number of Availability Zones
       KeyPairName:
         default: Key Pair Name
-      SSHAccessCIDR:
-        default: Permitted IP range for console SSH access
       CreatePrivateSubnets:
         default: Create production ready environment
       QSS3BucketName:
@@ -62,11 +60,6 @@ Parameters:
       - 'false'
     Default: 'true'
     Description: Whether to create and use Private Subnets with a fronting ELB
-    Type: String
-  SSHAccessCIDR:
-    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
-    Description: Allowed CIDR block for external access to cluster nodes for SSH. Ignored for the "Create production ready environment" false case.
     Type: String
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
@@ -113,55 +106,3 @@ Resources:
         CreatePrivateSubnets: !Ref 'CreatePrivateSubnets'
         KeyPairName: !Ref 'KeyPairName'
         NumberOfAZs: !Ref 'NumberOfAZs'
-        VPCTenancy: "default"
-  BastionHostRole:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      Path: /
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action:
-              - 'sts:AssumeRole'
-            Principal:
-              Service:
-                - !Sub 'ec2.${AWS::URLSuffix}'
-            Effect: Allow
-        Version: 2012-10-17
-      Policies:
-        - PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Action:
-                  - s3:GetObject
-                Resource: !Sub
-                  - arn:${AWS::Partition}:s3:::${S3Bucket}/${QSS3KeyPrefix}*
-                  - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-                Effect: Allow
-          PolicyName: s3-policy
-      ManagedPolicyArns:
-        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
-        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy'
-  BastionStack:
-    Type: AWS::CloudFormation::Stack
-    Condition: UsePrivateSubnets
-    Properties:
-      TemplateURL:
-        !Sub
-          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template'
-          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      Parameters:
-        BastionInstanceType: t2.micro
-        EnableBanner: 'true'
-        BastionBanner: !Sub
-          - s3://${S3Bucket}/${QSS3KeyPrefix}scripts/solace-banner.txt
-          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-        NumBastionHosts: '2'
-        KeyPairName: !Ref 'KeyPairName'
-        PublicSubnet1ID: !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
-        PublicSubnet2ID: !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Sub ${QSS3KeyPrefix}submodules/quickstart-linux-bastion/
-        RemoteAccessCIDR: !Ref 'SSHAccessCIDR'
-        VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
