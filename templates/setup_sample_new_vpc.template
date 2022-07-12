@@ -183,6 +183,9 @@ Outputs:
   VPCID:
     Description: VPC ID
     Value: !GetAtt 'VPCStack.Outputs.VPCID'
+  VPCCIDR:
+    Description: VPC CIDR
+    Value: !GetAtt 'VPCStack.Outputs.VPCCIDR'
   PrivateSubnet1ID:
     Description: Private VPC Subnet 1
     Value: !GetAtt 'VPCStack.Outputs.PrivateSubnet1AID'

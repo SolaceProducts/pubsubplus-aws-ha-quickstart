@@ -262,7 +262,6 @@ Resources:
         AvailabilityZones: !Join
           - ','
           - !Ref 'AvailabilityZones'
-        CreatePrivateSubnets: !Ref 'CreatePrivateSubnets'
         NumberOfAZs: !Ref 'NumberOfAZs'
   BastionHostRole:
     Type: 'AWS::IAM::Role'
@@ -373,3 +372,4 @@ Resources:
             - - !GetAtt 'VPCStack.Outputs.PublicSubnet1ID'
               - !GetAtt 'VPCStack.Outputs.PublicSubnet2ID'
         VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
+        VPCCIDR: !GetAtt 'VPCStack.Outputs.VPCCIDR'
