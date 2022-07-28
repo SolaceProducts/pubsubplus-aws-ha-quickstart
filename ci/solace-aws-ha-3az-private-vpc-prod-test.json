@@ -1,5 +1,5 @@
 [
-    {   
+    {
         "ParameterKey": "SolaceDockerImage",
         "ParameterValue": "SolaceDockerImageParameterValue"
     },
@@ -16,12 +16,28 @@
         "ParameterValue": "3"
     },
     {
-        "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "SolaceStackRegionNAMEa,SolaceStackRegionNAMEb,SolaceStackRegionNAMEc" 
+        "ParameterKey": "VPCID",
+        "ParameterValue": "VPCIDParam"
     },
     {
-        "ParameterKey": "CreatePrivateSubnets",
-        "ParameterValue": "true" 
+        "ParameterKey": "VPCAccessOnly",
+        "ParameterValue": "true"
+    },
+    {
+        "ParameterKey": "UsePrivateSubnets",
+        "ParameterValue": "true"
+    },
+    {
+        "ParameterKey": "PublicSubnetIDs",
+        "ParameterValue": "SolaceStackPublicSubnetID1A"
+    },
+    {
+        "ParameterKey": "PrivateSubnetIDs",
+        "ParameterValue": "SolaceStackPrivateSubnetID1A,SolaceStackPrivateSubnetID2B,SolaceStackPrivateSubnetID3C"
+    },
+    {
+        "ParameterKey": "SSHSecurityGroupID",
+        "ParameterValue": "VPCSecurityGroupIDParam"
     },
     {
         "ParameterKey": "BootDiskSize",
@@ -45,10 +61,6 @@
     },
     {
         "ParameterKey": "RemoteAccessCIDR",
-        "ParameterValue": "0.0.0.0/0"
-    },
-    {
-        "ParameterKey": "SSHAccessCIDR",
         "ParameterValue": "0.0.0.0/0"
     },
     {

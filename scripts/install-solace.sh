@@ -184,17 +184,12 @@ chown -R 1000001 $(dirname ${admin_password_file})
 chmod 700 $(dirname ${admin_password_file})
 
 if [[ ${disk_size} == "0" ]]; then
-  echo "`date` Using ephemeral volumes"
-  #Create new volumes that the PubSub+ Message Broker container can use to consume and store data.
-  docker volume create --name=jail
-  docker volume create --name=var
-  docker volume create --name=adb
-  docker volume create --name=softAdb
-  docker volume create --name=diagnostics
-  docker volume create --name=internalSpool
-  SPOOL_MOUNT="-v jail:/usr/sw/jail -v var:/usr/sw/var -v softAdb:/usr/sw/internalSpool/softAdb -v adb:/usr/sw/adb -v diagnostics:/var/lib/solace/diags -v internalSpool:/usr/sw/internalSpool"
+  echo "`date` Using ephemeral volume"
+  #Create new volume that the PubSub+ Message Broker container can use to consume and store data.
+  docker volume create --name=solace
+  SPOOL_MOUNT="-v solace:/var/lib/solace"
 else
-  echo "`date` Using persistent volumes"
+  echo "`date` Using persistent volume"
   echo "`date` Create primary partition on new disk"
   (
     echo n # Add a new partition
@@ -210,16 +205,11 @@ else
   echo "UUID=${UUID} /opt/pubsubplus xfs defaults 0 0" >> /etc/fstab
   mkdir /opt/pubsubplus
   mount -a
-  mkdir /opt/pubsubplus/jail
-  mkdir /opt/pubsubplus/var
-  mkdir /opt/pubsubplus/adb
-  mkdir /opt/pubsubplus/softAdb
-  mkdir /opt/pubsubplus/diagnostics
-  mkdir /opt/pubsubplus/internalSpool
+  mkdir /opt/pubsubplus/solace
   chown 1000001 -R /opt/pubsubplus/
   #chmod -R 777 /opt/pubsubplus
   
-  SPOOL_MOUNT="-v /opt/pubsubplus/jail:/usr/sw/jail -v /opt/pubsubplus/var:/usr/sw/var -v /opt/pubsubplus/adb:/usr/sw/adb -v /opt/pubsubplus/softAdb:/usr/sw/internalSpool/softAdb -v /opt/pubsubplus/diagnostics:/var/lib/solace/diags -v /opt/pubsubplus/internalSpool:/usr/sw/internalSpool"
+  SPOOL_MOUNT="-v /opt/pubsubplus/solace:/var/lib/solace"
 fi
 
 ############# From here execution path is different for nonHA and HA

@@ -12,6 +12,14 @@ jobs:
     timeout-minutes: 50
 
     steps:
+    - name: Extract branch name for non PR
+      if: github.event_name != 'pull_request'
+      shell: bash
+      run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr _. - )" >> $GITHUB_ENV
+      id: extract_branch
+    - name: Extract branch name for PR
+      if: github.event_name == 'pull_request'
+      run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr _. -)" >> $GITHUB_ENV
     - name: Set env
       run: |
         echo "AWS_DEFAULT_REGION=eu-west-2" >> $GITHUB_ENV
@@ -54,7 +62,8 @@ jobs:
         export BUCKETREGION=`aws s3api get-bucket-location --bucket ${{ env.TEST_S3_BUCKET }} | grep LocationConstraint | awk -F' ' '{print $NF}' | tr -d '"'`
         sed -i "s@SolaceStackRegionNAME@${AWS_DEFAULT_REGION}@g" ci/solace-aws-ha-3az-prod-test.json
         sed -i "s@SolaceBucketRegionNAME@${BUCKETREGION}@g" ci/solace-aws-ha-3az-prod-test.json
-        aws s3 sync . s3://${{ env.TEST_S3_BUCKET }}/solace/eventbroker/latest --acl public-read
+        sed -i "s@SolaceBranchNAME@${{ env.BRANCH_NAME }}@g" ci/solace-aws-ha-3az-prod-test.json
+        aws s3 sync . s3://${{ env.TEST_S3_BUCKET }}/solace/eventbroker/${{ env.BRANCH_NAME }} --acl public-read
 
     - name: Test with production deployment option (create public subnet)
       run: |
