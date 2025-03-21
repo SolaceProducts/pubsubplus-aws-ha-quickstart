@@ -155,7 +155,7 @@ echo "`date` INFO: Solace message broker image and tag: `docker images | grep so
 
 # Common for all scalings
 shmsize="1g"
-ulimit_nofile="2448:422192"
+ulimit_nofile="2448:1048576"
 SWAP_SIZE="2048"
 
 echo "`date` INFO: Using shmsize: ${shmsize}, ulimit_nofile: ${ulimit_nofile}, SWAP_SIZE: ${SWAP_SIZE}"
